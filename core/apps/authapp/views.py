@@ -44,7 +44,7 @@ class UserViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=User, detail="User")
     def destroy(self, request, user=None):
-        if request.user.groups.id > user.groups.id:
+        if user.groups is not None and request.user.groups.id > user.groups.id:
             return Response({ "detail": "Request Denied!", "success": False })
         user.delete()
         return Response({ "success": True })
@@ -55,7 +55,7 @@ class UserViewSet(viewsets.GenericViewSet):
         if request.user.groups.id > user.groups.id:
             return Response({ "detail": "Request Denied!", "success": False })
         user_request_data = request.data
-        upd_user = self.get_serializer_class()(user, data=user_request_data)
+        upd_user = local_serializers.CustomUserUpdateSerializer(user, data=user_request_data)
         upd_user.is_valid(raise_exception=True)
         user_request_data["user"] = user.id
         upd_profile = local_serializers.UserProfileSerializer(user.profile, data=user_request_data)

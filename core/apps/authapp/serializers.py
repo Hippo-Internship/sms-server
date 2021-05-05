@@ -18,7 +18,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class CustomUserSerializer(serializers.ModelSerializer):
 
     profile = UserProfileSerializer(read_only=True)
-    password = serializers.CharField(required=True, write_only=True)
 
     class Meta:
         model = get_user_model()
@@ -35,6 +34,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
             "profile",
             "groups"
         ]
+        extra_kwargs = {
+            "password": { "write_only": True }
+        }
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -42,3 +44,23 @@ class CustomUserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+class CustomUserUpdateSerializer(serializers.ModelSerializer):
+
+    profile = UserProfileSerializer(read_only=True)
+
+    class Meta:
+        model = get_user_model()
+        fields = [
+            'id',
+            'first_name',
+            'last_name',
+            'email',
+            'phone',
+            'related_phone',
+            'school_id',
+            'branch_id',
+            "profile",
+            "groups"
+        ]
+        read_only_field = [ "school_id", "branch_id" ]

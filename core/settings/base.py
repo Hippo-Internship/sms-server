@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'dj_rest_auth',
     # Local apps
-    'core.apps.authapp.apps.AuthappConfig'
+    'core.apps.authapp.apps.AuthappConfig',
+    'core.apps.schoolapp.apps.SchoolappConfig',
 ]
 
 MIDDLEWARE = [

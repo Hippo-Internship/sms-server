@@ -54,8 +54,8 @@ class CustomUser(AbstractUser):
     )
 
     id = models.BigAutoField(primary_key=True)
-    first_name = models.CharField(null=True, blank=True, max_length=100)
-    last_name = models.CharField(null=True, blank=True, max_length=100)
+    firstname = models.CharField(null=True, blank=True, max_length=100)
+    lastname = models.CharField(null=True, blank=True, max_length=100)
     username = models.CharField(null=True, blank=True, max_length=50)
     email = models.EmailField(
         unique=True, null=True, db_index=True,
@@ -92,13 +92,13 @@ class CustomUser(AbstractUser):
         return self.ROLES[self.role_id - 1][1]
 
     def __str__(self):
-        return '%s: %s: %s' % (self.phone, self.first_name, self.last_name)
+        return '%s %s %s: %s' % (self.id, self.phone, self.first_name, self.last_name)
 
 
 class Profile(models.Model):
 
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='profile')
-    profile_image = models.ImageField(upload_to='image', blank=True, default="")
+    image = models.ImageField(upload_to='image/profiles', null=True, blank=True)
     address_city = models.CharField(null=True, blank=True, max_length=255)
     address_district = models.CharField(null=True, blank=True, max_length=255)
     address_khoroo = models.CharField(null=True, blank=True, max_length=255)
@@ -111,4 +111,4 @@ class Profile(models.Model):
         return '{}{}'.format(settings.MEDIA_URL, self.profile_image)
 
     def __str__(self):
-        return str(user)
+        return str(self.user)
