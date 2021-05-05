@@ -33,5 +33,12 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'school_id',
             'branch_id',
             "profile",
-            "group"
+            "groups"
         ]
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = super().create(validated_data)
+        user.set_password(password)
+        user.save()
+        return user

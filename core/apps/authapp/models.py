@@ -76,13 +76,16 @@ class CustomUser(AbstractUser):
     branch_id = models.IntegerField(null=True, default=0)
     seen_datasheet = models.IntegerField(null=True, default=3)
     is_active = models.IntegerField(null=True, default=1)
-    groups = None
-    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True)
+    # groups = None
+    groups = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone', 'role_id']
 
     objects = CustomUserManager()
+
+    class Meta:
+        ordering = [ 'id' ]
 
     @property
     def role_name(self):

@@ -7,7 +7,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 # Local imports
 from . import models as local_models, serializers as local_serializers
-from core import decorators as core_decorators
+from core import decorators as core_decorators, permissions as core_permissions
 
 # User Model
 User = get_user_model()
@@ -16,12 +16,13 @@ class UserViewSet(viewsets.GenericViewSet):
 
     queryset = User.objects.all()
     serializer_class = local_serializers.CustomUserSerializer
+    permission_classes = [ core_permissions.UserGetOrModifyPermission ]
 
     @core_decorators.object_exists(model=Group, detail="Group")
-    def retrieve(self, request, group):
-        if request.user.group.id > group.id:
+    def retrieve(self, request, groups):
+        if request.user.groups.id > groups.id:
             return Response({ "detail": "Request Denied!", "success": False })
-        users = group.customuser_set.all()
+        users = groups.customuser_set.all()
         p_users = self.paginate_queryset(users)
         users = self.get_serializer_class()(p_users, many=True)
         return self.get_paginated_response(users.data);
@@ -30,7 +31,7 @@ class UserViewSet(viewsets.GenericViewSet):
         user_request_data = request.data
         user = self.get_serializer_class()(data=user_request_data)
         user.is_valid(raise_exception=True)
-        if user_request_data["group"] < request.user.group.id:
+        if user_request_data["groups"] < request.user.groups.id:
             return Response({ "detail": "Request Denied!", "success": False })
         user = user.save()
         user_request_data["user"] = user.id
@@ -43,7 +44,7 @@ class UserViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=User, detail="User")
     def destroy(self, request, user=None):
-        if request.user.group.id > user.group.id:
+        if request.user.groups.id > user.groups.id:
             return Response({ "detail": "Request Denied!", "success": False })
         user.delete()
         return Response({ "success": True })
@@ -51,7 +52,7 @@ class UserViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=User, detail="User")
     def update(self, request, user=None):
-        if request.user.group.id > user.group.id:
+        if request.user.groups.id > user.groups.id:
             return Response({ "detail": "Request Denied!", "success": False })
         user_request_data = request.data
         upd_user = self.get_serializer_class()(user, data=user_request_data)
