@@ -1,5 +1,6 @@
 # Django imports
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import BaseUserManager, AbstractUser
 # Local imports
 from . import validators as local_validators
@@ -50,8 +51,8 @@ class CustomUser(AbstractUser):
     related_phone = models.CharField(validators = [ local_validators.validate_phone ], max_length=20, null=True, blank=True)
     role_id = models.IntegerField(null=False, choices=ROLES, blank=False)
     interested_at = models.CharField(null=True, max_length=255)
-    # school_id = models.IntegerField(null=True, default=0)
-    # branch_id = models.IntegerField(null=True, default=0)
+    school_id = models.IntegerField(null=True, default=0)
+    branch_id = models.IntegerField(null=True, default=0)
     seen_datasheet = models.IntegerField(null=True, default=3)
     is_active = models.IntegerField(null=True, default=1)
 
@@ -62,7 +63,24 @@ class CustomUser(AbstractUser):
 
     @property
     def role_name(self):
-        return self.ROLES[self.role_id - 1][0]
+        return self.ROLES[self.role_id - 1][1]
 
     def __str__(self):
         return '%s: %s: %s' % (self.phone, self.first_name, self.last_name)
+
+class Profile(models.Model):
+    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='profile')
+    profile_image = models.ImageField(upload_to='image', blank=True, default="")
+    address_city = models.CharField(null=True, blank=True, max_length=255, default="")
+    address_district = models.CharField(null=True, blank=True, max_length=255, default="")
+    address_khoroo = models.CharField(blank=True, max_length=255, default="")
+    address_appartment = models.CharField(blank=True, max_length=255, default="")
+    dob = models.CharField(blank=True, max_length=255, default="")
+    register = models.CharField(max_length=255, blank=True, default="")
+
+    @property
+    def image_url(self):
+        return '{}{}'.format(settings.MEDIA_URL, self.profile_image)
+
+    def __str__(self):
+        return str(user)
