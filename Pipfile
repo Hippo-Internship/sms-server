@@ -8,6 +8,9 @@ django = "*"
 djangorestframework = "*"
 mysqlclient = "*"
 django-environ = "*"
+pillow = "*"
+dj-rest-auth = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 
