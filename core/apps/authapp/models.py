@@ -7,6 +7,7 @@ from . import validators as local_validators
 
 # Create your models here.
 class CustomUserManager(BaseUserManager):
+
     def create_user(self, email, password, **kwargs):
         if not email:
             raise ValueError("Email is required")
@@ -31,26 +32,46 @@ class CustomUserManager(BaseUserManager):
         
         return self.create_user(email, password, **kwargs)
 
+
 class CustomUser(AbstractUser):
 
-    ROLES = (
-        (1, "SuperAdmin"),
-        (2, "Admin"),
-        (3, "Operator"),
-        (4, "Teacher"),
-        (5, "Student"),
-        (6, "Accountant"),
-        (7, "Staff"),
-    )
+    SUPER_ADMIN = 1
+    ADMIN = 2
+    OPERATOR = 3
+    TEACHER = 4
+    STUDENT = 5
+    ACCOUNTANT = 6
+    STAFF = 7
 
-    first_name = models.CharField(null=True, blank=False, max_length=100)
+    ROLES = (
+        (SUPER_ADMIN, "SuperAdmin"),
+        (ADMIN, "Admin"),
+        (OPERATOR, "Operator"),
+        (TEACHER, "Teacher"),
+        (STUDENT, "Student"),
+        (ACCOUNTANT, "Accountant"),
+        (STAFF, "Staff"),
+    )
+    id = models.BigAutoField(primary_key=True)
+    first_name = models.CharField(null=True, blank=True, max_length=100)
     last_name = models.CharField(null=True, blank=True, max_length=100)
     username = models.CharField(null=True, blank=True, max_length=50)
-    email = models.EmailField(unique=True, null=True, db_index=True)
-    phone = models.CharField(validators=[ local_validators.validate_phone ], max_length=20, null=False)
+    email = models.EmailField(
+        unique=True, null=True, db_index=True,
+        error_messages={
+            "unique": "This email is already registered!"
+        }
+    )
+    phone = models.CharField(
+        validators=[ local_validators.validate_phone ], 
+        max_length=20, null=False, unique=True, 
+        error_messages={
+            "unique": "This number is already registered!"
+        }
+    )
     related_phone = models.CharField(validators = [ local_validators.validate_phone ], max_length=20, null=True, blank=True)
     role_id = models.IntegerField(null=False, choices=ROLES, blank=False)
-    interested_at = models.CharField(null=True, max_length=255)
+    interested_at = models.CharField(null=True, max_length=255, blank=True)
     school_id = models.IntegerField(null=True, default=0)
     branch_id = models.IntegerField(null=True, default=0)
     seen_datasheet = models.IntegerField(null=True, default=3)
@@ -68,15 +89,17 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return '%s: %s: %s' % (self.phone, self.first_name, self.last_name)
 
+
 class Profile(models.Model):
+
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='profile')
     profile_image = models.ImageField(upload_to='image', blank=True, default="")
-    address_city = models.CharField(null=True, blank=True, max_length=255, default="")
-    address_district = models.CharField(null=True, blank=True, max_length=255, default="")
-    address_khoroo = models.CharField(blank=True, max_length=255, default="")
-    address_appartment = models.CharField(blank=True, max_length=255, default="")
-    dob = models.CharField(blank=True, max_length=255, default="")
-    register = models.CharField(max_length=255, blank=True, default="")
+    address_city = models.CharField(null=True, blank=True, max_length=255)
+    address_district = models.CharField(null=True, blank=True, max_length=255)
+    address_khoroo = models.CharField(null=True, blank=True, max_length=255)
+    address_appartment = models.CharField(blank=True, max_length=255)
+    dob = models.DateField(null=True, blank=True, max_length=255)
+    register = models.CharField(null=True, max_length=255, blank=True)
 
     @property
     def image_url(self):
