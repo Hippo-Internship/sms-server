@@ -15,6 +15,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "user": { "write_only": True }
         }
 
+
 class CustomUserSerializer(serializers.ModelSerializer):
 
     profile = UserProfileSerializer(read_only=True)
@@ -44,6 +45,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+        
 
 class CustomUserUpdateSerializer(serializers.ModelSerializer):
 

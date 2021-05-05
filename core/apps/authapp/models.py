@@ -97,6 +97,7 @@ class CustomUser(AbstractUser):
 
 class Profile(models.Model):
 
+    id = models.BigAutoField(primary_key=True)
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='profile')
     image = models.ImageField(upload_to='image/profiles', null=True, blank=True)
     address_city = models.CharField(null=True, blank=True, max_length=255)
@@ -106,9 +107,5 @@ class Profile(models.Model):
     dob = models.DateField(null=True, blank=True, max_length=255)
     register = models.CharField(null=True, max_length=255, blank=True)
 
-    @property
-    def image_url(self):
-        return '{}{}'.format(settings.MEDIA_URL, self.profile_image)
-
     def __str__(self):
-        return str(self.user)
+        return '%d %s %s' % (self.id, self.user)
