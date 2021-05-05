@@ -13,13 +13,13 @@ def has_key(key):
         return wrapper
     return _has_key
 
-def object_exists(model, detail):
+def object_exists(model, detail, many=False):
     def _object_exists(func):
         @wraps(func)
         def wrapper(self, request, pk=None, *args, **kwargs):
             _object = model.objects.filter(id=pk)
             if _object.exists():
-                return func(self, request, _object, *args, **kwargs)
+                return func(self, request, _object if many else _object[0], *args, **kwargs)
             else:
                 return Response({ "detail": detail + " does not exist!", "success": False }, status=404)
         return wrapper

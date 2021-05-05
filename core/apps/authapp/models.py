@@ -1,7 +1,7 @@
 # Django imports
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import BaseUserManager, AbstractUser
+from django.contrib.auth.models import BaseUserManager, AbstractUser, Group
 # Local imports
 from . import validators as local_validators
 
@@ -52,6 +52,7 @@ class CustomUser(AbstractUser):
         (ACCOUNTANT, "Accountant"),
         (STAFF, "Staff"),
     )
+
     id = models.BigAutoField(primary_key=True)
     first_name = models.CharField(null=True, blank=True, max_length=100)
     last_name = models.CharField(null=True, blank=True, max_length=100)
@@ -70,12 +71,13 @@ class CustomUser(AbstractUser):
         }
     )
     related_phone = models.CharField(validators = [ local_validators.validate_phone ], max_length=20, null=True, blank=True)
-    role_id = models.IntegerField(null=False, choices=ROLES, blank=False)
     interested_at = models.CharField(null=True, max_length=255, blank=True)
     school_id = models.IntegerField(null=True, default=0)
     branch_id = models.IntegerField(null=True, default=0)
     seen_datasheet = models.IntegerField(null=True, default=3)
     is_active = models.IntegerField(null=True, default=1)
+    groups = None
+    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone', 'role_id']
@@ -97,7 +99,7 @@ class Profile(models.Model):
     address_city = models.CharField(null=True, blank=True, max_length=255)
     address_district = models.CharField(null=True, blank=True, max_length=255)
     address_khoroo = models.CharField(null=True, blank=True, max_length=255)
-    address_appartment = models.CharField(blank=True, max_length=255)
+    address_appartment = models.CharField(null=True, blank=True, max_length=255)
     dob = models.DateField(null=True, blank=True, max_length=255)
     register = models.CharField(null=True, max_length=255, blank=True)
 

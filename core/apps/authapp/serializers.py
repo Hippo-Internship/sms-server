@@ -30,8 +30,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'phone',
             'password',
             'related_phone',
-            'role_id',
             'school_id',
             'branch_id',
-            "profile"
+            "profile",
+            "group"
         ]
