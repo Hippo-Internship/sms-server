@@ -19,7 +19,7 @@ class UserGetOrModifyPermission(BasePermission):
     def has_permission(self, request, view):
         user = request.user
         switch = generate_basic_permission_switch("authapp", "customuser")
-        return switch[view.action]
+        return user.has_perm(switch.get(view.action, ""))
 
 
 class SchoolGetOrModifyPermission(BasePermission):
@@ -27,7 +27,7 @@ class SchoolGetOrModifyPermission(BasePermission):
     def has_permission(self, request, view):
         user = request.user
         switch = generate_basic_permission_switch("schoolapp", "school")
-        return switch[view.action]
+        return user.has_perm(switch.get(view.action, ""))
 
 
 class BranchGetOrModifyPermission(BasePermission):
@@ -35,4 +35,4 @@ class BranchGetOrModifyPermission(BasePermission):
     def has_permission(self, request, view):
         user = request.user
         switch = generate_basic_permission_switch("schoolapp", "branch")
-        return switch[view.action]
+        return user.has_perm(switch.get(view.action, ""))
