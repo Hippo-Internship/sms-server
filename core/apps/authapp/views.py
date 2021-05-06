@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 # Third party imports
 from rest_framework import viewsets
+from rest_framework.settings import api_settings
 from rest_framework.response import Response
 # Local imports
 from . import models as local_models, serializers as local_serializers
@@ -20,7 +21,7 @@ class UserViewSet(viewsets.GenericViewSet):
 
     queryset = User.objects.all()
     serializer_class = local_serializers.CustomUserSerializer
-    permission_classes = [ core_permissions.UserGetOrModifyPermission ]
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ core_permissions.UserGetOrModifyPermission ]
 
     @core_decorators.object_exists(model=Group, detail="Group")
     def retrieve(self, request, groups):

@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.contrib.auth import get_user_model
 # Third party imports
 from rest_framework import viewsets
+from rest_framework.settings import api_settings
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 # Local imports
@@ -10,7 +11,8 @@ from . import models as local_models, serializers as local_serializers
 from core import \
     decorators as core_decorators, \
     permissions as core_permissions, \
-    responses as core_responses
+    responses as core_responses, \
+    utils as core_utils
 
 # User model
 User = get_user_model()
@@ -19,8 +21,8 @@ class SchoolViewSet(viewsets.ModelViewSet):
 
     queryset = local_models.School.objects.all()
     serializer_class =  local_serializers.SchoolSerializer
-    parser_classes = [ MultiPartParser, FormParser, FileUploadParser ]
-    permission_classes = [ core_permissions.SchoolGetOrModifyPermission, ]
+    # parser_classes = [ MultiPartParser, FormParser, FileUploadParser ]
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ core_permissions.SchoolGetOrModifyPermission, ]
 
     @core_decorators.object_exists(model=local_models.School, detail="School")
     def retrieve(self, request, school):
@@ -37,13 +39,11 @@ class SchoolViewSet(viewsets.ModelViewSet):
         return core_responses.request_success_with_data(data)
 
     
-
-
 class BranchViewSet(viewsets.GenericViewSet):
 
     queryset = local_models.Branch.objects.all()
     serializer_class = local_serializers.BranchSerializer
-    # parser_classes = [ MultiPartParser, FormParser, FileUploadParser ]
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ core_permissions.BranchGetOrModifyPermission ]
     
     def list(self, request):
         request_user = request.user
@@ -57,13 +57,35 @@ class BranchViewSet(viewsets.GenericViewSet):
         return self.get_paginated_response(branches.data)
 
     def create(self, request):
-        pass
+        request_user = request.user
+        branch_request_data = request.data
+        branch = self.get_serializer_class()(data=branch_request_data)
+        branch.is_valid(raise_exception=True)
+        if not core_utils.check_if_branch_can_procceed(request_user, branch_request_data["school"]):
+            return core_responses.request_denied()
+        branch.save()
+        return core_responses.request_success_with_data(branch.data)
 
-    def update(self, request, pk=None):
-        pass
+    @core_decorators.object_exists(model=local_models.Branch, detail="Branch")
+    def update(self, request, branch=None):
+        request_user = request.user
+        branch_request_data = request.data
+        s_branch = self.get_serializer_class()(branch, data=branch_request_data)
+        s_branch.is_valid(raise_exception=True)
+        if branch.school.id is not branch_request_data["school"]:
+            return core_responses.request_denied()
+        if not core_utils.check_if_branch_can_procceed(request_user, branch.school.id):
+            return core_responses.request_denied()
+        s_branch.save()
+        return core_responses.request_success_with_data(s_branch.data)
 
-    def destroy(Self, request, pk=None):
-        pass
+    @core_decorators.object_exists(model=local_models.Branch, detail="Branch")
+    def destroy(Self, request, branch=None):
+        request_user = request.user
+        if not core_utils.check_if_branch_can_procceed(request_user, branch.school.id):
+            return core_responses.request_denied()
+        branch.delete()
+        return core_responses.request_success()
 
     def retrieve(self, request, pk=None):
         pass

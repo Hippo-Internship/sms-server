@@ -4,30 +4,35 @@ from rest_framework.permissions import BasePermission
 # Local imports
 
 
+def generate_basic_permission_switch(app_name, model_name):
+    return {
+        "list": app_name + ".view_" + model_name,
+        "create": app_name + ".add_b" + model_name,
+        "update": app_name + ".chang" + model_name,
+        "delete": app_name + ".delet" + model_name,
+        "retrieve": app_name + ".view_" + model_name,
+    }
+
+
 class UserGetOrModifyPermission(BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        if view.action is "retrieve":
-            return user.has_perm("authapp.view_customuser")
-        elif view.action is "update":
-            return user.has_perm("authapp.change_customuser")
-        else:
-            return user.has_perms([
-                "authapp.add_customuser",
-                "authapp.delete_customuser",
-            ])
+        switch = generate_basic_permission_switch("authapp", "customuser")
+        return switch[view.action]
 
 
 class SchoolGetOrModifyPermission(BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        if view.action is "retrieve":
-            return user.has_perm("schoolapp.view_school")
-        else:
-            return user.has_perms([
-                "schoolapp.add_school",
-                "schoolapp.delete_school",
-                "schoolapp.change_school",
-            ])
+        switch = generate_basic_permission_switch("schoolapp", "school")
+        return switch[view.action]
+
+
+class BranchGetOrModifyPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        switch = generate_basic_permission_switch("schoolapp", "branch")
+        return switch[view.action]
