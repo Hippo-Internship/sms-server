@@ -19,13 +19,14 @@ class School(base_models.BaseWithDate):
         ordering = [ "id" ]
 
     def __str__(self):
-        return '%d %s' % (self.id, self.name)
+        return '%s %s' % (self.id, self.name)
+
 
 class Branch(base_models.BaseWithDate):
     
     id = models.BigAutoField(primary_key=True)
-    school = models.ForeignKey(School, related_name="branchs", on_delete = models.CASCADE)
-    name = models.CharField(max_length=36, )
+    school = models.ForeignKey(School, related_name="branches", on_delete = models.CASCADE)
+    name = models.CharField(max_length=36, unique=True, null=False, blank=False)
     description = models.CharField(max_length=128, null=True, blank=True)
     address = models.CharField(max_length=128, null=True, blank=True)
     website = models.CharField(max_length=52, null=True, blank=True)
@@ -35,6 +36,6 @@ class Branch(base_models.BaseWithDate):
         ordering = [ "id" ]
 
     def __str__(self):
-        return '%d %s %s' % (self.id, self.name, self.school)
+        return '%s %s %s' % (self.id, self.name, self.school)
     
     

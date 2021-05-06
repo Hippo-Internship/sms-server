@@ -30,13 +30,15 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'phone',
             'password',
             'related_phone',
-            'school_id',
-            'branch_id',
+            'school',
+            'branch',
             "profile",
             "groups"
         ]
         extra_kwargs = {
-            "password": { "write_only": True }
+            "password": { "write_only": True },
+            "school": { "required": True },
+            "branch": { "required": True },
         }
 
     def create(self, validated_data):
@@ -60,9 +62,9 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
             'email',
             'phone',
             'related_phone',
-            'school_id',
-            'branch_id',
+            'school',
+            'branch',
             "profile",
             "groups"
         ]
-        read_only_field = [ "school_id", "branch_id" ]
+        read_only_field = [ "school", "branch" ]

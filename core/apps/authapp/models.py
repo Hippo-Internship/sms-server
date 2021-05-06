@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import BaseUserManager, AbstractUser, Group
 # Local imports
 from . import validators as local_validators
+from core.apps.schoolapp import models as schoolapp_models
 
 # Create your models here.
 class CustomUserManager(BaseUserManager):
@@ -58,7 +59,7 @@ class CustomUser(AbstractUser):
     lastname = models.CharField(null=True, blank=True, max_length=100)
     username = models.CharField(null=True, blank=True, max_length=50)
     email = models.EmailField(
-        unique=True, null=True, db_index=True,
+        unique=True, null=False, db_index=True,
         error_messages={
             "unique": "This email is already registered!"
         }
@@ -72,12 +73,11 @@ class CustomUser(AbstractUser):
     )
     related_phone = models.CharField(validators = [ local_validators.validate_phone ], max_length=20, null=True, blank=True)
     interested_at = models.CharField(null=True, max_length=255, blank=True)
-    school_id = models.IntegerField(null=True, default=0)
-    branch_id = models.IntegerField(null=True, default=0)
+    school = models.ForeignKey(schoolapp_models.School, on_delete=models.CASCADE, null=True, blank=True, related_name="users")
+    branch = models.ForeignKey(schoolapp_models.Branch, on_delete=models.CASCADE, null=True, blank=True, related_name="users")
     seen_datasheet = models.IntegerField(null=True, default=3)
     is_active = models.IntegerField(null=True, default=1)
-    # groups = None
-    groups = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True)
+    groups = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="users")
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone', 'role_id']
@@ -98,7 +98,7 @@ class CustomUser(AbstractUser):
 class Profile(models.Model):
 
     id = models.BigAutoField(primary_key=True)
-    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='profile')
+    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='user')
     image = models.ImageField(upload_to='image/profiles', null=True, blank=True)
     address_city = models.CharField(null=True, blank=True, max_length=255)
     address_district = models.CharField(null=True, blank=True, max_length=255)
@@ -108,4 +108,4 @@ class Profile(models.Model):
     register = models.CharField(null=True, max_length=255, blank=True)
 
     def __str__(self):
-        return '%d %s %s' % (self.id, self.user)
+        return '%s %s' % (self.id, self.user)
