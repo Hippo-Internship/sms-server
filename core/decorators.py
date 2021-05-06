@@ -13,6 +13,7 @@ def has_key(key):
         return wrapper
     return _has_key
 
+
 def object_exists(model, detail, many=False):
     def _object_exists(func):
         @wraps(func)
@@ -24,3 +25,11 @@ def object_exists(model, detail, many=False):
                 return Response({ "detail": detail + " does not exist!", "success": False }, status=404)
         return wrapper
     return _object_exists
+
+
+def testing(func):
+    def wrapper(*args, **kwargs):
+        print("dwq")
+        func(*args, **kwargs)
+    
+    return wrapper

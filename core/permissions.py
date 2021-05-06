@@ -18,7 +18,10 @@ class UserGetOrModifyPermission(BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        switch = generate_basic_permission_switch("authapp", "customuser")
+        app_name = "authapp"
+        model_name = "customuser"
+        switch = generate_basic_permission_switch(app_name, model_name)
+        switch["group"] = app_name + ".view_" + model_name
         return user.has_perm(switch.get(view.action, ""))
 
 

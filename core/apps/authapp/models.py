@@ -55,6 +55,15 @@ class CustomUser(AbstractUser):
     )
 
     id = models.BigAutoField(primary_key=True)
+    school = models.ForeignKey(
+        schoolapp_models.School, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        related_name="users", 
+        db_index=True
+    )
+    branch = models.ForeignKey(schoolapp_models.Branch, on_delete=models.CASCADE, null=True, blank=True, related_name="users", db_index=True)
     firstname = models.CharField(null=True, blank=True, max_length=100)
     lastname = models.CharField(null=True, blank=True, max_length=100)
     username = models.CharField(null=True, blank=True, max_length=50)
@@ -73,8 +82,6 @@ class CustomUser(AbstractUser):
     )
     related_phone = models.CharField(validators = [ local_validators.validate_phone ], max_length=20, null=True, blank=True)
     interested_at = models.CharField(null=True, max_length=255, blank=True)
-    school = models.ForeignKey(schoolapp_models.School, on_delete=models.CASCADE, null=True, blank=True, related_name="users")
-    branch = models.ForeignKey(schoolapp_models.Branch, on_delete=models.CASCADE, null=True, blank=True, related_name="users")
     seen_datasheet = models.IntegerField(null=True, default=3)
     is_active = models.IntegerField(null=True, default=1)
     groups = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="users")
@@ -98,7 +105,12 @@ class CustomUser(AbstractUser):
 class Profile(models.Model):
 
     id = models.BigAutoField(primary_key=True)
-    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='user')
+    user = models.OneToOneField(
+        get_user_model(), 
+        on_delete=models.CASCADE, 
+        related_name='user', 
+        db_index=True
+    )
     image = models.ImageField(upload_to='image/profiles', null=True, blank=True)
     address_city = models.CharField(null=True, blank=True, max_length=255)
     address_district = models.CharField(null=True, blank=True, max_length=255)

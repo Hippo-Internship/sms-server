@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     # Local apps
     'core.apps.authapp.apps.AuthappConfig',
     'core.apps.schoolapp.apps.SchoolappConfig',
+    'core.apps.classapp.apps.ClassappConfig',
 ]
 
 MIDDLEWARE = [

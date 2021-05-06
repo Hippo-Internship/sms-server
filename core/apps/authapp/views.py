@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 # Third party imports
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.settings import api_settings
 from rest_framework.response import Response
 # Local imports
@@ -23,8 +24,9 @@ class UserViewSet(viewsets.GenericViewSet):
     serializer_class = local_serializers.CustomUserSerializer
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ core_permissions.UserGetOrModifyPermission ]
 
+    @action(detail=True, methods=[ "GET" ])
     @core_decorators.object_exists(model=Group, detail="Group")
-    def retrieve(self, request, groups):
+    def group(self, request, groups):
         request_user = request.user
         if request_user.groups.id > groups.id:
             return core_responses.request_denied()
@@ -35,6 +37,14 @@ class UserViewSet(viewsets.GenericViewSet):
         p_users = self.paginate_queryset(users)
         users = self.get_serializer_class()(p_users, many=True)
         return self.get_paginated_response(users.data);
+
+    @core_decorators.object_exists(model=User, detail="User")
+    def retrieve(self, request, user):
+        request_user = request.user
+        if not core_utils.check_if_user_can_procceed(request_user, user.school.id, user.branch.id):
+            return core_responses.request_denied()
+        user = self.get_serializer_class()(user)
+        return core_responses.request_success_with_data(user.data)
 
     def create(self, request):
         request_user = request.user
