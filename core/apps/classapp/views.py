@@ -88,3 +88,48 @@ class RoomViewSet(viewsets.ModelViewSet):
     def update(self, request, room=None):
         data = super(RoomViewSet, self).update(request, room.id).data
         return core_responses.request_success_with_data(data)
+
+
+class ClassViewSet(viewsets.GenericViewSet):
+
+    queryset = local_models.Class.objects.all()
+    serializer_class = local_serializers.ClassDetailSerializer
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
+        core_permissions.BranchContentManagementPermission,
+    ]
+
+    def list(self, request):
+        request_user = request.user
+        if request_user.groups.id == User.SUPER_ADMIN:
+            classes = self.get_queryset().all()
+        elif request_user.groups.id == User.ADMIN:
+            branches = request_user.school.branches.all()
+            classes = self.get_queryset().filter(branch__in=branches)
+        elif request_user.groups.id == User.OPERATOR:
+            classes = self.get_queryset().filter(branch=request_user.branch)
+        elif request_user.groups.id == User.TEACHER:
+            classes = self.get_queryset().filter(teacher=request_user)
+        p_classes = self.paginate_queryset(classes)
+        classes = self.get_serializer_class()(p_classes, many=True)
+        return self.get_paginated_response(classes.data)
+
+    @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    def retrieve(self, request, _class=None):
+        _class = self.get_serializer_class()(_class)
+        return core_responses.request_success_with_data(_class.data)
+
+    def create(self, request):
+        class_request_data = request.data
+        _class = local_serializers.ClassCreateAndUpdateSerializer(data=class_request_data)
+        _class.is_valid(raise_exception=True)
+        return core_responses.request_success()
+
+    @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    def destroy(self, request, _class=None):
+        pass
+
+    @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    def update(self, request, _class=None):
+        pass
+    
+    
