@@ -127,7 +127,8 @@ class ClassViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def destroy(self, request, _class=None):
-        pass
+        _class.delete()
+        return core_responses.request_success()
 
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def update(self, request, _class=None):

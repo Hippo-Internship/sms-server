@@ -24,18 +24,21 @@ class UserViewSet(viewsets.GenericViewSet):
     serializer_class = local_serializers.CustomUserSerializer
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
         core_permissions.UserGetOrModifyPermission,
+        core_permissions.SchoolContentManagementPermission,
         core_permissions.BranchContentManagementPermission
     ]
 
     @action(detail=True, methods=[ "GET" ])
-    @core_decorators.object_exists(model=Group, detail="Group")
-    def group(self, request, groups):
+    def group(self, request, pk=None):
+        if int(pk) > len(User.ROLES):
+            return core_responses.request_denied()
+        groups = Group.objects.get(role_id=pk)
         request_user = request.user
         if request_user.groups.role_id > groups.role_id:
             return core_responses.request_denied()
         if request_user.groups.role_id == User.ADMIN:
             users = request_user.school.users.filter(groups=groups)
-        else:
+        elif request_user.groups.role_id == User.OPERATOR:
             users = request_user.branch.users.filter(groups=groups)
         p_users = self.paginate_queryset(users)
         users = self.get_serializer_class()(p_users, many=True)
@@ -57,7 +60,6 @@ class UserViewSet(viewsets.GenericViewSet):
         if request_user.groups.role_id >= user_request_data["groups"]:
             return core_responses.request_denied()
         user = user.save()
-        print(user.id)
         user_request_data["user"] = user.id
         profile = local_serializers.UserProfileSerializer(data=user_request_data)
         profile.is_valid(raise_exception=True)
@@ -77,7 +79,7 @@ class UserViewSet(viewsets.GenericViewSet):
         if request.user.id is not user.id and request.user.groups.role_id >= user.groups.role_id:
             return core_responses.request_denied()
         user_request_data = request.data
-        upd_user = local_serializers.CustomUserUpdateSerializer(user, data=user_request_data)
+        upd_user = self.get_serializer_class()(user, data=user_request_data)
         upd_user.is_valid(raise_exception=True)
         user_request_data["user"] = user.id
         upd_profile = local_serializers.UserProfileSerializer(user.profile, data=user_request_data)

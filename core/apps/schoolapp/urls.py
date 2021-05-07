@@ -7,6 +7,6 @@ from . import views as local_views
 
 router = DefaultRouter()
 router.register("branch", local_views.BranchViewSet, basename="branch")
-router.register("", local_views.SchoolViewSet, basename="school")
+router.register("action", local_views.SchoolViewSet, basename="school")
 
 urlpatterns = router.urls

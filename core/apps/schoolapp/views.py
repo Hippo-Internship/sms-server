@@ -43,7 +43,10 @@ class BranchViewSet(viewsets.GenericViewSet):
 
     queryset = local_models.Branch.objects.all()
     serializer_class = local_serializers.BranchSerializer
-    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ core_permissions.BranchGetOrModifyPermission ]
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ 
+        core_permissions.BranchGetOrModifyPermission,
+        core_permissions.SchoolContentManagementPermission,
+    ]
     
     def list(self, request):
         request_user = request.user

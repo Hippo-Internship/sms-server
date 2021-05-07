@@ -2,6 +2,7 @@
 from django.contrib.auth import get_user_model
 # Third Party imports
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError, PermissionDenied
 # Local imports
 from . import models as local_models
 
@@ -24,8 +25,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = [
             'id',
-            'first_name',
-            'last_name',
+            'firstname',
+            'lastname',
             'email',
             'phone',
             'password',
@@ -57,8 +58,8 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = [
             'id',
-            'first_name',
-            'last_name',
+            'firstname',
+            'lastname',
             'email',
             'phone',
             'related_phone',
@@ -67,4 +68,4 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
             "profile",
             "groups"
         ]
-        read_only_field = [ "school", "branch" ]
+        read_only_fields = [ "school", "branch" ]

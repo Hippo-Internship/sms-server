@@ -26,25 +26,26 @@ class BranchContentManagementPermission(BasePermission):
         user = request.user
         if user.groups.role_id == User.SUPER_ADMIN:
             return True
-
         if view.action == "create" or view.action == "update":
             request_data = request.data
             branch_id = request_data.get("branch", -1)
-            branch = schoolapp_models.Branch.objects.filter(id=branch_id)
-            if not branch.exists():
-                raise NotFound({ "detail": "Branch does not exist!", "success": False })
-            branch = branch[0]
+            if branch_id == -1:
+                raise NotFound({ "detail": "branch is not given!", "success": False })
             if user.groups.role_id == User.ADMIN:
+                branch = schoolapp_models.Branch.objects.filter(id=branch_id)
+                if not branch.exists():
+                    raise NotFound({ "detail": "Branch does not exist!", "success": False })
+                branch = branch[0]
                 if branch.school.id is not user.school.id:
                     return False
                 else:
                     return True
-            if branch.id is not user.branch.id:
+            if branch_id is not user.branch.id:
                 return False
         elif view.action == "retrieve" or view.action == "destroy":
             _object = view.get_queryset().filter(id=view.kwargs["pk"])
             if not _object.exists():
-                raise NotFound({ "detail": "Room does not exist!", "success": False })
+                raise NotFound({ "detail": "Object does not exist!", "success": False })
             _object = _object[0]
             if user.groups.role_id == User.ADMIN:
                 if _object.branch.school.id is not user.school.id:
@@ -56,7 +57,38 @@ class BranchContentManagementPermission(BasePermission):
         return True
 
 
-# class 
+class SchoolContentManagementPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        if user.groups.role_id == User.SUPER_ADMIN:
+            return True
+        if view.action == "create" or view.action == "update":
+            request_data = request.data
+            school_id = request_data.get("school", -1)
+            if school_id == -1:
+                raise NotFound({ "detail": "school is not given!", "success": False })
+            if user.groups.role_id == User.ADMIN:
+                if school_id is not user.school.id:
+                    return False
+                else:
+                    return True
+            if school_id is not user.school.id:
+                return False
+        elif view.action == "retrieve" or view.action == "destroy":
+            _object = view.get_queryset().filter(id=view.kwargs["pk"])
+            if not _object.exists():
+                raise NotFound({ "detail": "Object does not exist!", "success": False })
+            _object = _object[0]
+            if user.groups.role_id == User.ADMIN:
+                if _object.branch.school.id is not user.school.id:
+                    return False
+                else:
+                    return True
+            if _object.branch.school.id is not user.school.id:
+                return False
+        return True
+
 
 
 class UserGetOrModifyPermission(BasePermission):
