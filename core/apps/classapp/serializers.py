@@ -7,6 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 # Local imports
 from . import models as local_models
+from core.apps.authapp import serializers as authapp_serializers
 from core.apps.schoolapp import serializers as schoolapp_serializers
 
 # User model
@@ -51,7 +52,7 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
             raise ValidationError("Such lesson does't exist in the branch!")
         return value
 
-    def room(self, value):
+    def validate_room(self, value):
         if value.branch.id != self.initial_data.get("branch", 0):
             raise ValidationError("Such room does't exist in the branch!")
         return value
@@ -89,9 +90,20 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
 class ClassDetailSerializer(serializers.ModelSerializer):
 
     branch = serializers.CharField(source="branch.name", read_only=True)
-    teacher = serializers.CharField(source="teacher.name", read_only=True)
+    teacher = serializers.CharField(source="teacher.firstname", read_only=True)
     lesson = serializers.CharField(source="lesson.name", read_only=True)
     room = serializers.CharField(source="room.name", read_only=True)
+
+    class Meta:
+        model = local_models.Class
+        fields = "__all__"
+
+
+class ClassFullDetailSerializer(serializers.ModelSerializer):
+
+    teacher = authapp_serializers.CustomUserSerializer(read_only=True)
+    lesson = LessonSerializer(read_only=True)
+    room = RoomSerializer(read_only=True)
 
     class Meta:
         model = local_models.Class

@@ -36,10 +36,10 @@ class BranchContentManagementPermission(BasePermission):
                 if not branch.exists():
                     raise NotFound({ "detail": "Branch does not exist!", "success": False })
                 branch = branch[0]
-                if branch.school.id is not user.school.id:
-                    return False
-                else:
+                if branch.school.id is user.school.id:
                     return True
+                else:
+                    return False
             if branch_id is not user.branch.id:
                 return False
         elif view.action == "retrieve" or view.action == "destroy":

@@ -120,9 +120,10 @@ class ClassViewSet(viewsets.GenericViewSet):
 
     def create(self, request):
         class_request_data = request.data
-        _class = local_serializers.ClassCreateAndUpdateSerializer(data=class_request_data)
+        _class = self.get_serializer_class()(data=class_request_data)
         _class.is_valid(raise_exception=True)
-        # _class.save()
+        days = _class.validated_data.pop("days")
+        _class.save()
         return core_responses.request_success()
 
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
@@ -132,4 +133,16 @@ class ClassViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def update(self, request, _class=None):
-        pass
+        class_requst_data = request.data
+        upd_class = self.get_serializer_class()(_class, data=class_requst_data)
+        upd_class.is_valid(raise_exception=True)
+        upd_class.save()
+        return core_responses.request_success_with_data(upd_class.data)
+
+    def get_serializer_class(self):
+        if self.action == "update" or self.action == "create":
+            return local_serializers.ClassCreateAndUpdateSerializer
+        elif self.action == "retrieve":
+            return local_serializers.ClassFullDetailSerializer
+        else:
+            return super(ClassViewSet, self).get_serializer_class()
