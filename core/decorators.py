@@ -1,5 +1,8 @@
+# Python imports
 from functools import wraps
+# Third party imports
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError, NotFound
 
 def has_key(key):
     def _has_key(func):
@@ -8,7 +11,7 @@ def has_key(key):
             if key in request.data:
                 return func(self, request, pk, *args, **kwargs)
             else:
-                return Response({ "detail": key + " is not given!", "success": False }, status=400)
+                raise ValidationError({ "detail": key + " is not given!", "success": False })
 
         return wrapper
     return _has_key
@@ -22,7 +25,7 @@ def object_exists(model, detail, many=False):
             if _object.exists():
                 return func(self, request, _object if many else _object[0], *args, **kwargs)
             else:
-                return Response({ "detail": detail + " does not exist!", "success": False }, status=404)
+                raise NotFound({ "detail": detail + " does not exist!", "success": False }, status=404)
         return wrapper
     return _object_exists
 

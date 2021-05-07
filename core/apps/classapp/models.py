@@ -30,7 +30,7 @@ class Lesson(base_models.BaseWithDate):
     color = models.CharField(max_length = 50, default="#3d3f56")
     sort = models.PositiveIntegerField(null=True, blank=True)
     exam = models.PositiveIntegerField(null=True, default=0)
-    is_active = models.IntegerField(null=True, blank=True, default=1)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         ordering = [ "id" ]

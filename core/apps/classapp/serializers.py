@@ -16,4 +16,3 @@ class RoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Room
         fields = "__all__"
-
