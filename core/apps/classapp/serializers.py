@@ -1,11 +1,16 @@
 # Python imports
 from datetime import datetime
+# Django built-in imports
+from django.contrib.auth import get_user_model
 # Third party imports
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 # Local imports
 from . import models as local_models
 from core.apps.schoolapp import serializers as schoolapp_serializers
+
+# User model
+User = get_user_model()
 
 class LessonSerializer(serializers.ModelSerializer):
 
@@ -28,6 +33,28 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Class
         fields = "__all__"
+        extra_kwargs = {
+            "lesson": { "required": True },
+            "teacher": { "required": True },
+            "room": { "required": True },
+        }
+
+    def validate_lesson(self, value):
+        if value.branch.id != self.initial_data.get("branch", 0):
+            raise ValidationError("Such lesson does't exist in the branch!")
+        return value
+
+    def validate_teacher(self, value):
+        if value.groups.role_id != User.TEACHER:
+            raise ValidationError("Invalid teacher!")
+        if value.branch.id != self.initial_data.get("branch", 0):
+            raise ValidationError("Such lesson does't exist in the branch!")
+        return value
+
+    def room(self, value):
+        if value.branch.id != self.initial_data.get("branch", 0):
+            raise ValidationError("Such room does't exist in the branch!")
+        return value
 
     def validate_days(self, value):
         if len(value) != 7:

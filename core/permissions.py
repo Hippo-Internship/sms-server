@@ -24,7 +24,7 @@ class BranchContentManagementPermission(BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        if user.groups.id == User.SUPER_ADMIN:
+        if user.groups.role_id == User.SUPER_ADMIN:
             return True
 
         if view.action == "create" or view.action == "update":
@@ -34,7 +34,7 @@ class BranchContentManagementPermission(BasePermission):
             if not branch.exists():
                 raise NotFound({ "detail": "Branch does not exist!", "success": False })
             branch = branch[0]
-            if user.groups.id == User.ADMIN:
+            if user.groups.role_id == User.ADMIN:
                 if branch.school.id is not user.school.id:
                     return False
                 else:
@@ -46,7 +46,7 @@ class BranchContentManagementPermission(BasePermission):
             if not _object.exists():
                 raise NotFound({ "detail": "Room does not exist!", "success": False })
             _object = _object[0]
-            if user.groups.id == User.ADMIN:
+            if user.groups.role_id == User.ADMIN:
                 if _object.branch.school.id is not user.school.id:
                     return False
                 else:

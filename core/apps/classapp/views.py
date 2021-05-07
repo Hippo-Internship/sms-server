@@ -27,12 +27,12 @@ class LessonViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         request_user = request.user
-        if request_user.groups.id == User.SUPER_ADMIN:
+        if request_user.groups.role_id == User.SUPER_ADMIN:
             lessons = self.get_queryset().all()
-        elif request_user.groups.id == User.ADMIN:
+        elif request_user.groups.role_id == User.ADMIN:
             branches = request_user.school.branches.all()
             lessons = self.get_queryset().filter(branch__in=branches)
-        elif request_user.groups.id == User.OPERATOR:
+        elif request_user.groups.role_id == User.OPERATOR:
             lessons = self.get_queryset().filter(branch=request_user.branch)
         p_lessons = self.paginate_queryset(lessons)
         lessons = self.get_serializer_class()(p_lessons, many=True)
@@ -64,12 +64,12 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         request_user = request.user
-        if request_user.groups.id == User.SUPER_ADMIN:
+        if request_user.groups.role_id == User.SUPER_ADMIN:
             rooms = self.get_queryset().all()
-        elif request_user.groups.id == User.ADMIN:
+        elif request_user.groups.role_id == User.ADMIN:
             branches = request_user.school.branches.all()
             rooms = self.get_queryset().filter(branch__in=branches)
-        elif request_user.groups.id == User.OPERATOR:
+        elif request_user.groups.role_id == User.OPERATOR:
             rooms = self.get_queryset().filter(branch=request_user.branch)
         p_rooms = self.paginate_queryset(rooms)
         rooms = self.get_serializer_class()(p_rooms, many=True)
@@ -100,14 +100,14 @@ class ClassViewSet(viewsets.GenericViewSet):
 
     def list(self, request):
         request_user = request.user
-        if request_user.groups.id == User.SUPER_ADMIN:
+        if request_user.groups.role_id == User.SUPER_ADMIN:
             classes = self.get_queryset().all()
-        elif request_user.groups.id == User.ADMIN:
+        elif request_user.groups.role_id == User.ADMIN:
             branches = request_user.school.branches.all()
             classes = self.get_queryset().filter(branch__in=branches)
-        elif request_user.groups.id == User.OPERATOR:
+        elif request_user.groups.role_id == User.OPERATOR:
             classes = self.get_queryset().filter(branch=request_user.branch)
-        elif request_user.groups.id == User.TEACHER:
+        elif request_user.groups.role_id == User.TEACHER:
             classes = self.get_queryset().filter(teacher=request_user)
         p_classes = self.paginate_queryset(classes)
         classes = self.get_serializer_class()(p_classes, many=True)
@@ -122,6 +122,7 @@ class ClassViewSet(viewsets.GenericViewSet):
         class_request_data = request.data
         _class = local_serializers.ClassCreateAndUpdateSerializer(data=class_request_data)
         _class.is_valid(raise_exception=True)
+        # _class.save()
         return core_responses.request_success()
 
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
@@ -131,5 +132,3 @@ class ClassViewSet(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def update(self, request, _class=None):
         pass
-    
-    

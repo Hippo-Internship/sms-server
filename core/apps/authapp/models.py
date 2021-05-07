@@ -6,7 +6,9 @@ from django.contrib.auth.models import BaseUserManager, AbstractUser, Group
 from . import validators as local_validators
 from core.apps.schoolapp import models as schoolapp_models
 
-# Create your models here.
+# Adding custom field to the group
+Group.add_to_class('role_id', models.IntegerField(null=False, blank=False, default=7))
+
 class CustomUserManager(BaseUserManager):
 
     def create_user(self, email, password, **kwargs):

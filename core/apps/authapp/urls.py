@@ -7,7 +7,7 @@ from . import views as local_views
 
 # Router
 router = DefaultRouter()
-router.register("actions", local_views.UserViewSet, basename="actions")
+router.register("action", local_views.UserViewSet, basename="actions")
 
 urlpatterns = [
     path("", include("dj_rest_auth.urls"))

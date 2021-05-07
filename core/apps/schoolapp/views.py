@@ -48,9 +48,9 @@ class BranchViewSet(viewsets.GenericViewSet):
     def list(self, request):
         request_user = request.user
         branches = []
-        if request_user.groups.id is User.SUPER_ADMIN:
+        if request_user.groups.role_id is User.SUPER_ADMIN:
             branches = self.get_queryset().all() 
-        elif request_user.groups.id is User.ADMIN:
+        elif request_user.groups.role_id is User.ADMIN:
             branches = self.get_queryset().filter(school=request_user.school)
         p_branches = self.paginate_queryset(branches)
         branches = self.get_serializer_class()(p_branches, many=True)

@@ -22,15 +22,18 @@ class UserViewSet(viewsets.GenericViewSet):
 
     queryset = User.objects.all()
     serializer_class = local_serializers.CustomUserSerializer
-    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ core_permissions.UserGetOrModifyPermission ]
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
+        core_permissions.UserGetOrModifyPermission,
+        core_permissions.BranchContentManagementPermission
+    ]
 
     @action(detail=True, methods=[ "GET" ])
     @core_decorators.object_exists(model=Group, detail="Group")
     def group(self, request, groups):
         request_user = request.user
-        if request_user.groups.id > groups.id:
+        if request_user.groups.role_id > groups.role_id:
             return core_responses.request_denied()
-        if request_user.groups.id == local_models.CustomUser.ADMIN:
+        if request_user.groups.role_id == User.ADMIN:
             users = request_user.school.users.filter(groups=groups)
         else:
             users = request_user.branch.users.filter(groups=groups)
@@ -51,9 +54,7 @@ class UserViewSet(viewsets.GenericViewSet):
         user_request_data = request.data
         user = self.get_serializer_class()(data=user_request_data)
         user.is_valid(raise_exception=True)
-        if request_user.groups.id >= user_request_data["groups"]:
-            return core_responses.request_denied()
-        if not core_utils.check_if_user_can_procceed(request_user, user_request_data["school"], user_request_data["branch"]):
+        if request_user.groups.role_id >= user_request_data["groups"]:
             return core_responses.request_denied()
         user = user.save()
         print(user.id)
@@ -66,18 +67,14 @@ class UserViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=User, detail="User")
     def destroy(self, request, user=None):
-        if user.groups is not None and request.user.groups.id >= user.groups.id:
-            return core_responses.request_denied()
-        if not core_utils.check_if_user_can_procceed(request.user, user.schoo.id, user.branch.id):
+        if user.groups is not None and request.user.groups.role_id >= user.groups.role_id:
             return core_responses.request_denied()
         user.delete()
         return core_responses.request_success()
 
     @core_decorators.object_exists(model=User, detail="User")
     def update(self, request, user=None):
-        if request.user.id is not user.id and request.user.groups.id >= user.groups.id:
-            return core_responses.request_denied()
-        if not core_utils.check_if_user_can_procceed(request.user, user.school.id, user.branch.id):
+        if request.user.id is not user.id and request.user.groups.role_id >= user.groups.role_id:
             return core_responses.request_denied()
         user_request_data = request.data
         upd_user = local_serializers.CustomUserUpdateSerializer(user, data=user_request_data)
