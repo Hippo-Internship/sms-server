@@ -7,3 +7,4 @@ from . import models
 admin.site.register(models.Room)
 admin.site.register(models.Lesson)
 admin.site.register(models.Class)
+admin.site.register(models.Calendar)

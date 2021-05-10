@@ -29,7 +29,7 @@ class RoomSerializer(serializers.ModelSerializer):
 
 class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
 
-    days = serializers.ListField(required=True)
+    # days = serializers.ListField(required=True)
 
     class Meta:
         model = local_models.Class
@@ -54,16 +54,6 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
             raise ValidationError("Such lesson does't exist in the branch!")
         if not value.is_active:
             raise ValidationError("Teacher doesn't exist!")
-        return value
-
-    def validate_room(self, value):
-        if value.branch.id != self.initial_data.get("branch", 0):
-            raise ValidationError("Such room does't exist in the branch!")
-        return value
-
-    def validate_days(self, value):
-        if len(value) != 7:
-            raise ValidationError("Days should contain only 7 elements!")
         return value
 
     def validate_start_date(self, value):
@@ -112,3 +102,28 @@ class ClassFullDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Class
         fields = "__all__"
+
+class CalendarSerializer(serializers.ModelSerializer):
+
+    room = serializers.CharField(source="room.name", read_only=True)
+
+    def __init__(self, *args, **kwargs):
+        self._class = kwargs.pop("_class", None)
+        super(CalendarSerializer, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = local_models.Calendar
+        fields = "__all__"
+        extra_kwargs = {
+            "_class": { "required": False }
+        }
+
+    def validate(self, data):
+        print(data)
+        if data["room"].branch.id is not self._class.branch.id:
+            raise ValidationError("Invalid Class")
+        if data["day"] > 6:
+            raise ValidationError("Day should be between 0 and 6")
+        if data["end_time"] < data["start_time"]:
+            raise ValidationError("End time should be later than the start time!")
+        return data

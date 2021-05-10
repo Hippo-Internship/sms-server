@@ -10,5 +10,6 @@ router = DefaultRouter()
 router.register("lesson", local_views.LessonViewSet, basename="lesson")
 router.register("room", local_views.RoomViewSet, basename="room")
 router.register("action", local_views.ClassViewSet, basename="class")
+router.register("calendar", local_views.CalendarViewSet, basename="calendar")
 
 urlpatterns = router.urls

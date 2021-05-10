@@ -51,31 +51,3 @@ class Branch(base_models.BaseWithDate):
 
     def __str__(self):
         return '%s %s %s' % (self.id, self.name, self.school)
-    
-    
-# class PaymentMethod(models.Model):
-    
-#     id = models.AutoField(primary_key=True)
-#     name = models.CharField(max_length = 100)
-#     branches = models.ManyToManyField(Branch, related_name="payment_methods")
-
-#     class Meta:
-#         ordering = [ "id" ]
-
-#     def __str__(self):
-#         return "%s %s" % (self.id, self.name)
-    
-
-# class Status(models.Model):
-
-#     id = models.AutoField(primary_key=True)
-#     name = models.CharField(max_length=24, null=False, blank=False)
-#     color = models.CharField(max_length=24, null=False, default="#3d3f56")
-#     branches = models.ManyToManyField(Branch, related_name="statuses")
-
-#     class Meta:
-#         ordering = [ "id" ]
-
-#     def __str__(self):
-#         return "%s %s" % (self.id, self.name)
-    

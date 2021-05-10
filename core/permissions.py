@@ -42,7 +42,7 @@ class BranchContentManagementPermission(BasePermission):
                     return False
             if branch_id is not user.branch.id:
                 return False
-        elif view.action == "retrieve" or view.action == "destroy":
+        elif view.action == "retrieve" or view.action == "destroy" or view.detail:
             _object = view.get_queryset().filter(id=view.kwargs["pk"])
             if not _object.exists():
                 raise NotFound({ "detail": "Object does not exist!", "success": False })

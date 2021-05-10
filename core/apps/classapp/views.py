@@ -132,8 +132,7 @@ class ClassViewSet(viewsets.GenericViewSet):
         class_request_data = request.data
         _class = self.get_serializer_class()(data=class_request_data)
         _class.is_valid(raise_exception=True)
-        days = _class.validated_data.pop("days")
-        _class.save()
+        # _class = _class.save()
         return core_responses.request_success()
 
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
@@ -149,6 +148,21 @@ class ClassViewSet(viewsets.GenericViewSet):
         upd_class.save()
         return core_responses.request_success_with_data(upd_class.data)
 
+    @rest_decorator.action(detail=True, methods=[ "POST" ], url_path="calendar")
+    @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    def create_calendar(self, request, _class=None):
+        calendar_request_data = request.data
+        calendar = local_serializers.CalendarSerializer(data=calendar_request_data, many=True, _class=_class)
+        calendar.is_valid(raise_exception=True)
+        calendar.save()
+        return core_responses.request_success_with_data(calendar.data)
+
+    @create_calendar.mapping.delete
+    @core_decorators.has_key("days")
+    @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    def destroy_calendar(self, request, _class=None):
+        _class.calendar.filter(id__in=request.data["days"]).delete()
+        return core_responses.request_success()
 
     def get_serializer_class(self):
         if self.action == "update" or self.action == "create":
@@ -157,3 +171,25 @@ class ClassViewSet(viewsets.GenericViewSet):
             return local_serializers.ClassFullDetailSerializer
         else:
             return super(ClassViewSet, self).get_serializer_class()
+
+
+class CalendarViewSet(viewsets.GenericViewSet):
+
+    queryset = local_models.Calendar.objects.all()
+    serializer_class = local_serializers.CalendarSerializer
+
+    def list(self, request):
+        request_user = request.user
+        if request_user.groups.role_id == User.SUPER_ADMIN:
+            calendar = self.get_queryset().all()
+        elif request_user.groups.role_id == User.ADMIN:
+            branches = request_user.school.branches.all()
+            calendar = self.get_queryset().filter(_class__branch__in=branches)
+        elif request_user.groups.role_id == User.OPERATOR:
+            calendar = self.get_queryset().filter(_class__branch=request_user.branch)
+        elif request_user.groups.role_id == User.TEACHER:
+            calendar = self.get_queryset().filter(_class__teacher=request_user)
+        p_calendar = self.paginate_queryset(calendar)
+        calendar = self.get_serializer_class()(p_calendar, many=True)
+        return self.get_paginated_response(calendar.data)
+    

@@ -96,14 +96,6 @@ class Class(models.Model):
         blank=True,
         db_index=True
     )
-    room = models.ForeignKey(
-        Room, 
-        related_name='classes', 
-        on_delete=models.SET_NULL, 
-        null=True,
-        blank=True, 
-        db_index=True
-    )
     name = models.CharField(max_length=56, null=False, blank=False)
     start_date = models.DateField(null=False, blank=False)
     start_time = models.TimeField(null=False, blank=False)
@@ -135,10 +127,18 @@ class Calendar(models.Model):
     _class = models.ForeignKey(
         Class,
         on_delete=models.CASCADE,
-        related_name="dates",
+        related_name="calendar",
         null=False,
         blank=False,
         db_column="class",
+        db_index=True
+    )
+    room = models.ForeignKey(
+        Room, 
+        related_name='calendar', 
+        on_delete=models.SET_NULL, 
+        null=True,
+        blank=True, 
         db_index=True
     )
     day = models.IntegerField(choices=DAYS)
@@ -147,7 +147,8 @@ class Calendar(models.Model):
 
     class Meta:
         ordering = [ "id" ]
+        unique_together = [ "room", "day", "start_time" ]
 
     def __str__(self):
-        return "%s %s %s" % (self.id, self.day)
+        return "%s %s %s" % (self.id, self.day, self._class)
     
