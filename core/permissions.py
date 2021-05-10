@@ -140,3 +140,22 @@ class RoomGetOrModifyPermission(BasePermission):
         user = request.user
         switch = generate_basic_permission_switch("classapp", "room")
         return user.has_perm(switch.get(view.action, ""))
+
+
+class ClassGetOrModifyPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        app_name = "classapp"
+        model_name = "class"
+        switch = generate_basic_permission_switch(app_name, model_name)
+        switch["create_calendar"] = app_name + ".add_calendar"
+        switch["destroy_calendar"] = app_name + ".delete_calendar"
+        return user.has_perm(switch.get(view.action, ""))
+
+
+class CalendarGetPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        return user.has_perm("classapp.calendar_view")

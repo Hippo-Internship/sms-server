@@ -73,7 +73,7 @@ class Payment(models.Model):
         blank=True,
         db_index=True
     )
-    paytype = models.ForeignKey(
+    pay_type = models.ForeignKey(
         utilityapp_models.PaymentMethod,
         on_delete = models.CASCADE, 
         related_name='payment_type', 

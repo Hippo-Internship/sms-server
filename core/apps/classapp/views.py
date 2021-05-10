@@ -98,6 +98,7 @@ class ClassViewSet(viewsets.GenericViewSet):
     queryset = local_models.Class.objects.all()
     serializer_class = local_serializers.ClassDetailSerializer
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
+        core_permissions.ClassGetOrModifyPermission,
         core_permissions.BranchContentManagementPermission,
     ]
 
