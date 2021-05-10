@@ -117,3 +117,37 @@ class Class(models.Model):
 
     def __str__(self):
         return "%s %s %s" % (self.id, self.branch, self.lesson)
+
+
+class Calendar(models.Model):
+
+    DAYS = (
+        (0, "Monday"),
+        (1, "Tuesday"),
+        (2, "Wednesday"),
+        (3, "Thursday"),
+        (4, "Friday"),
+        (5, "Saturday"),
+        (6, "Sunday"),
+    )
+
+    id = models.AutoField(primary_key=True)
+    _class = models.ForeignKey(
+        Class,
+        on_delete=models.CASCADE,
+        related_name="dates",
+        null=False,
+        blank=False,
+        db_column="class",
+        db_index=True
+    )
+    day = models.IntegerField(choices=DAYS)
+    start_time = models.TimeField(null=False, blank=False)
+    end_time = models.TimeField(null=False, blank=False)
+
+    class Meta:
+        ordering = [ "id" ]
+
+    def __str__(self):
+        return "%s %s %s" % (self.id, self.day)
+    

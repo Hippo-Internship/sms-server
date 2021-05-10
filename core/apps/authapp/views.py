@@ -37,9 +37,9 @@ class UserViewSet(viewsets.GenericViewSet):
         if request_user.groups.role_id > groups.role_id:
             return core_responses.request_denied()
         if request_user.groups.role_id == User.ADMIN:
-            users = request_user.school.users.filter(groups=groups)
+            users = request_user.school.users.filter(groups=groups, is_active=True)
         elif request_user.groups.role_id == User.OPERATOR:
-            users = request_user.branch.users.filter(groups=groups)
+            users = request_user.branch.users.filter(groups=groups, is_active=True)
         p_users = self.paginate_queryset(users)
         users = self.get_serializer_class()(p_users, many=True)
         return self.get_paginated_response(users.data);
@@ -69,9 +69,10 @@ class UserViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=User, detail="User")
     def destroy(self, request, user=None):
-        if user.groups is not None and request.user.groups.role_id >= user.groups.role_id:
+        if request.user.groups.role_id >= user.groups.role_id:
             return core_responses.request_denied()
-        user.delete()
+        user.is_active = False
+        user.save()
         return core_responses.request_success()
 
     @core_decorators.object_exists(model=User, detail="User")

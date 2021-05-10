@@ -85,8 +85,8 @@ class CustomUser(AbstractUser):
     related_phone = models.CharField(validators = [ local_validators.validate_phone ], max_length=20, null=True, blank=True)
     interested_at = models.CharField(null=True, max_length=255, blank=True)
     seen_datasheet = models.IntegerField(null=True, default=3)
-    is_active = models.IntegerField(null=True, default=1)
     groups = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="users")
+    is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone', 'role_id']

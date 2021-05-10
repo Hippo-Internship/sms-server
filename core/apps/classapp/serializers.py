@@ -43,6 +43,8 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
     def validate_lesson(self, value):
         if value.branch.id != self.initial_data.get("branch", 0):
             raise ValidationError("Such lesson does't exist in the branch!")
+        if not value.is_active:
+            raise ValidationError("Lesson doesn't exist!")
         return value
 
     def validate_teacher(self, value):
@@ -50,6 +52,8 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
             raise ValidationError("Invalid teacher!")
         if value.branch.id != self.initial_data.get("branch", 0):
             raise ValidationError("Such lesson does't exist in the branch!")
+        if not value.is_active:
+            raise ValidationError("Teacher doesn't exist!")
         return value
 
     def validate_room(self, value):
