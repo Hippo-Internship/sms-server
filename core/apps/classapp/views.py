@@ -15,6 +15,9 @@ from core import \
         responses as core_responses, \
         permissions as core_permissions, \
         decorators as core_decorators
+from core.apps.studentapp import \
+        models as studentapp_models, \
+        serializers as studentapp_serializers
 
 # User model
 User = get_user_model()
@@ -98,7 +101,7 @@ class ClassViewSet(viewsets.GenericViewSet):
     queryset = local_models.Class.objects.all()
     serializer_class = local_serializers.ClassDetailSerializer
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
-        core_permissions.ClassGetOrModifyPermission,
+        # core_permissions.ClassGetOrModifyPermission,
         core_permissions.BranchContentManagementPermission,
     ]
 
@@ -153,7 +156,8 @@ class ClassViewSet(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def create_calendar(self, request, _class=None):
         calendar_request_data = request.data
-        calendar = local_serializers.CalendarSerializer(data=calendar_request_data, many=True, _class=_class)
+        calendar_request_data["_class"] = _class.id
+        calendar = self.get_serializer_class()(data=calendar_request_data, many=True)
         calendar.is_valid(raise_exception=True)
         calendar.save()
         return core_responses.request_success_with_data(calendar.data)
@@ -165,11 +169,25 @@ class ClassViewSet(viewsets.GenericViewSet):
         _class.calendar.filter(id__in=request.data["days"]).delete()
         return core_responses.request_success()
 
+    @rest_decorator.action(detail=True, methods=[ "POST" ], url_path="student")
+    @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    def create_student(self, request, _class=None):
+        student_request_data = request.data
+        student_request_data["operator"] = request.user.id
+        student_request_data["_class"] = _class.id
+        student = self.get_serializer_class()(data=student_request_data)
+        student.is_valid(raise_exception=True)
+        return core_responses.request_success()
+
     def get_serializer_class(self):
         if self.action == "update" or self.action == "create":
             return local_serializers.ClassCreateAndUpdateSerializer
         elif self.action == "retrieve":
             return local_serializers.ClassFullDetailSerializer
+        elif self.action == "create_calendar":
+            return local_serializers.CalendarSerializer
+        elif self.action == "create_student":
+            return studentapp_serializers.StudentCreateOrModifySerializer
         else:
             return super(ClassViewSet, self).get_serializer_class()
 

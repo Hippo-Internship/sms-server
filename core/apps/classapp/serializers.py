@@ -107,10 +107,6 @@ class CalendarSerializer(serializers.ModelSerializer):
 
     room = serializers.CharField(source="room.name", read_only=True)
 
-    def __init__(self, *args, **kwargs):
-        self._class = kwargs.pop("_class", None)
-        super(CalendarSerializer, self).__init__(*args, **kwargs)
-
     class Meta:
         model = local_models.Calendar
         fields = "__all__"
@@ -120,7 +116,8 @@ class CalendarSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         print(data)
-        if data["room"].branch.id is not self._class.branch.id:
+        _class = data["_class"]
+        if data["room"].branch.id is not _class.branch.id:
             raise ValidationError("Invalid Class")
         if data["day"] > 6:
             raise ValidationError("Day should be between 0 and 6")

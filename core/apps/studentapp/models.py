@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from core import base_models
 from core.apps.classapp import models as classapp_models
 from core.apps.utilityapp import models as utilityapp_models
+from core.apps.schoolapp import models as schoolapp_models
 
 # User model
 User = get_user_model()
@@ -90,4 +91,25 @@ class Payment(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.id, self.student)
+    
+
+class Discount(models.Model):
+
+    id = models.AutoField(primary_key=True)
+    branch = models.ForeignKey(
+        schoolapp_models.Branch,
+        on_delete=models.CASCADE,
+        related_name="discounts",
+        null=False,
+        blank=False,
+        db_index=True
+    )
+    name = models.CharField(max_length=56, null=False, blank=True, unique=True)
+    percent = models.FloatField(null=True, blank=True)
+    value = models.IntegerField(null=True, blank=True)
+    start_date = models.DateField(null=True)
+    end_date = models.DateField(null=True)
+
+    def __str__(self):
+        return "%s %s" % (self.id, self.name)
     
