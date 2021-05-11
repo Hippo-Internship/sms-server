@@ -4,7 +4,6 @@ from datetime import datetime
 from django.contrib.auth import get_user_model
 # Third party imports
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 # Local imports
 from . import models as local_models
 from core.apps.authapp import serializers as authapp_serializers
@@ -42,18 +41,18 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
 
     def validate_lesson(self, value):
         if value.branch.id != self.initial_data.get("branch", 0):
-            raise ValidationError("Such lesson does't exist in the branch!")
+            raise serializers.ValidationError("Such lesson does't exist in the branch!")
         if not value.is_active:
-            raise ValidationError("Lesson doesn't exist!")
+            raise serializers.ValidationError("Lesson doesn't exist!")
         return value
 
     def validate_teacher(self, value):
         if value.groups.role_id != User.TEACHER:
-            raise ValidationError("Invalid teacher!")
+            raise serializers.ValidationError("Invalid teacher!")
         if value.branch.id != self.initial_data.get("branch", 0):
-            raise ValidationError("Such lesson does't exist in the branch!")
+            raise serializers.ValidationError("Such lesson does't exist in the branch!")
         if not value.is_active:
-            raise ValidationError("Teacher doesn't exist!")
+            raise serializers.ValidationError("Teacher doesn't exist!")
         return value
 
     def validate_start_date(self, value):
@@ -61,7 +60,7 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
         start_date = initial_data.get("start_date", None)
         start_date = datetime.strptime(start_date, "%Y-%m-%d")
         if start_date < datetime.now():
-            raise ValidationError("Start date should be later than the today's date!")
+            raise serializers.ValidationError("Start date should be later than the today's date!")
         return value
 
     def validate_end_date(self, value):
@@ -69,7 +68,7 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
         start_date = initial_data.get("start_date", None)
         end_date = initial_data.get("end_date", None)
         if end_date < start_date:
-            raise ValidationError("End date should be later than the start date!")
+            raise serializers.ValidationError("End date should be later than the start date!")
         return value
 
     def validate_end_time(self, value):
@@ -77,7 +76,7 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
         start_time = initial_data.get("start_time", None)
         end_time = initial_data.get("end_time", None)
         if start_time < end_time:
-            raise ValidationError("End time should be later than the start time!")
+            raise serializers.ValidationError("End time should be later than the start time!")
         return value
 
 
@@ -118,9 +117,9 @@ class CalendarSerializer(serializers.ModelSerializer):
         print(data)
         _class = data["_class"]
         if data["room"].branch.id is not _class.branch.id:
-            raise ValidationError("Invalid Class")
+            raise serializers.ValidationError("Invalid Class")
         if data["day"] > 6:
-            raise ValidationError("Day should be between 0 and 6")
+            raise serializers.ValidationError("Day should be between 0 and 6")
         if data["end_time"] < data["start_time"]:
-            raise ValidationError("End time should be later than the start time!")
+            raise serializers.ValidationError("End time should be later than the start time!")
         return data

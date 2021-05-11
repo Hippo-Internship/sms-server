@@ -11,6 +11,30 @@ from core.apps.schoolapp import models as schoolapp_models
 # User model
 User = get_user_model()
 
+
+class Discount(models.Model):
+
+    id = models.AutoField(primary_key=True)
+    branch = models.ForeignKey(
+        schoolapp_models.Branch,
+        on_delete=models.CASCADE,
+        related_name="discounts",
+        null=False,
+        blank=False,
+        db_index=True
+    )
+    name = models.CharField(max_length=56, null=False, blank=True, unique=True)
+    percent = models.FloatField(null=True, blank=True)
+    value = models.IntegerField(null=True, blank=True)
+    limited = models.BooleanField(null=True, default=False)
+    limit = models.IntegerField(null=True, default=0)
+    count = models.IntegerField(null=True, default=0)
+    start_date = models.DateField(null=True)
+    end_date = models.DateField(null=True)
+
+    def __str__(self):
+        return "%s %s" % (self.id, self.name)
+
 class Student(base_models.BaseWithDate):
 
     id = models.BigAutoField(primary_key=True)
@@ -47,11 +71,10 @@ class Student(base_models.BaseWithDate):
         blank=False,
         db_index=True
     )
-    # payment_payed = models.IntegerField(null=True, default=0) # tulsun tulbur
-    # total_payment = models.FloatField(null=True, default=0) # niit tulbur
-    # payment_remain = models.FloatField(null=True, default=0) # vldsen tulber
-    # discount_amount = models.IntegerField(default=0, null=True)
-    start_date = models.DateField(null=False)
+    payment_paid = models.IntegerField(null=False, default=0)
+    discount_amount = models.FloatField(null=False, default=0)
+    discounts = models.ManyToManyField(Discount, blank=True)
+    start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
     note = models.CharField(max_length = 255, null=True, blank=True)
     canceled = models.BooleanField(null=False, default=False)
@@ -60,7 +83,7 @@ class Student(base_models.BaseWithDate):
         ordering = [ "id" ]
 
     def __str__(self):
-        return "%d %d %d" % (self.id, self.user, self.operator)
+        return "%s %s %s" % (self.id, self.user, self.operator)
     
 
 class Payment(models.Model):
@@ -69,7 +92,7 @@ class Payment(models.Model):
     student = models.ForeignKey(
         Student, 
         on_delete = models.CASCADE,
-        related_name='payment',
+        related_name="payments",
         null=True,
         blank=True,
         db_index=True
@@ -77,7 +100,7 @@ class Payment(models.Model):
     pay_type = models.ForeignKey(
         utilityapp_models.PaymentMethod,
         on_delete = models.CASCADE, 
-        related_name='payment_type', 
+        related_name="payments", 
         null=True,
         blank=True, 
         db_index=True
@@ -91,25 +114,4 @@ class Payment(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.id, self.student)
-    
-
-class Discount(models.Model):
-
-    id = models.AutoField(primary_key=True)
-    branch = models.ForeignKey(
-        schoolapp_models.Branch,
-        on_delete=models.CASCADE,
-        related_name="discounts",
-        null=False,
-        blank=False,
-        db_index=True
-    )
-    name = models.CharField(max_length=56, null=False, blank=True, unique=True)
-    percent = models.FloatField(null=True, blank=True)
-    value = models.IntegerField(null=True, blank=True)
-    start_date = models.DateField(null=True)
-    end_date = models.DateField(null=True)
-
-    def __str__(self):
-        return "%s %s" % (self.id, self.name)
     

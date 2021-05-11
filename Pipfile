@@ -11,6 +11,7 @@ django-environ = "*"
 pillow = "*"
 dj-rest-auth = "*"
 djangorestframework-simplejwt = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 

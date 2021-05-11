@@ -177,7 +177,10 @@ class ClassViewSet(viewsets.GenericViewSet):
         student_request_data["_class"] = _class.id
         student = self.get_serializer_class()(data=student_request_data)
         student.is_valid(raise_exception=True)
-        return core_responses.request_success()
+        class_price = student.validated_data["_class"].lesson.price
+        student.validated_data["discount_amount"] = local_utils.calculate_discount(class_price, student.validated_data["discounts"])
+        student.save()
+        return core_responses.request_success_with_data(student.data)
 
     def get_serializer_class(self):
         if self.action == "update" or self.action == "create":
