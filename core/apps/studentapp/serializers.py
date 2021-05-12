@@ -79,9 +79,16 @@ class DiscountDetailSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class DiscountShortDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Discount
+        fields = [ "name" ]
+
+
 class StudentShortDetailSerializer(serializers.ModelSerializer):
 
-    discounts = serializers.ListField(child=serializers.CharField())
+    discounts = DiscountShortDetailSerializer(many=True)
 
     class Meta:
         model = local_models.Student
@@ -124,6 +131,7 @@ class UserStudentsDetailSerializer(serializers.ModelSerializer):
             'email',
             'school',
             'branch',
-            "groups"
+            "groups",
+            "students"
         ]
 

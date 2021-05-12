@@ -210,7 +210,14 @@ class ClassViewSet(viewsets.GenericViewSet):
         _class.calendar.filter(id__in=request.data["days"]).delete()
         return core_responses.request_success()
 
-    @rest_decorator.action(detail=True, methods=[ "POST" ], url_path="student")
+    @rest_decorator.action(detail=True, methods=[ "GET" ], url_path="student")
+    @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    def list_student(self, request, _class=None):
+        p_student = self.paginate_queryset(_class.students.filter(canceled=False))
+        students = studentapp_serializers.StudentShortDetailSerializer(p_student, many=True)
+        return self.get_paginated_response(students.data)
+
+    @list_student.mapping.post
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def create_student(self, request, _class=None):
         student_request_data = request.data
@@ -224,7 +231,7 @@ class ClassViewSet(viewsets.GenericViewSet):
         student.save()
         return core_responses.request_success_with_data(student.data)
 
-    @create_student.mapping.put
+    @list_student.mapping.put
     @core_decorators.has_key("user")
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def update_student(self, request, _class=None):

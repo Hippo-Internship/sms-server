@@ -1,11 +1,8 @@
 # Django built-in imports
-from django.shortcuts import redirect
-from django.http import HttpResponseRedirect
 from django.db.models import F
 # Third Party imports
 from rest_framework import viewsets
-from rest_framework import decorators as rest_decorators
-from rest_framework.response import Response
+from rest_framework.settings import api_settings
 # Local imports
 from . import \
         models as local_models, \
@@ -18,8 +15,11 @@ from core import \
 
 class StudentViewSet(viewsets.GenericViewSet):
 
-    queryset = local_models.Student.objects.all()
+    queryset = local_models.User.objects.all()
     serializer_class = local_serializers.StudentCreateSerializer
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
+        core_permissions.BranchContentManagementPermission
+    ]
 
     def list(self, request):
         query_params = core_utils.normalize_data(
@@ -51,15 +51,15 @@ class StudentViewSet(viewsets.GenericViewSet):
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
         request_user = request.user
         if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
-            students = local_models.User.objects.all(groups=local_models.User.STUDENT)
+            students = self.get_queryset().all(groups=local_models.User.STUDENT)
         elif request_user.groups.role_id == local_models.User.ADMIN:
-            students = local_models.User.objects.filter(
+            students = self.get_queryset().filter(
                 branch__school=request_user.school.id, 
                 groups__role_id=local_models.User.STUDENT, 
                 **filter_queries
             )
         elif request_user.groups.role_id == local_models.User.OPERATOR:
-            students = local_models.User.objects.filter(
+            students = self.get_queryset().filter(
                 branch=request_user.branch, 
                 groups__role_id=local_models.User.STUDENT, 
                 **filter_queries
