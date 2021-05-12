@@ -25,7 +25,7 @@ def object_exists(model, detail, many=False):
             if _object.exists():
                 return func(self, request, _object if many else _object[0], *args, **kwargs)
             else:
-                raise NotFound({ "detail": detail + " does not exist!", "success": False }, status=404)
+                raise NotFound({ "detail": detail + " does not exist!", "success": False })
         return wrapper
     return _object_exists
 

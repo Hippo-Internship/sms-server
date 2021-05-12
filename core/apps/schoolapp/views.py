@@ -22,7 +22,9 @@ class SchoolViewSet(viewsets.ModelViewSet):
     queryset = local_models.School.objects.all()
     serializer_class =  local_serializers.SchoolSerializer
     # parser_classes = [ MultiPartParser, FormParser, FileUploadParser ]
-    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ core_permissions.SchoolGetOrModifyPermission, ]
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ 
+        core_permissions.SchoolGetOrModifyPermission
+    ]
 
     @core_decorators.object_exists(model=local_models.School, detail="School")
     def retrieve(self, request, school):
@@ -64,8 +66,6 @@ class BranchViewSet(viewsets.GenericViewSet):
         branch_request_data = request.data
         branch = self.get_serializer_class()(data=branch_request_data)
         branch.is_valid(raise_exception=True)
-        if not core_utils.check_if_branch_can_procceed(request_user, branch_request_data["school"]):
-            return core_responses.request_denied()
         branch.save()
         return core_responses.request_success_with_data(branch.data)
 
@@ -75,9 +75,7 @@ class BranchViewSet(viewsets.GenericViewSet):
         branch_request_data = request.data
         s_branch = self.get_serializer_class()(branch, data=branch_request_data)
         s_branch.is_valid(raise_exception=True)
-        if branch.school.id is not branch_request_data["school"]:
-            return core_responses.request_denied()
-        if not core_utils.check_if_branch_can_procceed(request_user, branch.school.id):
+        if branch.school.id == branch_request_data["school"]:
             return core_responses.request_denied()
         s_branch.save()
         return core_responses.request_success_with_data(s_branch.data)
@@ -85,8 +83,6 @@ class BranchViewSet(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=local_models.Branch, detail="Branch")
     def destroy(Self, request, branch=None):
         request_user = request.user
-        if not core_utils.check_if_branch_can_procceed(request_user, branch.school.id):
-            return core_responses.request_denied()
         branch.delete()
         return core_responses.request_success()
 

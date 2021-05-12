@@ -44,6 +44,7 @@ class Branch(base_models.BaseWithDate):
     description = models.CharField(max_length=128, null=True, blank=True)
     address = models.CharField(max_length=128, null=True, blank=True)
     website = models.CharField(max_length=52, null=True, blank=True)
+    color = models.CharField(max_length = 52, null=False, default="#3d3f56")
     image = models.ImageField(upload_to = "image/branches", blank=True, null=True)
 
     class Meta: 

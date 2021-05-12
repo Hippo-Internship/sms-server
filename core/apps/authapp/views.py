@@ -60,8 +60,7 @@ class UserViewSet(viewsets.GenericViewSet):
         if request_user.groups.role_id >= user_request_data["groups"]:
             return core_responses.request_denied()
         user = user.save()
-        user_request_data["user"] = user.id
-        profile = local_serializers.UserProfileSerializer(data=user_request_data)
+        profile = local_serializers.UserProfileSerializer(user.profile, data=user_request_data)
         profile.is_valid(raise_exception=True)
         profile.save()
         user = self.get_serializer_class()(user, many=False)

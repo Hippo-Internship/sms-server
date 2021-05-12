@@ -14,6 +14,8 @@ class SchoolSerializer(serializers.ModelSerializer):
         
 class BranchSerializer(serializers.ModelSerializer):
 
+    school = serializers.CharField(source="school.name")
+
     class Meta:
         model = local_models.Branch
         fields = "__all__"

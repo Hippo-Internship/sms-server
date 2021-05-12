@@ -13,7 +13,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = local_models.Profile
         fields = "__all__"
         extra_kwargs = {
-            "user": { "write_only": True }
+            "user": { "required": False, "write_only": True }
         }
 
 

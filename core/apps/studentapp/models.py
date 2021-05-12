@@ -27,8 +27,8 @@ class Discount(models.Model):
     percent = models.FloatField(null=True, blank=True)
     value = models.IntegerField(null=True, blank=True)
     limited = models.BooleanField(null=True, default=False)
-    limit = models.IntegerField(null=True, default=0)
-    count = models.IntegerField(null=True, default=0)
+    limit = models.IntegerField(null=False, blank=True, default=0)
+    count = models.IntegerField(null=False, blank=True, default=0)
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
 
@@ -81,6 +81,7 @@ class Student(base_models.BaseWithDate):
 
     class Meta:
         ordering = [ "id" ]
+        unique_together = [ "user", "_class" ]
 
     def __str__(self):
         return "%s %s %s" % (self.id, self.user, self.operator)

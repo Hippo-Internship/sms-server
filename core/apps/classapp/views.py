@@ -1,3 +1,5 @@
+# Python imports
+from datetime import datetime
 # Django built-in imports
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
@@ -14,7 +16,8 @@ from . import \
 from core import \
         responses as core_responses, \
         permissions as core_permissions, \
-        decorators as core_decorators
+        decorators as core_decorators, \
+        utils as core_utils
 from core.apps.studentapp import \
         models as studentapp_models, \
         serializers as studentapp_serializers
@@ -107,22 +110,60 @@ class ClassViewSet(viewsets.GenericViewSet):
 
     def list(self, request):
         request_user = request.user
-        filter_params = local_utils.normalize_data(
+        query_params = core_utils.normalize_data(
             { 
                 "teacher": "int",
                 "lesson": "int",
+                "search": "str",
+                "status": "str"
             },
             dict(request.query_params)
         )
+        today_date = datetime.now()
+        filter_model = {
+            "teacher": "teacher",
+            "lesson": "lesson",
+            "search": "name__icontains",
+            "status": {
+                "active": [
+                    {
+                        "name": "end_date__gte",
+                        "value": today_date
+                    },
+                    {
+                        "name": "start_date__lt",
+                        "value": today_date
+                    }
+                ],
+                "finished": {
+                    "name": "end_date__lt",
+                    "value": today_date
+                },
+                "soon": {
+                    "name": "start_date__gt",
+                    "value": today_date
+                }
+            }
+        }
+        filter_queries = core_utils.build_filter_query(filter_model, query_params)
         if request_user.groups.role_id == User.SUPER_ADMIN:
             classes = self.get_queryset().all()
         elif request_user.groups.role_id == User.ADMIN:
             branches = request_user.school.branches.all()
-            classes = self.get_queryset().filter(branch__in=branches, **filter_params)
+            classes = self.get_queryset().filter(
+                branch__in=branches, 
+                **filter_queries
+            )
         elif request_user.groups.role_id == User.OPERATOR:
-            classes = self.get_queryset().filter(branch=request_user.branch, **filter_params)
+            classes = self.get_queryset().filter(
+                branch=request_user.branch, 
+                **filter_queries
+            )
         elif request_user.groups.role_id == User.TEACHER:
-            classes = self.get_queryset().filter(teacher=request_user, **filter_params)
+            classes = self.get_queryset().filter(
+                teacher=request_user, 
+                **filter_queries
+            )
         p_classes = self.paginate_queryset(classes)
         classes = self.get_serializer_class()(p_classes, many=True)
         return self.get_paginated_response(classes.data)
@@ -177,6 +218,36 @@ class ClassViewSet(viewsets.GenericViewSet):
         student_request_data["_class"] = _class.id
         student = self.get_serializer_class()(data=student_request_data)
         student.is_valid(raise_exception=True)
+        class_price = _class.lesson.price
+        if "discounts" in student.validated_data:
+            student.validated_data["discount_amount"] = local_utils.calculate_discount(class_price, student.validated_data["discounts"])
+        student.save()
+        return core_responses.request_success_with_data(student.data)
+
+    @create_student.mapping.put
+    @core_decorators.has_key("user")
+    @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    def update_student(self, request, _class=None):
+        student_request_data = request.data
+        student = studentapp_models.Student.objects.filter(user=request.data["user"])
+        if not student.exists():
+            return core_responses.request_denied()
+        student = self.get_serializer_class()(student[0], data=student_request_data)
+        student.is_valid(raise_exception=True)
+        class_price = _class.lesson.price
+        if "discounts" in student.validated_data:
+            student.validated_data["discount_amount"] = local_utils.calculate_discount(class_price, student.validated_data["discounts"])
+        student.save()
+        return core_responses.request_success_with_data(student.data)
+
+    @rest_decorator.action(detail=True, methods=[ "POST" ], url_path="student/datasheet")
+    @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    def create_student_from_datasheet(self, request, _class=None):
+        student_request_data = request.data
+        student_request_data["operator"] = request.user.id
+        student_request_data["_class"] = _class.id
+        student = self.get_serializer_class()(data=student_request_data)
+        student.is_valid(raise_exception=True)
         class_price = student.validated_data["_class"].lesson.price
         student.validated_data["discount_amount"] = local_utils.calculate_discount(class_price, student.validated_data["discounts"])
         student.save()
@@ -190,7 +261,9 @@ class ClassViewSet(viewsets.GenericViewSet):
         elif self.action == "create_calendar":
             return local_serializers.CalendarSerializer
         elif self.action == "create_student":
-            return studentapp_serializers.StudentCreateOrModifySerializer
+            return studentapp_serializers.StudentCreateSerializer
+        elif self.action == "update_student":
+            return studentapp_serializers.StudentUpdateSerializer
         else:
             return super(ClassViewSet, self).get_serializer_class()
 

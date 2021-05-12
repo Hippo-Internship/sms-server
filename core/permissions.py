@@ -40,7 +40,7 @@ class BranchContentManagementPermission(BasePermission):
                     return True
                 else:
                     return False
-            if branch_id is not user.branch.id:
+            if branch_id != user.branch.id:
                 return False
         elif view.action == "retrieve" or view.action == "destroy" or view.detail:
             _object = view.get_queryset().filter(id=view.kwargs["pk"])
@@ -48,11 +48,11 @@ class BranchContentManagementPermission(BasePermission):
                 raise NotFound({ "detail": "Object does not exist!", "success": False })
             _object = _object[0]
             if user.groups.role_id == User.ADMIN:
-                if _object.branch.school.id is not user.school.id:
+                if _object.branch.school.id != user.school.id:
                     return False
                 else:
                     return True
-            if _object.branch.id is not user.branch.id:
+            if _object.branch.id != user.branch.id:
                 return False
         return True
 
@@ -69,11 +69,11 @@ class SchoolContentManagementPermission(BasePermission):
             if school_id == -1:
                 raise NotFound({ "detail": "school is not given!", "success": False })
             if user.groups.role_id == User.ADMIN:
-                if school_id is not user.school.id:
+                if school_id == user.school.id:
                     return False
                 else:
                     return True
-            if school_id is not user.school.id:
+            if school_id != user.school.id:
                 return False
         elif view.action == "retrieve" or view.action == "destroy":
             _object = view.get_queryset().filter(id=view.kwargs["pk"])
@@ -81,11 +81,11 @@ class SchoolContentManagementPermission(BasePermission):
                 raise NotFound({ "detail": "Object does not exist!", "success": False })
             _object = _object[0]
             if user.groups.role_id == User.ADMIN:
-                if _object.branch.school.id is not user.school.id:
+                if _object.school.id != user.school.id:
                     return False
                 else:
                     return True
-            if _object.branch.school.id is not user.school.id:
+            if _object.branch.school.id != user.school.id:
                 return False
         return True
 
