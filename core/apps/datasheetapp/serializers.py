@@ -34,3 +34,10 @@ class DatasheetCreateSerializer(serializers.ModelSerializer):
         if value.groups.role_id not in [ local_models.User.OPERATOR, local_models.User.SUPER_ADMIN, local_models.User.ADMIN ]:
             raise PermissionDenied()
         return value
+
+
+class DatasheetUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Datasheet
+        fields = []
