@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'core.apps.classapp.apps.ClassappConfig',
     'core.apps.studentapp.apps.StudentappConfig',
     'core.apps.utilityapp.apps.UtilityappConfig',
+    'core.apps.datasheetapp.apps.DatasheetappConfig',
 ]
 
 MIDDLEWARE = [
@@ -135,7 +136,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
@@ -162,7 +162,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated'
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 3
+    'PAGE_SIZE': 10
 }
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None

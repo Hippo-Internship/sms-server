@@ -4,6 +4,7 @@ from datetime import datetime
 from django.contrib.auth import get_user_model
 # Third party imports
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 # Local imports
 from . import models as local_models
 from core.apps.authapp import serializers as authapp_serializers
@@ -41,16 +42,16 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
 
     def validate_lesson(self, value):
         if value.branch.id != self.initial_data.get("branch", 0):
-            raise serializers.ValidationError("Such lesson does't exist in the branch!")
+            raise PermissionDenied()
         if not value.is_active:
             raise serializers.ValidationError("Lesson doesn't exist!")
         return value
 
     def validate_teacher(self, value):
+        if value.branch.id != self.initial_data.get("branch", 0):
+            raise PermissionDenied()
         if value.groups.role_id != User.TEACHER:
             raise serializers.ValidationError("Invalid teacher!")
-        if value.branch.id != self.initial_data.get("branch", 0):
-            raise serializers.ValidationError("Such lesson does't exist in the branch!")
         if not value.is_active:
             raise serializers.ValidationError("Teacher doesn't exist!")
         return value

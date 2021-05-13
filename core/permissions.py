@@ -69,7 +69,7 @@ class SchoolContentManagementPermission(BasePermission):
             if school_id == -1:
                 raise NotFound({ "detail": "school is not given!", "success": False })
             if user.groups.role_id == User.ADMIN:
-                if school_id == user.school.id:
+                if school_id != user.school.id:
                     return False
                 else:
                     return True
@@ -151,11 +151,23 @@ class ClassGetOrModifyPermission(BasePermission):
         switch = generate_basic_permission_switch(app_name, model_name)
         switch["create_calendar"] = app_name + ".add_calendar"
         switch["destroy_calendar"] = app_name + ".delete_calendar"
+        switch["list_student"] = "studentapp.view_student"
+        switch["create_student"] = "studentapp.add_student"
+        switch["update_student"] = "studentapp.delete_student"
         return user.has_perm(switch.get(view.action, ""))
 
 
-class CalendarGetPermission(BasePermission):
+class CalendarGetOrModifyPermission(BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        return user.has_perm("classapp.calendar_view")
+        switch = generate_basic_permission_switch("classapp", "calendar")
+        return user.has_perm(switch.get(view.action, ""))
+
+
+class StudentGetOrModifyPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        switch = generate_basic_permission_switch("studentapp", "student")
+        return user.has_perm(switch.get(view.action, ""))

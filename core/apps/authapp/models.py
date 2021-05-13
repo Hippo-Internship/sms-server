@@ -1,5 +1,6 @@
 # Django imports
 from django.db import models
+from django.utils.translation import gettext as _
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import BaseUserManager, AbstractUser, Group
 # Local imports
@@ -65,16 +66,23 @@ class CustomUser(AbstractUser):
         related_name="users", 
         db_index=True
     )
-    branch = models.ForeignKey(schoolapp_models.Branch, on_delete=models.CASCADE, null=True, blank=True, related_name="users", db_index=True)
-    firstname = models.CharField(null=True, blank=True, max_length=100)
-    lastname = models.CharField(null=True, blank=True, max_length=100)
-    username = models.CharField(null=True, blank=True, max_length=50)
+    branch = models.ForeignKey(
+        schoolapp_models.Branch, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        related_name="users", 
+        db_index=True)
+    firstname = models.CharField(max_length=56, null=True, blank=True)
+    lastname = models.CharField(max_length=56, null=True, blank=True)
+    username = models.CharField(max_length=56, null=True, blank=True)
     email = models.EmailField(
         unique=True, null=False, db_index=True,
         error_messages={
             "unique": "This email is already registered!"
         }
     )
+    password = models.CharField(_('password'), max_length=128, null=True, blank=True)
     phone = models.CharField(
         validators=[ local_validators.validate_phone ], 
         max_length=20, null=False, unique=True, 

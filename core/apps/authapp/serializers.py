@@ -43,6 +43,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
+        if "password" not in validated_data:
+            return super().create(validated_data)
         password = validated_data.pop('password')
         user = super().create(validated_data)
         user.set_password(password)

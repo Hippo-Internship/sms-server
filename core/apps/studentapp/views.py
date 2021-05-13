@@ -18,6 +18,7 @@ class StudentViewSet(viewsets.GenericViewSet):
     queryset = local_models.User.objects.all()
     serializer_class = local_serializers.StudentCreateSerializer
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
+        core_permissions.StudentGetOrModifyPermission,
         core_permissions.BranchContentManagementPermission
     ]
 
@@ -70,7 +71,6 @@ class StudentViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=local_models.User, detail="Student")
     def retrieve(self, request, student=None):
-        print(student)
         student = self.get_serializer_class()(student, many=False)
         return core_responses.request_success_with_data(student.data)
 

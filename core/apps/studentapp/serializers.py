@@ -89,10 +89,19 @@ class DiscountShortDetailSerializer(serializers.ModelSerializer):
 class StudentShortDetailSerializer(serializers.ModelSerializer):
 
     discounts = DiscountShortDetailSerializer(many=True)
+    firstname = serializers.CharField(source="user.firstname")
+    lastname = serializers.CharField(source="user.lastname")
+    status = serializers.CharField(source="status.name")
 
     class Meta:
         model = local_models.Student
-        fields = "__all__"
+        exclude = [ 
+            "_class", 
+            "created", 
+            "modified",
+            "start_date",
+            "end_date"
+        ]
 
 
 class StudentFullDetailSerializer(serializers.ModelSerializer):

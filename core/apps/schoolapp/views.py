@@ -21,7 +21,6 @@ class SchoolViewSet(viewsets.ModelViewSet):
 
     queryset = local_models.School.objects.all()
     serializer_class =  local_serializers.SchoolSerializer
-    # parser_classes = [ MultiPartParser, FormParser, FileUploadParser ]
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ 
         core_permissions.SchoolGetOrModifyPermission
     ]
@@ -39,6 +38,11 @@ class SchoolViewSet(viewsets.ModelViewSet):
     def update(self, request, school=None):
         data = super(SchoolViewSet, self).update(request, school.id).data
         return core_responses.request_success_with_data(data)
+
+    @core_decorators.object_exists(model=local_models.School, detail="School")
+    def destroy(self, request, school=None):
+        super(SchoolViewSet, self).destroy(request, school.id)
+        return core_responses.request_success()
 
     
 class BranchViewSet(viewsets.GenericViewSet):

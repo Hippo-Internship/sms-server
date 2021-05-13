@@ -17,7 +17,7 @@ class School(base_models.BaseWithDate):
     address = models.CharField(max_length=128, null=True, blank=True)
     website = models.CharField(max_length=52, null=True, blank=True)
     color = models.CharField(max_length = 52, null=False, default="#3d3f56")
-    image = models.ImageField(upload_to = "image/schools", blank=True, null=True)
+    image = models.ImageField(upload_to = "image/schools", null=False, blank=True, default="image/schools/default-min.jpg")
     logo = models.ImageField(upload_to = "image/schools-logo", blank=True, null=True)
 
     class Meta: 
