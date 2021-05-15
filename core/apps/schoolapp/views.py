@@ -66,7 +66,6 @@ class BranchViewSet(viewsets.GenericViewSet):
         return self.get_paginated_response(branches.data)
 
     def create(self, request):
-        request_user = request.user
         branch_request_data = request.data
         branch = self.get_serializer_class()(data=branch_request_data)
         branch.is_valid(raise_exception=True)
@@ -75,7 +74,6 @@ class BranchViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=local_models.Branch, detail="Branch")
     def update(self, request, branch=None):
-        request_user = request.user
         branch_request_data = request.data
         s_branch = self.get_serializer_class()(branch, data=branch_request_data)
         s_branch.is_valid(raise_exception=True)
@@ -86,10 +84,11 @@ class BranchViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=local_models.Branch, detail="Branch")
     def destroy(Self, request, branch=None):
-        request_user = request.user
         branch.delete()
         return core_responses.request_success()
 
-    def retrieve(self, request, pk=None):
-        pass
+    @core_decorators.object_exists(model=local_models.Branch, detail="Branch")
+    def retrieve(self, request, branch=None):
+        branch = self.get_serializer_class()(branch)
+        return core_responses.request_success_with_data(branch.data)
 

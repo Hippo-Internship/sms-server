@@ -26,7 +26,7 @@ class BranchContentManagementPermission(BasePermission):
         user = request.user
         if user.groups.role_id == User.SUPER_ADMIN:
             return True
-        if view.action == "create" or view.action == "update":
+        if view.action == "create" or view.action == "update" or (hasattr(view, "additional_action") and view.action in view.additional_action):
             request_data = request.data
             branch_id = request_data.get("branch", -1)
             if branch_id == -1:
@@ -42,7 +42,7 @@ class BranchContentManagementPermission(BasePermission):
                     return False
             if branch_id != user.branch.id:
                 return False
-        elif view.action == "retrieve" or view.action == "destroy" or view.detail:
+        elif view.action == "retrieve" or view.action == "destroy" or (hasattr(view, "detail_additional_action") and view.action in view.detail_additional_action):
             _object = view.get_queryset().filter(id=view.kwargs["pk"])
             if not _object.exists():
                 raise NotFound({ "detail": "Object does not exist!", "success": False })
@@ -170,4 +170,20 @@ class StudentGetOrModifyPermission(BasePermission):
     def has_permission(self, request, view):
         user = request.user
         switch = generate_basic_permission_switch("studentapp", "student")
+        return user.has_perm(switch.get(view.action, ""))
+
+
+class DatasheetGetOrModifyPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        switch = generate_basic_permission_switch("datasheetapp", "datasheet")
+        return user.has_perm(switch.get(view.action, ""))
+
+
+class DatasheetStatusGetOrModifyPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        switch = generate_basic_permission_switch("datasheetapp", "status")
         return user.has_perm(switch.get(view.action, ""))

@@ -26,7 +26,7 @@ class CustomUserManager(BaseUserManager):
         kwargs.setdefault("is_staff", True)
         kwargs.setdefault("is_superuser", True)
         kwargs.setdefault("is_active", True)
-        kwargs.setdefault("role_id", 1)
+        kwargs.setdefault("groups", 1)
 
         if kwargs.get("is_staff") is not True:
             raise ValueError("Superuser must be a staff!")
@@ -57,6 +57,16 @@ class CustomUser(AbstractUser):
         (STAFF, "Staff"),
     )
 
+    CREATED_FROM_DATASHEET = 1
+    DATASHEET_AND_STUDENT = 2
+    CREATED_FROM_STUDENT = 3
+
+    SEEN_DATASHEET_TYPE = (
+        (CREATED_FROM_DATASHEET, "Created from datasheet"),
+        (DATASHEET_AND_STUDENT, "Student and registered in datasheet"),
+        (CREATED_FROM_STUDENT, "Created from student")
+    )
+
     id = models.BigAutoField(primary_key=True)
     school = models.ForeignKey(
         schoolapp_models.School, 
@@ -73,11 +83,11 @@ class CustomUser(AbstractUser):
         blank=True, 
         related_name="users", 
         db_index=True)
-    firstname = models.CharField(max_length=56, null=True, blank=True)
+    firstname = models.CharField(max_length=56, null=False, blank=False)
     lastname = models.CharField(max_length=56, null=True, blank=True)
     username = models.CharField(max_length=56, null=True, blank=True)
-    email = models.EmailField(
-        unique=True, null=False, db_index=True,
+    email = models.EmailField( 
+        unique=True, null=True, blank=True,
         error_messages={
             "unique": "This email is already registered!"
         }
@@ -92,7 +102,7 @@ class CustomUser(AbstractUser):
     )
     related_phone = models.CharField(validators = [ local_validators.validate_phone ], max_length=20, null=True, blank=True)
     interested_at = models.CharField(null=True, max_length=255, blank=True)
-    seen_datasheet = models.IntegerField(null=True, default=3)
+    seen_datasheet = models.IntegerField(null=False, blank=True, choices=SEEN_DATASHEET_TYPE, default=SEEN_DATASHEET_TYPE[2][0])
     groups = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="users")
     is_active = models.BooleanField(default=True)
 
@@ -102,7 +112,7 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
 
     class Meta:
-        ordering = [ 'id' ]
+        ordering = [ "-id" ]
 
     @property
     def role_name(self):

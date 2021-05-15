@@ -7,3 +7,4 @@ from . import models
 admin.site.register(models.Student)
 admin.site.register(models.Payment)
 admin.site.register(models.Discount)
+admin.site.register(models.Note)

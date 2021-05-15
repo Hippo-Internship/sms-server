@@ -74,6 +74,8 @@ class StudentViewSet(viewsets.GenericViewSet):
         student = self.get_serializer_class()(student, many=False)
         return core_responses.request_success_with_data(student.data)
 
+    
+
     def get_serializer_class(self):
         if self.action == "list":
             return local_serializers.UserStudentsDetailSerializer

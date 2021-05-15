@@ -1,5 +1,6 @@
 # Python imports
 from functools import wraps
+from django.db.models import fields
 # Third party imports
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, NotFound
@@ -16,12 +17,25 @@ def has_key(key):
         return wrapper
     return _has_key
 
+def has_keys(*args):
+    def _has_key(func):
+        @wraps(func)
+        def wrapper(self, request, pk=None, *args, **kwargs):
+            for key in args:
+                if key not in request.data:
+                    raise ValidationError({ "detail": key + " is not given!", "success": False })
+            return func(self, request, pk, *args, **kwargs)
+        return wrapper
+    return _has_key
 
-def object_exists(model, detail, many=False):
+def object_exists(model, detail, many=False, field=None):
     def _object_exists(func):
         @wraps(func)
         def wrapper(self, request, pk=None, *args, **kwargs):
-            _object = model.objects.filter(id=pk)
+            if field is None:
+                _object = model.objects.filter(id=pk)
+            else:
+                _object = model.objects.filter(**{ field: pk })
             if _object.exists():
                 return func(self, request, _object if many else _object[0], *args, **kwargs)
             else:

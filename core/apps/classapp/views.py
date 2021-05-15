@@ -106,6 +106,15 @@ class ClassViewSet(viewsets.GenericViewSet):
         core_permissions.BranchContentManagementPermission,
     ]
 
+    detail_additional_action = [
+        "create_calendar",
+        "destroy_calendar",
+        "list_student",
+        "create_student",
+        "destroy_student",
+        "update_student"
+    ]
+
     def list(self, request):
         request_user = request.user
         query_params = core_utils.normalize_data(
@@ -241,19 +250,6 @@ class ClassViewSet(viewsets.GenericViewSet):
         class_price = _class.lesson.price
         if "discounts" in student.validated_data:
             student.validated_data["discount_amount"] = local_utils.calculate_discount(class_price, student.validated_data["discounts"])
-        student.save()
-        return core_responses.request_success_with_data(student.data)
-
-    @rest_decorator.action(detail=True, methods=[ "POST" ], url_path="student/datasheet")
-    @core_decorators.object_exists(model=local_models.Class, detail="Class")
-    def create_student_from_datasheet(self, request, _class=None):
-        student_request_data = request.data
-        student_request_data["operator"] = request.user.id
-        student_request_data["_class"] = _class.id
-        student = self.get_serializer_class()(data=student_request_data)
-        student.is_valid(raise_exception=True)
-        class_price = student.validated_data["_class"].lesson.price
-        student.validated_data["discount_amount"] = local_utils.calculate_discount(class_price, student.validated_data["discounts"])
         student.save()
         return core_responses.request_success_with_data(student.data)
 

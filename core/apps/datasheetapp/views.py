@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.contrib.auth.models import Group
 # Third party imports
 from rest_framework import viewsets
+from rest_framework.response import Response
 from rest_framework.settings import api_settings
 # Local imports
 from . import \
@@ -15,11 +16,13 @@ from core import \
         utils as core_utils
 from core.apps.authapp import serializers as authapp_serializers
 
+
 class DatasheetViewSet(viewsets.GenericViewSet):
 
     queryset = local_models.Datasheet.objects.all()
     serializer_class = local_serializers.DatasheetCreateSerializer
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
+        core_permissions.DatasheetGetOrModifyPermission,
         core_permissions.BranchContentManagementPermission,
     ]
 
@@ -57,18 +60,80 @@ class DatasheetViewSet(viewsets.GenericViewSet):
         datasheets = self.get_serializer_class()(p_datasheets, many=True)
         return self.get_paginated_response(datasheets.data)
 
-    def create(self, request):
+    def create(self, request, pk=None):
         datasheet_request_data = request.data
         datasheet = self.get_serializer_class()(data=datasheet_request_data)
-        user = authapp_serializers.CustomUserSerializer(data=datasheet_request_data)
         datasheet.is_valid(raise_exception=True)
-        datasheet_request_data["school"] = datasheet.validated_data["branch"].school.id
-        datasheet_request_data["groups"] = Group.objects.get(role_id=local_models.User.STUDENT).id
-        user.is_valid(raise_exception=True)
-        user = user.save()
-        datasheet.validated_data["user"] = user
+        if "user" not in datasheet_request_data:
+            datasheet_request_data["school"] = datasheet.validated_data["branch"].school.id
+            datasheet_request_data["groups"] = Group.objects.get(role_id=local_models.User.STUDENT).id
+            datasheet_request_data["seen_datasheet"] = local_models.User.CREATED_FROM_DATASHEET
+            user = authapp_serializers.CustomUserSerializer(data=datasheet_request_data)
+            user.is_valid(raise_exception=True)
+            user = user.save()
+            datasheet.validated_data["user"] = user
+        else:
+            user = datasheet.validated_data["user"]
+            if user.students.exists():
+                user.seen_datasheet = local_models.User.DATASHEET_AND_STUDENT
         datasheet.save()
         return core_responses.request_success_with_data(datasheet.data)
 
-    # def put(self, request):
-        
+    @core_decorators.object_exists(model=local_models.Datasheet, detail="Datasheet")
+    def update(self, request, datasheet=None):
+        datasheet_request_data = request.data
+        datasheet = self.get_serializer_class()(datasheet, data=datasheet_request_data)
+        datasheet.is_valid(raise_exception=True)
+        return core_responses.request_success_with_data(datasheet.data)
+
+    @core_decorators.object_exists(model=local_models.Datasheet, detail="Datasheet")
+    def destroy(self, request, datasheet=None):
+        datasheet.user.delete()
+        return core_responses.request_success()
+
+    def get_serializer_class(self):
+        if self.action == "update":
+            return local_serializers.DatasheetUpdateSerializer
+        return super().get_serializer_class()
+
+
+class DatasheetStatusViewSet(viewsets.ModelViewSet):
+
+    queryset = local_models.Status.objects.all()
+    serializer_class = local_serializers.DatasheetStatuSerializer
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
+        core_permissions.DatasheetStatusGetOrModifyPermission,
+        core_permissions.BranchContentManagementPermission,
+    ]
+
+    def list(self, request):
+        request_user = request.user
+        if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
+            lessons = self.get_queryset().all()
+        elif request_user.groups.role_id == local_models.User.ADMIN:
+            branches = request_user.school.branches.all()
+            lessons = self.get_queryset().filter(branch__in=branches)
+        else:
+            lessons = self.get_queryset().filter(branch=request_user.branch)
+        p_lessons = self.paginate_queryset(lessons)
+        lessons = self.get_serializer_class()(p_lessons, many=True)
+        return self.get_paginated_response(lessons.data)
+
+    @core_decorators.object_exists(model=local_models.Status, detail="Status")
+    def retrieve(self, request, status=None):
+        data = super(DatasheetStatusViewSet, self).retrieve(request, status.id).data
+        return core_responses.request_success_with_data(data)
+
+    def create(self, request):
+        data = super(DatasheetStatusViewSet, self).create(request).data
+        return core_responses.request_success_with_data(data)
+
+    @core_decorators.object_exists(model=local_models.Status, detail="Status")
+    def update(self, request, status=None):
+        data = super(DatasheetStatusViewSet, self).update(request, status.id).data
+        return core_responses.request_success_with_data(data)
+
+    @core_decorators.object_exists(model=local_models.Status, detail="Status")
+    def destroy(self, request, status=None):
+        super(DatasheetStatusViewSet, self).destroy(request, status.id)
+        return core_responses.request_success()

@@ -21,7 +21,7 @@ class Status(models.Model):
         blank=False,
         db_index=True
     )
-    label = models.CharField(max_length=36, null=False, blank=False)
+    name = models.CharField(max_length=36, null=False, blank=False)
     priority = models.IntegerField(null=False, default=0)
 
     def __str__(self):

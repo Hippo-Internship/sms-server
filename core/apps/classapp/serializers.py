@@ -83,10 +83,11 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
 
 class ClassDetailSerializer(serializers.ModelSerializer):
 
-    branch = serializers.CharField(source="branch.name", read_only=True)
-    teacher = serializers.CharField(source="teacher.firstname", read_only=True)
-    lesson = serializers.CharField(source="lesson.name", read_only=True)
-    room = serializers.CharField(source="room.name", read_only=True)
+    branch_name = serializers.CharField(source="branch.name", read_only=True)
+    teacher_firstname = serializers.CharField(source="teacher.firstname", read_only=True)
+    teacher_lastname = serializers.CharField(source="teacher.lastname", read_only=True)
+    lesson_name = serializers.CharField(source="lesson.name", read_only=True)
+    room_name = serializers.CharField(source="room.name", read_only=True)
 
     class Meta:
         model = local_models.Class
@@ -95,9 +96,9 @@ class ClassDetailSerializer(serializers.ModelSerializer):
 
 class ClassFullDetailSerializer(serializers.ModelSerializer):
 
-    teacher = authapp_serializers.CustomUserSerializer(read_only=True)
-    lesson = LessonSerializer(read_only=True)
-    room = RoomSerializer(read_only=True)
+    teacher_firstname = authapp_serializers.CustomUserSerializer(read_only=True)
+    lesson_name = serializers.CharField(source="lesson.name", read_only=True)
+    room_name = serializers.CharField(source="room.name", read_only=True)
 
     class Meta:
         model = local_models.Class
@@ -105,7 +106,7 @@ class ClassFullDetailSerializer(serializers.ModelSerializer):
 
 class CalendarSerializer(serializers.ModelSerializer):
 
-    room = serializers.CharField(source="room.name", read_only=True)
+    room_name = serializers.CharField(source="room.name", read_only=True)
 
     class Meta:
         model = local_models.Calendar
@@ -115,7 +116,6 @@ class CalendarSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, data):
-        print(data)
         _class = data["_class"]
         if data["room"].branch.id is not _class.branch.id:
             raise serializers.ValidationError("Invalid Class")

@@ -89,9 +89,9 @@ class DiscountShortDetailSerializer(serializers.ModelSerializer):
 class StudentShortDetailSerializer(serializers.ModelSerializer):
 
     discounts = DiscountShortDetailSerializer(many=True)
-    firstname = serializers.CharField(source="user.firstname")
-    lastname = serializers.CharField(source="user.lastname")
-    status = serializers.CharField(source="status.name")
+    user_firstname = serializers.CharField(source="user.firstname")
+    user_lastname = serializers.CharField(source="user.lastname")
+    status_name = serializers.CharField(source="status.name")
 
     class Meta:
         model = local_models.Student

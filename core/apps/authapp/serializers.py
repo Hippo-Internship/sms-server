@@ -2,6 +2,7 @@
 from django.contrib.auth import get_user_model
 # Third Party imports
 from rest_framework import serializers
+from rest_framework.settings import api_settings
 from rest_framework.exceptions import ValidationError, PermissionDenied
 # Local imports
 from . import models as local_models
@@ -20,6 +21,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class CustomUserSerializer(serializers.ModelSerializer):
 
     profile = UserProfileSerializer(read_only=True)
+    role_id = serializers.IntegerField(source="groups.role_id", read_only=True)
+    role_name = serializers.CharField(source="groups.name", read_only=True)
+    school_name = serializers.CharField(source="school.name", read_only=True)
+    branch_name = serializers.CharField(source="branch.name", read_only=True)
+    job_hour = serializers.CharField(read_only=True)
 
     class Meta:
         model = get_user_model()
@@ -32,9 +38,14 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'password',
             'related_phone',
             'school',
+            "school_name",
+            "branch_name",
             'branch',
             "profile",
-            "groups"
+            "groups",
+            "role_id",
+            "role_name",
+            "job_hour"
         ]
         extra_kwargs = {
             "password": { "write_only": True },

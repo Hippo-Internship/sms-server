@@ -1,4 +1,5 @@
 # Django built-in imports
+from re import T
 from django.db import models
 from django.contrib.auth import get_user_model
 # Third party imports
@@ -10,7 +11,6 @@ from core.apps.schoolapp import models as schoolapp_models
 
 # User model
 User = get_user_model()
-
 
 class Discount(models.Model):
 
@@ -116,3 +116,27 @@ class Payment(models.Model):
     def __str__(self):
         return "%s %s" % (self.id, self.student)
     
+
+class Note(base_models.BaseWithDate):
+
+    id = models.AutoField(primary_key=True)
+    operator = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="student_notes",
+        null=True,
+        blank=False,
+        db_index=True
+    )
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name="notes",
+        null=False,
+        blank=False,
+        db_index=True
+    )
+    body = models.CharField(max_length=255, null=False, blank=False)
+
+    def __str__(self):
+        return "%s %s" % (self.id, self.student)
