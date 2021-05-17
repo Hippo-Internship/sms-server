@@ -97,16 +97,16 @@ class Payment(models.Model):
         Student, 
         on_delete = models.CASCADE,
         related_name="payments",
-        null=True,
-        blank=True,
+        null=False,
+        blank=False,
         db_index=True
     )
     pay_type = models.ForeignKey(
         utilityapp_models.PaymentMethod,
         on_delete = models.CASCADE, 
         related_name="payments", 
-        null=True,
-        blank=True, 
+        null=False,
+        blank=False, 
         db_index=True
     )
     paid = models.FloatField(null=False, blank=False)

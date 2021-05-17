@@ -2,6 +2,7 @@
 from django.db.models import F
 # Third Party imports
 from rest_framework import viewsets
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.settings import api_settings
 # Local imports
 from . import \
@@ -119,7 +120,7 @@ class DiscountViewSet(viewsets.ModelViewSet):
         return core_responses.request_success_with_data(data)
 
 
-class PaymentViewSet(viewsets.ModelViewSet):
+class PaymentViewSet(viewsets.GenericViewSet):
 
     queryset = local_models.Payment.objects.all()
     serializer_class = local_serializers.PaymentSerializer
@@ -138,10 +139,29 @@ class PaymentViewSet(viewsets.ModelViewSet):
         return self.get_paginated_response(payments.data)
 
     def create(self, request):
-        data = super(PaymentViewSet, self).create(request).data
-        return core_responses.request_success_with_data(data)
+        payment_request_data = request.data
+        request_user = request.user
+        payment = self.get_serializer_class()(data=payment_request_data) 
+        payment.is_valid(raise_exception=True)
+        student = payment.validated_data["student"]
+        if request_user.groups.role_id == local_models.User.ADMIN:
+            if not request_user.school.branches.filter(id=student.user.branch.id).exists():
+                raise PermissionDenied()
+        elif request_user.groups.role_id == local_models.User.OPERATOR:
+            if request_user.branch.id != student.user.branch.id:
+                raise PermissionDenied()
+        payment.save()
+        return core_responses.request_success_with_data(payment.data)
 
-    @core_decorators.object_exists(model=local_models.Student, detail="Student")
-    def update(self, request, student=None):
-        data = super(PaymentViewSet, self).update(request, student.id).data
-        return core_responses.request_success_with_data(data)
+    @core_decorators.object_exists(model=local_models.Payment, detail="Payment")
+    def update(self, request, payment=None):
+        payment_request_data = request.data
+        payment = self.get_serializer_class()(payment, data=payment_request_data)
+        payment.is_valid(raise_exception=True)
+        payment.save()
+        return core_responses.request_success_with_data(payment.data)
+
+    def get_serializer_class(self):
+        if self.action == "update":
+            return local_serializers.PaymentUpdateSerializer
+        return super(PaymentViewSet, self).get_serializer_class()
