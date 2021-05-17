@@ -10,5 +10,6 @@ router = DefaultRouter()
 router.register("action", local_views.StudentViewSet, basename="student")
 router.register("discount", local_views.DiscountViewSet, basename="discount")
 router.register("payment", local_views.PaymentViewSet, basename="payment")
+router.register("note", local_views.NoteViewSet, basename="note")
 
 urlpatterns = router.urls

@@ -166,3 +166,18 @@ class ShortDiscountSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Discount
         fields = [ "id", "name" ]
+
+
+class NoteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Note
+        fields = "__all__"
+
+
+class NoteUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Note
+        fields = "__all__"
+        read_only_fields = [ "id", "student" ]

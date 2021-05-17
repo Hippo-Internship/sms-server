@@ -4,9 +4,13 @@ from django.contrib.auth.models import Group
 # Third party imports
 from rest_framework import \
         views, \
-        viewsets, \
-        decorators as rest_decorators
+        viewsets
+from rest_framework.settings import api_settings
 # Local imports
+from . import \
+        models as local_models, \
+        serializers as local_serializers, \
+        services as local_services 
 from core import \
         decorators as core_decorators, \
         responses as core_responses, \
@@ -66,6 +70,69 @@ detail_switch = {
         "serializer": studentapp_serializers.ShortDiscountSerializer
     }
 }
+
+
+class StatusViewSet(viewsets.ModelViewSet):
+
+    queryset = local_models.Status.objects.all()
+    serializer_class = local_serializers.StatusSerializer
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ 
+        core_permissions.StatusGetOrModifySerializer,
+        core_permissions.BranchContentManagementPermission,
+    ]
+
+    def list(self, request):
+        request_user = request.user
+        statuses = local_services.list_status(request_user, self.get_queryset())
+        p_statuses = self.paginate_queryset(statuses)
+        statuses = self.get_serializer_class()(p_statuses, many=True)
+        return self.get_paginated_response(statuses.data)
+
+    @core_decorators.object_exists(model=local_models.Status, detail="Status")
+    def retrieve(self, request, status=None):
+        data = super(StatusViewSet, self).retrieve(request, status.id).data
+        return core_responses.request_success_with_data(data)
+
+    def create(self, request):
+        data = super(StatusViewSet, self).create(request).data
+        return core_responses.request_success_with_data(data)
+
+    @core_decorators.object_exists(model=local_models.Status, detail="Status")
+    def update(self, request, status=None):
+        data = super(StatusViewSet, self).update(request, status.id).data
+        return core_responses.request_success_with_data(data)
+
+
+class PaymentMethodViewSet(viewsets.ModelViewSet):
+
+    queryset = local_models.PaymentMethod.objects.all()
+    serializer_class = local_serializers.PaymentMethodSerializer
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ 
+        core_permissions.PaymentMethodGetOrModifySerializer,
+        core_permissions.BranchContentManagementPermission,
+    ]
+
+    def list(self, request):
+        request_user = request.user
+        pay_methods = local_services.list_payment_methods(request_user, self.get_queryset())
+        p_pay_methods = self.paginate_queryset(pay_methods)
+        pay_methods = self.get_serializer_class()(p_pay_methods, many=True)
+        return self.get_paginated_response(pay_methods.data)
+
+    @core_decorators.object_exists(model=local_models.PaymentMethod, detail="PaymentMethod")
+    def retrieve(self, request, pay_method=None):
+        data = super(StatusViewSet, self).retrieve(request, pay_method.id).data
+        return core_responses.request_success_with_data(data)
+
+    def create(self, request):
+        data = super(StatusViewSet, self).create(request).data
+        return core_responses.request_success_with_data(data)
+
+    @core_decorators.object_exists(model=local_models.PaymentMethod, detail="PaymentMethod")
+    def update(self, request, pay_method=None):
+        data = super(StatusViewSet, self).update(request, pay_method.id).data
+        return core_responses.request_success_with_data(data)
+
 
 class ListDetailView(views.APIView):
 

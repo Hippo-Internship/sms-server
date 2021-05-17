@@ -170,6 +170,10 @@ class StudentGetOrModifyPermission(BasePermission):
     def has_permission(self, request, view):
         user = request.user
         switch = generate_basic_permission_switch("studentapp", "student")
+        switch["list_payments"] = "studentapp.view_payment"
+        switch["create_payment"] = "studentapp.add_payment"
+        switch["list_notes"] = "studentapp.view_note"
+        switch["create_note"] = "studentapp.add_note"
         return user.has_perm(switch.get(view.action, ""))
 
 
@@ -202,4 +206,28 @@ class PaymentGetOrModifyPermission(BasePermission):
     def has_permission(self, request, view):
         user = request.user
         switch = generate_basic_permission_switch("studentapp", "payment")
+        return user.has_perm(switch.get(view.action, ""))
+
+
+class NoteGetOrModifyPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        switch = generate_basic_permission_switch("studentapp", "note")
+        return user.has_perm(switch.get(view.action, ""))
+
+
+class StatusGetOrModifySerializer(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        switch = generate_basic_permission_switch("utilityapp", "status")
+        return user.has_perm(switch.get(view.action, ""))
+
+
+class PaymentMethodGetOrModifySerializer(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        switch = generate_basic_permission_switch("utilityapp", "paymentmethod")
         return user.has_perm(switch.get(view.action, ""))
