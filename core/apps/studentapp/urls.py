@@ -8,5 +8,7 @@ from . import views as local_views
 
 router = DefaultRouter()
 router.register("action", local_views.StudentViewSet, basename="student")
+router.register("discount", local_views.DiscountViewSet, basename="discount")
+router.register("payment", local_views.PaymentViewSet, basename="payment")
 
 urlpatterns = router.urls

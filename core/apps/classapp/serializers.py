@@ -124,3 +124,24 @@ class CalendarSerializer(serializers.ModelSerializer):
         if data["end_time"] < data["start_time"]:
             raise serializers.ValidationError("End time should be later than the start time!")
         return data
+
+
+class ShortClassSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Class
+        fields = [ "id", "name" ]
+
+
+class ShortRoomSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Room
+        fields = [ "id", "name" ]
+
+
+class ShortLessonSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Lesson
+        fields = [ "id", "name" ]

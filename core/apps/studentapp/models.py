@@ -32,6 +32,9 @@ class Discount(models.Model):
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
 
+    class Meta:
+        ordering = [ "id" ]
+
     def __str__(self):
         return "%s %s" % (self.id, self.name)
 

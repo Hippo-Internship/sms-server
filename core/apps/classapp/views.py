@@ -12,7 +12,8 @@ from rest_framework.settings import api_settings
 from . import \
         models as local_models, \
         serializers as local_serializers, \
-        utils as local_utils
+        utils as local_utils, \
+        services as local_services
 from core import \
         responses as core_responses, \
         permissions as core_permissions, \
@@ -34,13 +35,7 @@ class LessonViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         request_user = request.user
-        if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
-            lessons = self.get_queryset().all()
-        elif request_user.groups.role_id == local_models.User.ADMIN:
-            branches = request_user.school.branches.all()
-            lessons = self.get_queryset().filter(branch__in=branches)
-        elif request_user.groups.role_id == local_models.User.OPERATOR:
-            lessons = self.get_queryset().filter(branch=request_user.branch)
+        lessons = local_services.list_lessons(request_user, self.get_queryset())
         p_lessons = self.paginate_queryset(lessons)
         lessons = self.get_serializer_class()(p_lessons, many=True)
         return self.get_paginated_response(lessons.data)
@@ -71,13 +66,7 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         request_user = request.user
-        if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
-            rooms = self.get_queryset().all()
-        elif request_user.groups.role_id == local_models.User.ADMIN:
-            branches = request_user.school.branches.all()
-            rooms = self.get_queryset().filter(branch__in=branches)
-        elif request_user.groups.role_id == local_models.User.OPERATOR:
-            rooms = self.get_queryset().filter(branch=request_user.branch)
+        rooms = local_services.list_rooms(request_user, self.get_queryset())
         p_rooms = self.paginate_queryset(rooms)
         rooms = self.get_serializer_class()(p_rooms, many=True)
         return self.get_paginated_response(rooms.data)
@@ -153,23 +142,7 @@ class ClassViewSet(viewsets.GenericViewSet):
             }
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
-        if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
-            classes = self.get_queryset().all()
-        elif request_user.groups.role_id == local_models.User.ADMIN:
-            classes = self.get_queryset().filter(
-                branch__school=request_user.school.id, 
-                **filter_queries
-            )
-        elif request_user.groups.role_id == local_models.User.OPERATOR:
-            classes = self.get_queryset().filter(
-                branch=request_user.branch, 
-                **filter_queries
-            )
-        elif request_user.groups.role_id == local_models.User.TEACHER:
-            classes = self.get_queryset().filter(
-                teacher=request_user, 
-                **filter_queries
-            )
+        classes = local_services.list_classes(request_user, self.get_queryset(), filter_queries)
         p_classes = self.paginate_queryset(classes)
         classes = self.get_serializer_class()(p_classes, many=True)
         return self.get_paginated_response(classes.data)

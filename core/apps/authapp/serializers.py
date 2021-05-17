@@ -1,11 +1,15 @@
 # Django imports
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 # Third Party imports
 from rest_framework import serializers
 from rest_framework.settings import api_settings
 from rest_framework.exceptions import ValidationError, PermissionDenied
 # Local imports
 from . import models as local_models
+
+# User model
+User = get_user_model()
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -28,7 +32,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     job_hour = serializers.CharField(read_only=True)
 
     class Meta:
-        model = get_user_model()
+        model = User
         fields = [
             'id',
             'firstname',
@@ -68,7 +72,7 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
 
     class Meta:
-        model = get_user_model()
+        model = User
         fields = [
             'id',
             'firstname',
@@ -82,3 +86,17 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
             "groups"
         ]
         read_only_fields = [ "school", "branch" ]
+
+
+class ShortUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [ "id", "firstname", "lastname" ]
+
+
+class GroupsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Group
+        fields = [ "id", "name", "role_id" ]

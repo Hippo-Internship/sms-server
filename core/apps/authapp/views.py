@@ -9,12 +9,15 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.settings import api_settings
 # Local imports
-from . import models as local_models, serializers as local_serializers
+from . import \
+        models as local_models, \
+        serializers as local_serializers, \
+        services as local_services
 from core import \
-    decorators as core_decorators, \
-    permissions as core_permissions, \
-    responses as core_responses, \
-    utils as core_utils
+        decorators as core_decorators, \
+        permissions as core_permissions, \
+        responses as core_responses, \
+        utils as core_utils
 
 # User Model
 User = get_user_model()
@@ -33,14 +36,7 @@ class UserViewSet(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=Group, detail="Group", field="role_id")
     def group(self, request, groups=None):
         request_user = request.user
-        if request_user.groups.role_id > groups.role_id:
-            return core_responses.request_denied()
-        if request_user.groups.role_id == User.SUPER_ADMIN:
-            users = self.get_queryset().filter(groups=groups, is_active=True)
-        elif request_user.groups.role_id == User.ADMIN:
-            users = request_user.school.users.filter(groups=groups, is_active=True)
-        elif request_user.groups.role_id == User.OPERATOR:
-            users = request_user.branch.users.filter(groups=groups, is_active=True)
+        users = local_services.list_users(request_user, self.get_queryset(), groups.role_id)
         if groups.role_id == User.TEACHER:
             users = users.annotate(job_hour=Sum(F("classes__calendar__end_time") - F("classes__calendar__start_time"), output_field=CharField()))
         p_users = self.paginate_queryset(users.order_by("id"))

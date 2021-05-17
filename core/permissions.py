@@ -187,3 +187,19 @@ class DatasheetStatusGetOrModifyPermission(BasePermission):
         user = request.user
         switch = generate_basic_permission_switch("datasheetapp", "status")
         return user.has_perm(switch.get(view.action, ""))
+
+
+class DiscountGetOrModifyPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        switch = generate_basic_permission_switch("studentapp", "discount")
+        return user.has_perm(switch.get(view.action, ""))
+
+
+class PaymentGetOrModifyPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        switch = generate_basic_permission_switch("studentapp", "payment")
+        return user.has_perm(switch.get(view.action, ""))

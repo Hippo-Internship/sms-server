@@ -144,3 +144,16 @@ class UserStudentsDetailSerializer(serializers.ModelSerializer):
             "students"
         ]
 
+
+class PaymentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Payment
+        fields = "__all__"
+
+
+class ShortDiscountSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Discount
+        fields = [ "id", "name" ]
