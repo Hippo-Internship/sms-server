@@ -68,6 +68,13 @@ detail_switch = {
             "queryset": studentapp_serializers.local_models.Discount.objects,
         },
         "serializer": studentapp_serializers.ShortDiscountSerializer
+    },
+    "status": {
+        "service": local_services.list_status,
+        "params": {
+            "queryset": local_models.Status.objects,
+        },
+        "serializer": local_serializers.ShortStatusSerializer
     }
 }
 
