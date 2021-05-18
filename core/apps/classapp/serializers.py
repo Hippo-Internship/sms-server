@@ -107,6 +107,7 @@ class ClassFullDetailSerializer(serializers.ModelSerializer):
 class CalendarSerializer(serializers.ModelSerializer):
 
     room_name = serializers.CharField(source="room.name", read_only=True)
+    class_name = serializers.CharField(source="_class.name", read_only=True)
 
     class Meta:
         model = local_models.Calendar
@@ -118,11 +119,23 @@ class CalendarSerializer(serializers.ModelSerializer):
     def validate(self, data):
         _class = data["_class"]
         if data["room"].branch.id is not _class.branch.id:
-            raise serializers.ValidationError("Invalid Class")
+            raise PermissionDenied
         if data["day"] > 6:
             raise serializers.ValidationError("Day should be between 0 and 6")
         if data["end_time"] < data["start_time"]:
             raise serializers.ValidationError("End time should be later than the start time!")
+        branch = _class.branch
+        today_date = datetime.now()
+        classes = branch.classes.filter(
+            start_date__lte=today_date, 
+            end_date__gte=today_date,
+            calendar__room=data["room"].id,
+            calendar__day=data["day"],
+            calendar__start_time__lte=data["start_time"],
+            calendar__end_time__gte=data["start_time"]
+        )
+        if classes.exists():
+            raise serializers.ValidationError("Room is occupied!")
         return data
 
 

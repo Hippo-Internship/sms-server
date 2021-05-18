@@ -177,7 +177,7 @@ class ClassViewSet(viewsets.GenericViewSet):
     def create_calendar(self, request, _class=None):
         calendar_request_data = request.data
         calendar_request_data["_class"] = _class.id
-        calendar = self.get_serializer_class()(data=calendar_request_data, many=True)
+        calendar = self.get_serializer_class()(data=calendar_request_data)
         calendar.is_valid(raise_exception=True)
         calendar.save()
         return core_responses.request_success_with_data(calendar.data)
@@ -253,15 +253,20 @@ class CalendarViewSet(viewsets.GenericViewSet):
 
     def list(self, request):
         request_user = request.user
+        today_date = datetime.now()
+        filter_queries = {
+            "_class__start_date__lte": today_date,
+            "_class__end_date__lte": today_date
+        }
         if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
-            calendar = self.get_queryset().all()
+            calendar = self.get_queryset().all(**filter_queries)
         elif request_user.groups.role_id == local_models.User.ADMIN:
             branches = request_user.school.branches.all()
-            calendar = self.get_queryset().filter(_class__branch__in=branches)
+            calendar = self.get_queryset().filter(_class__branch__in=branches, **filter_queries)
         elif request_user.groups.role_id == local_models.User.OPERATOR:
             calendar = self.get_queryset().filter(_class__branch=request_user.branch)
         elif request_user.groups.role_id == local_models.User.TEACHER:
-            calendar = self.get_queryset().filter(_class__teacher=request_user)
+            calendar = self.get_queryset().filter(_class__teacher=request_user, **filter_queries)
         p_calendar = self.paginate_queryset(calendar)
         calendar = self.get_serializer_class()(p_calendar, many=True)
         return self.get_paginated_response(calendar.data)

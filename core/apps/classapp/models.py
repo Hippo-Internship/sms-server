@@ -1,4 +1,5 @@
 # Django built-in imports
+from django.db.models.fields import DateField
 from django.db import models
 from django.contrib.auth import get_user_model
 # Local imports
@@ -151,4 +152,20 @@ class Calendar(models.Model):
 
     def __str__(self):
         return "%s %s %s" % (self.id, self.day, self._class)
-    
+
+
+class Exam(models.Model):
+
+    id = models.BigAutoField(primary_key=True)
+    _class = models.ForeignKey(
+        Class,
+        on_delete=models.CASCADE,
+        related_name="exams",
+        null=False,
+        blank=False,
+        db_column="class",
+        db_index=True
+    )
+    name = models.CharField(max_length=24, null=False, blank=False)
+    total_mark = models.IntegerField(null=False, blank=False, default=0)
+    date = DateField(null=False, blank=False)

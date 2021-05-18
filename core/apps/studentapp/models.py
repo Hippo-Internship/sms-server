@@ -143,3 +143,21 @@ class Note(base_models.BaseWithDate):
 
     def __str__(self):
         return "%s %s" % (self.id, self.student)
+
+
+class Journal(models.Model):
+
+    id = models.BigAutoField(primary_key=True)
+    student = models.ForeignKey(
+        Student, 
+        on_delete=models.CASCADE,
+        related_name="journals",
+        null=False,
+        blank=False,
+        db_index=True
+    )
+    date = models.DateField(null=False, blank=False)
+    state = models.BooleanField(null=True, blank=True, default=False)
+
+    def __str__(self):
+        return "%s %s" % (self.id, self.student)
