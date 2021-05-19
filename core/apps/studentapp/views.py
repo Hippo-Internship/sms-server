@@ -47,7 +47,8 @@ class StudentViewSet(viewsets.GenericViewSet):
 
     student_detail_additional_action = [
         "create_note",
-        "create_payment"
+        "create_payment",
+        "create_journal"
     ]
 
     def list(self, request):
@@ -104,7 +105,6 @@ class StudentViewSet(viewsets.GenericViewSet):
         payment.save()
         return core_responses.request_success_with_data(payment.data)
 
-
     @rest_decorators.action(detail=True, methods=[ "GET" ], url_path="note")
     @core_decorators.object_exists(model=local_models.Student, detail="Student")
     def list_notes(self, request, student=None):
@@ -123,6 +123,32 @@ class StudentViewSet(viewsets.GenericViewSet):
         note.save()
         return core_responses.request_success_with_data(note.data)
 
+    @rest_decorators.action(detail=True, methods=[ "POST" ], url_path="journal")
+    @core_decorators.object_exists(model=local_models.Student, detail="Student")
+    def create_journal(self, request, student=None):
+        journal_request_data = request.data
+        journal_request_data["student"] = student.id
+        journal = self.get_serializer_class()(data=journal_request_data)
+        journal.is_valid(raise_exception=True)
+        journal.save()
+        return core_responses.request_success_with_data(journal.data)
+
+    @create_journal.mapping.put
+    @core_decorators.has_keys("id", "state")
+    @core_decorators.object_exists(model=local_models.Student, detail="Student")
+    def update_journal(self, request, student=None):
+        journal = student.journals.filter(id=request.data["id"])
+        if not journal.exists():
+            return core_responses.request_denied()
+        state = request.data["state"]
+        if type(state).__name__ != "bool":
+            return core_responses.request_denied()
+        journal = journal[0]
+        journal.state = state
+        journal.save()
+        journal = self.get_serializer_class()(journal)
+        return core_responses.request_success_with_data(journal.data)
+
     def get_serializer_class(self):
         if self.action == "list":
             return local_serializers.UserStudentsDetailSerializer
@@ -134,17 +160,19 @@ class StudentViewSet(viewsets.GenericViewSet):
             return local_serializers.NoteSerializer
         elif self.action == "update_note":
             return local_serializers.NoteUpdateSerializer
+        elif self.action in [ "create_journal", "update_journal" ]:
+            return local_serializers.JournalSerializer
         else:
             return super(StudentViewSet, self).get_serializer_class()
     
     def get_permission_query(self):
-        if self.action in [ "create_payment", "retrieve", "create_note" ]:
+        if self.action in [ "create_payment", "retrieve", "create_note", "create_journal" ]:
             return True
         else:
             return False
 
     def get_queryset(self):
-        if self.action in [ "create_payment", "retrieve", "create_note" ]:
+        if self.action in [ "create_payment", "retrieve", "create_note", "create_journal" ]:
             return local_models.Student.objects
         return super().get_queryset()
 

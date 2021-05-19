@@ -213,6 +213,8 @@ class StudentGetOrModifyPermission(BasePermission):
         switch["create_payment"] = "studentapp.add_payment"
         switch["list_notes"] = "studentapp.view_note"
         switch["create_note"] = "studentapp.add_note"
+        switch["create_journal"] = "studentapp.add_journal"
+        switch["update_journal"] = "studentapp.change_journal"
         return user.has_perm(switch.get(view.action, ""))
 
 

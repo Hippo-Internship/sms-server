@@ -337,8 +337,11 @@ class ExamViewSet(viewsets.GenericViewSet):
     def update_exam_result(self, request, exam=None):
         exam_result = exam.results.filter(id=request.data["id"])
         if not exam_result.exists():
-            core_responses.request_denied()
+            return core_responses.request_denied()
+        mark = request.data["mark"]
+        if type(mark).__name__ != "int":
+            return core_responses.request_denied()
         exam_result = exam_result[0]
-        exam_result.mark = request.data["mark"]
+        exam_result.mark = mark
         exam_result.save()
         return core_responses.request_success_with_data(exam_result.data)

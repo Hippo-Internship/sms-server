@@ -21,11 +21,11 @@ def has_key(key):
         return wrapper
     return _has_key
 
-def has_keys(*args):
+def has_keys(*keys):
     def _has_key(func):
         @wraps(func)
         def wrapper(self, request, pk=None, *args, **kwargs):
-            for key in args:
+            for key in keys:
                 if key not in request.data:
                     raise ValidationError({ "detail": key + " is not given!", "success": False })
             return func(self, request, pk, *args, **kwargs)

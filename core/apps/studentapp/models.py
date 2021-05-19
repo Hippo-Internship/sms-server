@@ -186,6 +186,7 @@ class ExamResult(base_models.BaseWithDate):
 
     class Meta:
         ordering = [ "id" ]
+        unique_together = [ "exam", "student" ]
 
     def __str__(self):
         return "%s %s %s" % (self.id, self.student, self.exam)

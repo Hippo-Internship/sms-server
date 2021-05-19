@@ -103,6 +103,16 @@ class ExamResultSerializer(serializers.ModelSerializer):
         return data
 
 
+class JournalSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Journal
+        fields = "__all__"
+        extra_kwargs = {
+            "student": { "write_only": True },
+        }
+
+
 class StudentShortDetailSerializer(serializers.ModelSerializer):
 
     discounts = DiscountShortDetailSerializer(many=True)
@@ -111,7 +121,7 @@ class StudentShortDetailSerializer(serializers.ModelSerializer):
     status_name = serializers.CharField(source="status.name")
     total_payment = serializers.FloatField(source="_class.lesson.price")
     exam_results = ExamResultSerializer(many=True, read_only=True)
-    results = ExamResultSerializer(many=True, read_only=True)
+    journals = JournalSerializer(many=True, read_only=True)
 
     class Meta:
         model = local_models.Student
