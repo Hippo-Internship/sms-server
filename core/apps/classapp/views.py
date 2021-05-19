@@ -1,5 +1,6 @@
 # Python imports
 from datetime import datetime
+from django.core.exceptions import PermissionDenied
 # Django built-in imports
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
@@ -98,10 +99,13 @@ class ClassViewSet(viewsets.GenericViewSet):
     detail_additional_action = [
         "create_calendar",
         "destroy_calendar",
-        "list_student",
+        "list_students",
         "create_student",
         "destroy_student",
-        "update_student"
+        "update_student",
+        "list_exams",
+        "create_exam",
+        "destroy_exam",
     ]
 
     def list(self, request):
@@ -191,12 +195,12 @@ class ClassViewSet(viewsets.GenericViewSet):
 
     @rest_decorator.action(detail=True, methods=[ "GET" ], url_path="student")
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
-    def list_student(self, request, _class=None):
+    def list_students(self, request, _class=None):
         p_student = self.paginate_queryset(_class.students.filter(canceled=False))
         students = self.get_serializer_class()(p_student, many=True)
         return self.get_paginated_response(students.data)
 
-    @list_student.mapping.post
+    @list_students.mapping.post
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def create_student(self, request, _class=None):
         student_request_data = request.data
@@ -210,7 +214,7 @@ class ClassViewSet(viewsets.GenericViewSet):
         student.save()
         return core_responses.request_success_with_data(student.data)
 
-    @list_student.mapping.put
+    @list_students.mapping.put
     @core_decorators.has_key("user")
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def update_student(self, request, _class=None):
@@ -226,6 +230,31 @@ class ClassViewSet(viewsets.GenericViewSet):
         student.save()
         return core_responses.request_success_with_data(student.data)
 
+    @rest_decorator.action(detail=True, methods=[ "GET" ], url_path="exam")
+    @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    def list_exams(self, request, _class=None):
+        exams = _class.exams.all()
+        p_exams = self.paginate_queryset(exams)
+        exams = self.get_serializer_class()(p_exams, many=True)
+        return self.get_paginated_response(exams.data)
+
+    @list_exams.mapping.post
+    @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    def create_exam(self, request, _class=None):
+        exam_request_data = request.data
+        exam_request_data["_class"] = _class.id
+        exam = self.get_serializer_class()(data=exam_request_data)
+        exam.is_valid(raise_exception=True)
+        exam.save()
+        return core_responses.request_success_with_data(exam.data)
+
+    @list_exams.mapping.delete
+    @core_decorators.has_key("exams")
+    @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    def destroy_exam(self, request, _class=None):
+        _class.exams.filter(id__in=request.data["days"]).delete()
+        return core_responses.request_success()
+
     def get_serializer_class(self):
         if self.action == "update" or self.action == "create":
             return local_serializers.ClassCreateAndUpdateSerializer
@@ -237,8 +266,12 @@ class ClassViewSet(viewsets.GenericViewSet):
             return studentapp_serializers.StudentCreateSerializer
         elif self.action == "update_student":
             return studentapp_serializers.StudentUpdateSerializer
-        elif self.action == "list_student":
+        elif self.action == "list_students":
             return studentapp_serializers.StudentShortDetailSerializer
+        elif self.action in [ "list_exams", "create_exam" ]:
+            return local_serializers.ExamSerializer
+        elif self.action == "update_exam":
+            return local_serializers.ExamUpdateSerializer
         else:
             return super(ClassViewSet, self).get_serializer_class()
 
@@ -270,4 +303,42 @@ class CalendarViewSet(viewsets.GenericViewSet):
         p_calendar = self.paginate_queryset(calendar)
         calendar = self.get_serializer_class()(p_calendar, many=True)
         return self.get_paginated_response(calendar.data)
-    
+
+
+class ExamViewSet(viewsets.GenericViewSet):
+
+    queryset = local_models.Exam
+    serializer_class = local_serializers.ExamUpdateSerializer
+
+    @core_decorators.object_exists(model=local_models.Exam, detail="Exam")
+    @core_decorators.has_access_to_class
+    def update(self, request, exam=None):
+        exam_request_data = request.data
+        exam = self.get_serializer_class()(exam, data=exam_request_data)
+        exam.is_valid(raise_exception=True)
+        exam.save()
+        return core_responses.request_success_with_data(exam.data)
+
+    @rest_decorator.action(detail=True, methods=[ "POST" ], url_path="result")
+    @core_decorators.object_exists(model=local_models.Exam, detail="Exam")
+    @core_decorators.has_access_to_class
+    def create_exam_result(self, request, exam=None):
+        exam_result_request_data = request.data
+        exam_result_request_data["exam"] = exam.id
+        exam_result = studentapp_serializers.ExamResultSerializer(data=exam_result_request_data)
+        exam_result.is_valid(raise_exception=True)
+        exam_result.save()
+        return core_responses.request_success_with_data(exam_result.data)
+
+    @rest_decorator.action(detail=True, methods=[ "PUT" ], url_path="result")
+    @core_decorators.has_keys("id", "mark")
+    @core_decorators.object_exists(model=local_models.Exam, detail="Exam")
+    @core_decorators.has_access_to_class
+    def update_exam_result(self, request, exam=None):
+        exam_result = exam.results.filter(id=request.data["id"])
+        if not exam_result.exists():
+            core_responses.request_denied()
+        exam_result = exam_result[0]
+        exam_result.mark = request.data["mark"]
+        exam_result.save()
+        return core_responses.request_success_with_data(exam_result.data)

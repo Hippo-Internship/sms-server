@@ -161,3 +161,31 @@ class Journal(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.id, self.student)
+
+
+class ExamResult(base_models.BaseWithDate):
+
+    id = models.BigAutoField(primary_key=True)
+    exam = models.ForeignKey(
+        classapp_models.Exam,
+        on_delete=models.CASCADE,
+        related_name="results",
+        null=False,
+        blank=False,
+        db_index=True
+    )
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name="exam_results",
+        null=False,
+        blank=False,
+        db_index=True
+    )
+    mark = models.IntegerField(null=False, blank=False, default=0)
+
+    class Meta:
+        ordering = [ "id" ]
+
+    def __str__(self):
+        return "%s %s %s" % (self.id, self.student, self.exam)

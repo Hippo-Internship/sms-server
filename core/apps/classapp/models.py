@@ -169,3 +169,6 @@ class Exam(models.Model):
     name = models.CharField(max_length=24, null=False, blank=False)
     total_mark = models.IntegerField(null=False, blank=False, default=0)
     date = DateField(null=False, blank=False)
+
+    def __str__(self):
+        return "%s %s %s" % (self.id, self._class)

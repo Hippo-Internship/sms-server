@@ -83,7 +83,24 @@ class DiscountShortDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.Discount
-        fields = [ "name" ]
+        fields = [ "id", "name" ]
+
+
+class ExamResultSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.ExamResult
+        exclude = [ "created", "modified" ]
+        extra_kwargs = {
+            "student": { "write_only": True }
+        }
+
+    def validate(self, data):
+        exam = data["exam"]
+        student = data["student"]
+        if exam._class.id != student._class.id:
+            raise PermissionDenied()
+        return data
 
 
 class StudentShortDetailSerializer(serializers.ModelSerializer):
@@ -92,6 +109,9 @@ class StudentShortDetailSerializer(serializers.ModelSerializer):
     user_firstname = serializers.CharField(source="user.firstname")
     user_lastname = serializers.CharField(source="user.lastname")
     status_name = serializers.CharField(source="status.name")
+    total_payment = serializers.FloatField(source="_class.lesson.price")
+    exam_results = ExamResultSerializer(many=True, read_only=True)
+    results = ExamResultSerializer(many=True, read_only=True)
 
     class Meta:
         model = local_models.Student

@@ -139,6 +139,31 @@ class CalendarSerializer(serializers.ModelSerializer):
         return data
 
 
+class ExamSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Exam
+        fields = "__all__"
+
+    def validate_date(self, value):
+        if value < datetime.date(datetime.now()):
+            raise serializers.ValidationError("Start date should be later than the today's date!")
+        return value
+
+
+class ExamUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Exam
+        fields = "__all__"
+        read_only_fields = [ "id", "_class" ]
+
+    def validate_date(self, value):
+        if value < datetime.date(datetime.now()):
+            raise serializers.ValidationError("Start date should be later than the today's date!")
+        return value
+
+
 class ShortClassSerializer(serializers.ModelSerializer):
 
     class Meta:

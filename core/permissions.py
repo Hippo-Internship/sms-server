@@ -90,6 +90,42 @@ class SchoolContentManagementPermission(BasePermission):
         return True
 
 
+class StudentContentManagementPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        if user.groups.role_id == User.SUPER_ADMIN:
+            return True
+        if view.action == "create" or (hasattr(view, "additional_action") and view.action in view.additional_action):
+            request_data = request.data
+            student_id = request_data.get("student", -1)
+            if student_id == -1:
+                raise NotFound({ "detail": "student is not given!", "success": False })
+            student = view.get_queryset().filter(id=view.kwargs["pk"])
+            if not student.exists():
+                raise NotFound({ "detail": "Object does not exist!", "success": False })
+            student = student[0]
+            if user.groups.role_id == User.ADMIN:
+                if not user.school.branches.filter(id=student.user.branch.id).exists():
+                    return False
+            elif user.groups.role_id == User.OPERATOR:
+                if user.branch.id != student.user.branch.id:
+                    return False
+        if view.action == "retrieve" or view.action == "update" or view.action == "destroy" or (hasattr(view, "student_detail_additional_action") and view.action in view.student_detail_additional_action):
+            _object = view.get_queryset().filter(id=view.kwargs["pk"])
+            if not _object.exists():
+                raise NotFound({ "detail": "Object does not exist!", "success": False })
+            _object = _object[0]
+            if not view.get_permission_query():
+                _object = _object.student
+            if user.groups.role_id == User.ADMIN:
+                if not user.school.branches.filter(id=_object.user.branch.id).exists():
+                    return False
+            elif user.groups.role_id == User.OPERATOR:
+                if user.branch.id != _object.user.branch.id:
+                    return False
+        return True
+
 
 class UserGetOrModifyPermission(BasePermission):
 
@@ -151,9 +187,12 @@ class ClassGetOrModifyPermission(BasePermission):
         switch = generate_basic_permission_switch(app_name, model_name)
         switch["create_calendar"] = app_name + ".add_calendar"
         switch["destroy_calendar"] = app_name + ".delete_calendar"
-        switch["list_student"] = "studentapp.view_student"
+        switch["list_students"] = "studentapp.view_student"
         switch["create_student"] = "studentapp.add_student"
         switch["update_student"] = "studentapp.delete_student"
+        switch["list_exams"] = "classapp.view_exam"
+        switch["create_exam"] = "classapp.add_exam"
+        switch["update_exam"] = "classapp.change_exam"
         return user.has_perm(switch.get(view.action, ""))
 
 
