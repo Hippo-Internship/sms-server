@@ -1,6 +1,6 @@
+from uuid import uuid4
+import os
 from django.contrib.auth import get_user_model
-from django.db.models.expressions import Subquery
-
 
 User = get_user_model()
 
@@ -73,3 +73,11 @@ def build_filter_query(query_model, query_params):
             query_field = sub_query["name"]
         result[query_field] = query_value
     return result
+
+def path_and_rename(path):
+    def wrapper(instance, filename):
+        ext = filename.split('.')[-1]
+        print(instance)
+        filename = '{}.{}'.format(uuid4().hex, ext)
+        return os.path.join(path, filename)
+    return wrapper

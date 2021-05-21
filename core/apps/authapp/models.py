@@ -5,10 +5,13 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import BaseUserManager, AbstractUser, Group
 # Local imports
 from . import validators as local_validators
+from core import functions as core_functions
 from core.apps.schoolapp import models as schoolapp_models
 
 # Adding custom field to the group
 Group.add_to_class('role_id', models.IntegerField(null=False, blank=False, default=7))
+
+path_and_rename = core_functions.PathAndRename("image/profiles")
 
 class CustomUserManager(BaseUserManager):
 
@@ -114,10 +117,6 @@ class CustomUser(AbstractUser):
     class Meta:
         ordering = [ "-id" ]
 
-    @property
-    def role_name(self):
-        return self.ROLES[self.role_id - 1][1]
-
     def __str__(self):
         return '%s %s %s: %s' % (self.id, self.phone, self.first_name, self.last_name)
 
@@ -131,13 +130,20 @@ class Profile(models.Model):
         related_name='profile',
         db_index=True
     )
-    image = models.ImageField(upload_to='image/profiles', null=True, blank=True)
+    image = models.ImageField(upload_to=path_and_rename, null=True, blank=True)
     address_city = models.CharField(null=True, blank=True, max_length=255)
     address_district = models.CharField(null=True, blank=True, max_length=255)
     address_khoroo = models.CharField(null=True, blank=True, max_length=255)
     address_appartment = models.CharField(null=True, blank=True, max_length=255)
     dob = models.DateField(null=True, blank=True, max_length=255)
     register = models.CharField(null=True, max_length=255, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.image == None:
+            super(Profile, self).save(*args, **kwargs)
+            return
+        self.image = core_functions.compress_image(self.image)
+        super(Profile, self).save(*args, **kwargs)
 
     def __str__(self):
         return '%s %s' % (self.id, self.user)

@@ -14,8 +14,15 @@ class SchoolSerializer(serializers.ModelSerializer):
         
 class BranchSerializer(serializers.ModelSerializer):
 
-    school = serializers.CharField(source="school.name")
+    school_name = serializers.CharField(source="school.name", read_only=True)
 
     class Meta:
         model = local_models.Branch
         fields = "__all__"
+
+
+class SchoolShortSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.School
+        fields = [ "id", "name" ]

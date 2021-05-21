@@ -160,7 +160,7 @@ class ClassViewSet(viewsets.GenericViewSet):
         class_request_data = request.data
         _class = self.get_serializer_class()(data=class_request_data)
         _class.is_valid(raise_exception=True)
-        # _class = _class.save()
+        _class = _class.save()
         return core_responses.request_success()
 
     @core_decorators.object_exists(model=local_models.Class, detail="Class")

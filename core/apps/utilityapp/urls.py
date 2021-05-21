@@ -12,5 +12,5 @@ router.register("status", local_views.StatusViewSet, basename="status")
 router.register("method", local_views.PaymentMethodViewSet, basename="payment_method")
 
 urlpatterns = [
-    path("detail", local_views.ListDetailView.as_view(), name="detail-list")
+    path("detail/", local_views.ListDetailView.as_view(), name="detail-list")
 ] + router.urls

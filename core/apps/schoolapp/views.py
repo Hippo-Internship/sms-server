@@ -36,6 +36,8 @@ class SchoolViewSet(viewsets.ModelViewSet):
 
     @core_decorators.object_exists(model=local_models.School, detail="School")
     def update(self, request, school=None):
+        print(school)
+        print(request.data)
         data = super(SchoolViewSet, self).update(request, school.id).data
         return core_responses.request_success_with_data(data)
 

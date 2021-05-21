@@ -24,6 +24,9 @@ from core.apps.classapp import \
 from core.apps.studentapp import \
         services as studentapp_services, \
         serializers as studentapp_serializers
+from core.apps.schoolapp import \
+        services as schoolapp_services, \
+        serializers as schoolapp_serializers
 
 detail_switch = {
     "groups": {
@@ -75,6 +78,13 @@ detail_switch = {
             "queryset": local_models.Status.objects,
         },
         "serializer": local_serializers.ShortStatusSerializer
+    },
+    "school": {
+        "service": schoolapp_services.list_school,
+        "params": {
+            "queryset": schoolapp_serializers.local_models.School.objects
+        },
+        "serializer": schoolapp_serializers.SchoolShortSerializer
     }
 }
 

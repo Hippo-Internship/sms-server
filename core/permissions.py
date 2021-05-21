@@ -65,13 +65,14 @@ class SchoolContentManagementPermission(BasePermission):
             return True
         if view.action == "create" or view.action == "update":
             request_data = request.data
-            school_id = request_data.get("school", -1)
+            school_id = int(request_data.get("school", -1))
             if school_id == -1:
                 raise NotFound({ "detail": "school is not given!", "success": False })
             if user.groups.role_id == User.ADMIN:
                 if school_id != user.school.id:
                     return False
                 else:
+                    print("dqwdwq")
                     return True
             if school_id != user.school.id:
                 return False
@@ -98,7 +99,7 @@ class StudentContentManagementPermission(BasePermission):
             return True
         if view.action == "create" or (hasattr(view, "additional_action") and view.action in view.additional_action):
             request_data = request.data
-            student_id = request_data.get("student", -1)
+            student_id = int(request_data.get("student", -1))
             if student_id == -1:
                 raise NotFound({ "detail": "student is not given!", "success": False })
             student = view.get_queryset().filter(id=view.kwargs["pk"])
