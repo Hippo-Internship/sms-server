@@ -29,9 +29,9 @@ class School(base_models.BaseWithDate):
         ordering = [ "id" ]
 
     def save(self, *args, **kwargs):
-        if self.image != None:
+        if self.image:
             self.image = core_functions.compress_image(self.image)
-        if self.logo != None:
+        if self.logo:
             self.logo = core_functions.compress_image(self.logo)
         super(School, self).save(*args, **kwargs)
 
@@ -46,7 +46,10 @@ class Branch(base_models.BaseWithDate):
         School, 
         related_name="branches", 
         on_delete = models.CASCADE, 
-        db_index=True)
+        null=False,
+        blank=False,
+        db_index=True
+    )
     name = models.CharField(
         max_length=36, unique=True, null=False, blank=False,
         error_messages={

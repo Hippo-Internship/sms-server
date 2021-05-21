@@ -15,6 +15,7 @@ class SchoolSerializer(serializers.ModelSerializer):
 class BranchSerializer(serializers.ModelSerializer):
 
     school_name = serializers.CharField(source="school.name", read_only=True)
+    school_image = serializers.ImageField(source="school.image", read_only=True)
 
     class Meta:
         model = local_models.Branch
