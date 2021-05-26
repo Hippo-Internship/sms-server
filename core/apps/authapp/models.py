@@ -139,7 +139,7 @@ class Profile(models.Model):
     register = models.CharField(null=True, max_length=255, blank=True)
 
     def save(self, *args, **kwargs):
-        if not self.image or self.image == None:
+        if not self.image  or self.image == None:
             super(Profile, self).save(*args, **kwargs)
             return
         self.image = core_functions.compress_image(self.image)

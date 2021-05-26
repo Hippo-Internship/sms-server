@@ -65,8 +65,11 @@ class SchoolContentManagementPermission(BasePermission):
             return True
         if view.action == "create" or view.action == "update":
             request_data = request.data
-            school_id = int(request_data.get("school", -1))
-            if school_id == -1:
+            try:
+                school_id = int(request_data.get("school", -1))
+            except:
+                raise NotFound({ "detail": "school is not given!", "success": False })
+            if school_id == None:
                 raise NotFound({ "detail": "school is not given!", "success": False })
             if user.groups.role_id == User.ADMIN:
                 if school_id != user.school.id:

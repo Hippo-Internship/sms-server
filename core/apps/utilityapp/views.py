@@ -85,7 +85,14 @@ detail_switch = {
             "queryset": schoolapp_serializers.local_models.School.objects
         },
         "serializer": schoolapp_serializers.SchoolShortSerializer
-    }
+    },
+    "branch": {
+        "service": schoolapp_services.list_branch,
+        "params": {
+            "queryset": schoolapp_serializers.local_models.Branch.objects
+        },
+        "serializer": schoolapp_serializers.BranchShortSerializer
+    },
 }
 
 
@@ -162,6 +169,12 @@ class ListDetailView(views.APIView):
         if len(projection) > 5:
             return core_responses.request_denied()
         detail_switch["user"]["params"]["groups"] = request.data.get("groups", 0)
+        school = request.data.get("school", 0)
+        if school != 0 or type(school).__name__ != "int":
+            detail_switch["branch"]["params"]["school"] = school
+        else:
+            print("dwqdqwwqd")
+            detail_switch["branch"]["params"].pop("school", None)
         data = {}
         for key in projection:
             if key not in detail_switch:

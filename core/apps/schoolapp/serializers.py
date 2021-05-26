@@ -27,3 +27,10 @@ class SchoolShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.School
         fields = [ "id", "name" ]
+
+
+class BranchShortSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Branch
+        fields = [ "id", "name" ]

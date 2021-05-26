@@ -1,4 +1,5 @@
 # Django built-in imports
+from core.apps.schoolapp import services
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
 # Third party imports
@@ -7,12 +8,15 @@ from rest_framework.settings import api_settings
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 # Local imports
-from . import models as local_models, serializers as local_serializers
+from . import \
+        models as local_models, \
+        serializers as local_serializers, \
+        services as local_services
 from core import \
-    decorators as core_decorators, \
-    permissions as core_permissions, \
-    responses as core_responses, \
-    utils as core_utils
+        decorators as core_decorators, \
+        permissions as core_permissions, \
+        responses as core_responses, \
+        utils as core_utils
 
 # User model
 User = get_user_model()
@@ -58,11 +62,7 @@ class BranchViewSet(viewsets.GenericViewSet):
     
     def list(self, request):
         request_user = request.user
-        branches = []
-        if request_user.groups.role_id is User.SUPER_ADMIN:
-            branches = self.get_queryset().all() 
-        elif request_user.groups.role_id is User.ADMIN:
-            branches = self.get_queryset().filter(school=request_user.school)
+        branches = local_services.list_branch(request_user, self.get_queryset())
         p_branches = self.paginate_queryset(branches)
         branches = self.get_serializer_class()(p_branches, many=True)
         return self.get_paginated_response(branches.data)

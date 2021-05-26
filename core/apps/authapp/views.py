@@ -36,6 +36,7 @@ class UserViewSet(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=Group, detail="Group", field="role_id")
     def group(self, request, groups=None):
         request_user = request.user
+        print(request_user.groups.name)
         users = local_services.list_users(request_user, self.get_queryset(), groups.role_id)
         if groups.role_id == User.TEACHER:
             users = users.annotate(job_hour=Sum(F("classes__calendar__end_time") - F("classes__calendar__start_time"), output_field=CharField()))
@@ -52,12 +53,11 @@ class UserViewSet(viewsets.GenericViewSet):
         return core_responses.request_success_with_data(user.data)
 
     def create(self, request):
-        request_user = request.user
         user_request_data = request.data
-        user = self.get_serializer_class()(data=user_request_data)
+        user = self.get_serializer_class()(data=user_request_data, user=request.user)
         user.is_valid(raise_exception=True)
-        if request_user.groups.role_id >= user_request_data["groups"]:
-            return core_responses.request_denied()
+        # if request_user.groups.role_id >= int(user_request_data["groups"]):
+        #     return core_responses.request_denied()
         user = user.save()
         profile = local_serializers.UserProfileSerializer(user.profile, data=user_request_data)
         profile.is_valid(raise_exception=True)

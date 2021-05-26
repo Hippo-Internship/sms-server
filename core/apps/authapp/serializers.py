@@ -24,6 +24,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class CustomUserSerializer(serializers.ModelSerializer):
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super(CustomUserSerializer, self).__init__(*args, **kwargs)
+
     profile = UserProfileSerializer(read_only=True)
     role_id = serializers.IntegerField(source="groups.role_id", read_only=True)
     role_name = serializers.CharField(source="groups.name", read_only=True)
@@ -56,6 +60,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
             "school": { "required": True },
             "branch": { "required": True },
         }
+
+    def validate_groups(self, value):
+        if value.role_id <= self.user.groups.role_id:
+            raise PermissionDenied()
+        return value
 
     def create(self, validated_data):
         if "password" not in validated_data:
