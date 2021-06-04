@@ -58,8 +58,13 @@ class CustomUserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "password": { "write_only": True },
             "school": { "required": True },
-            "branch": { "required": True },
+            "branch": { "required": False },
         }
+
+    def validate(self, data):
+        if data["groups"].role_id <= User.ADMIN:
+            data.pop("branch", None)
+        return data
 
     def validate_groups(self, value):
         if value.role_id <= self.user.groups.role_id:

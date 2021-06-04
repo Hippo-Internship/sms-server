@@ -9,7 +9,7 @@ User = get_user_model()
 
 def list_classes(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
-        classes = queryset.all()
+        classes = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
         classes = queryset.filter(
             branch__school=user.school.id, 
@@ -31,10 +31,10 @@ def list_classes(user, queryset, filter_queries={}):
 
 def list_rooms(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
-        rooms = queryset.all()
+        rooms = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
-        branches = user.school.branches.all()
-        rooms = queryset.filter(branch__in=branches)
+        filter_queries.pop("school", 0)
+        rooms = queryset.filter(branch__school=user.school.id, **filter_queries)
     elif user.groups.role_id == User.OPERATOR:
         rooms = queryset.filter(branch=user.branch)
     else:
@@ -43,12 +43,12 @@ def list_rooms(user, queryset, filter_queries={}):
 
 def list_lessons(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
-        lessons = queryset.all()
+        lessons = queryset.filter(is_active=True, **filter_queries)
     elif user.groups.role_id == User.ADMIN:
-        branches = user.school.branches.all()
-        lessons = queryset.filter(branch__in=branches)
+        filter_queries.pop("school", 0)
+        lessons = queryset.filter(is_active=True, branch__school=user.school.id, **filter_queries)
     elif user.groups.role_id == User.OPERATOR:
-        lessons = queryset.filter(branch=user.branch)
+        lessons = queryset.filter(is_active=True, branch=user.branch)
     else:
         lessons = []
     return lessons

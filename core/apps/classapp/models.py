@@ -39,6 +39,7 @@ class Lesson(base_models.BaseWithDate):
 
     class Meta:
         ordering = [ "id" ]
+        unique_together = [ "branch", "name" ]
 
     def __str__(self):
         return "%s %s %s" % (self.id, self.name, self.branch)

@@ -27,12 +27,16 @@ from core.apps.studentapp import \
 from core.apps.schoolapp import \
         services as schoolapp_services, \
         serializers as schoolapp_serializers
+from core.apps.datasheetapp import \
+        services as datasheetapp_services, \
+        serializers as datasheetapp_serializers
 
 detail_switch = {
     "groups": {
         "service": authapp_services.list_groups,
         "params": {
             "queryset": Group.objects,
+            "filter_queries": {}
         },
         "serializer": authapp_serializers.GroupsSerializer
     },
@@ -40,7 +44,8 @@ detail_switch = {
         "service": authapp_services.list_users,
         "params": {
             "queryset": authapp_serializers.User.objects,
-            "groups": 0
+            "groups": 0,
+            "filter_queries": {}
         },
         "serializer": authapp_serializers.ShortUserSerializer
     },
@@ -48,6 +53,7 @@ detail_switch = {
         "service": classapp_services.list_classes,
         "params": {
             "queryset": classapp_serializers.local_models.Class.objects,
+            "filter_queries": {}
         },
         "serializer": classapp_serializers.ShortClassSerializer
     },
@@ -55,6 +61,7 @@ detail_switch = {
         "service": classapp_services.list_rooms,
         "params": {
             "queryset": classapp_serializers.local_models.Room.objects,
+            "filter_queries": {}
         },
         "serializer": classapp_serializers.ShortRoomSerializer
     },
@@ -62,6 +69,7 @@ detail_switch = {
         "service": classapp_services.list_lessons,
         "params": {
             "queryset": classapp_serializers.local_models.Lesson.objects,
+            "filter_queries": {}
         },
         "serializer": classapp_serializers.ShortLessonSerializer
     },
@@ -69,6 +77,7 @@ detail_switch = {
         "service": studentapp_services.list_discounts,
         "params": {
             "queryset": studentapp_serializers.local_models.Discount.objects,
+            "filter_queries": {}
         },
         "serializer": studentapp_serializers.ShortDiscountSerializer
     },
@@ -76,22 +85,33 @@ detail_switch = {
         "service": local_services.list_status,
         "params": {
             "queryset": local_models.Status.objects,
+            "filter_queries": {}
         },
         "serializer": local_serializers.ShortStatusSerializer
     },
     "school": {
         "service": schoolapp_services.list_school,
         "params": {
-            "queryset": schoolapp_serializers.local_models.School.objects
+            "queryset": schoolapp_serializers.local_models.School.objects,
+            "filter_queries": {}
         },
         "serializer": schoolapp_serializers.SchoolShortSerializer
     },
     "branch": {
         "service": schoolapp_services.list_branch,
         "params": {
-            "queryset": schoolapp_serializers.local_models.Branch.objects
+            "queryset": schoolapp_serializers.local_models.Branch.objects,
+            "filter_queries": {}
         },
         "serializer": schoolapp_serializers.BranchShortSerializer
+    },
+    "datasheet_status": {
+        "service": datasheetapp_services.list_datasheet_status,
+        "params": {
+            "queryset": datasheetapp_serializers.local_models.Status.objects,
+            "filter_queries": {}
+        },
+        "serializer": datasheetapp_serializers.ShortDatasheetStatuSerializer
     },
 }
 
@@ -173,8 +193,16 @@ class ListDetailView(views.APIView):
         if school != 0 or type(school).__name__ != "int":
             detail_switch["branch"]["params"]["school"] = school
         else:
-            print("dwqdqwwqd")
             detail_switch["branch"]["params"].pop("school", None)
+        branch = request.data.get("branch", 0)
+        if branch != 0 or type(branch).__name__ != "int":
+            detail_switch["lesson"]["params"]["filter_queries"]["branch"] = branch
+            detail_switch["user"]["params"]["filter_queries"]["branch"] = branch
+            detail_switch["room"]["params"]["filter_queries"]["branch"] = branch
+        else:
+            detail_switch["lesson"]["params"]["filter_queries"].pop("branch", None)
+            detail_switch["user"]["params"]["filter_queries"].pop("branch", None)
+            detail_switch["room"]["params"]["filter_queries"].pop("branch", None)
         data = {}
         for key in projection:
             if key not in detail_switch:

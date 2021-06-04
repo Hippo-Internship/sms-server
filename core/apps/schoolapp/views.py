@@ -1,9 +1,11 @@
 # Django built-in imports
-from core.apps.schoolapp import services
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
+
 # Third party imports
-from rest_framework import viewsets
+from rest_framework import \
+        viewsets, \
+        decorators as rest_decorators
 from rest_framework.settings import api_settings
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
@@ -49,6 +51,14 @@ class SchoolViewSet(viewsets.ModelViewSet):
     def destroy(self, request, school=None):
         super(SchoolViewSet, self).destroy(request, school.id)
         return core_responses.request_success()
+
+    @rest_decorators.action(detail=True, methods=[ "GET" ], url_path="branch")
+    @core_decorators.object_exists(model=local_models.School, detail="School")
+    def list_school_branch(self, request, school=None):
+        branches = school.branches.all()
+        p_branches = self.paginate_queryset(branches)
+        branches = local_serializers.BranchSerializer(p_branches, many=True)
+        return self.get_paginated_response(branches.data)
 
     
 class BranchViewSet(viewsets.GenericViewSet):

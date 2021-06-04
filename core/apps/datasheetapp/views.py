@@ -8,7 +8,8 @@ from rest_framework.settings import api_settings
 # Local imports
 from . import \
         models as local_models, \
-        serializers as local_serializers
+        serializers as local_serializers, \
+        services as local_services
 from core import \
         permissions as core_permissions, \
         decorators as core_decorators, \
@@ -33,7 +34,8 @@ class DatasheetViewSet(viewsets.GenericViewSet):
                 "operator": "int",
                 "lesson": "int",
                 "search": "str",
-                "status": "str"
+                "status": "str",
+                "branch": "int"
             },
             dict(request.query_params)
         )
@@ -41,21 +43,11 @@ class DatasheetViewSet(viewsets.GenericViewSet):
             "operator": "teacher",
             "lesson": "lesson",
             "search": "phone__icontains",
-            "status": "status"
+            "status": "status",
+            "branch": "branch"
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
-        if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
-            datasheets = self.get_queryset().all()
-        elif request_user.groups.role_id == local_models.User.ADMIN:
-            datasheets = self.get_queryset().filter(
-                branch__school=request_user.school, 
-                **filter_queries
-            )
-        elif request_user.groups.role_id == local_models.User.OPERATOR:
-            datasheets = self.get_queryset().filter(
-                branch=request_user.branch,
-                **filter_queries
-            )
+        datasheets = local_services.list_datasheet(request_user, self.get_queryset(), filter_queries)
         p_datasheets = self.paginate_queryset(datasheets)
         datasheets = self.get_serializer_class()(p_datasheets, many=True)
         return self.get_paginated_response(datasheets.data)
@@ -108,16 +100,10 @@ class DatasheetStatusViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         request_user = request.user
-        if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
-            lessons = self.get_queryset().all()
-        elif request_user.groups.role_id == local_models.User.ADMIN:
-            branches = request_user.school.branches.all()
-            lessons = self.get_queryset().filter(branch__in=branches)
-        else:
-            lessons = self.get_queryset().filter(branch=request_user.branch)
-        p_lessons = self.paginate_queryset(lessons)
-        lessons = self.get_serializer_class()(p_lessons, many=True)
-        return self.get_paginated_response(lessons.data)
+        datasheet_status = local_services.list_datasheet_status(request_user, self.get_queryset())
+        p_datasheet_status = self.paginate_queryset(datasheet_status)
+        datasheet_status = self.get_serializer_class()(p_datasheet_status, many=True)
+        return self.get_paginated_response(datasheet_status.data)
 
     @core_decorators.object_exists(model=local_models.Status, detail="Status")
     def retrieve(self, request, status=None):

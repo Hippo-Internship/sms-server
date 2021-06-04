@@ -25,7 +25,7 @@ class Status(models.Model):
     priority = models.IntegerField(null=False, default=0)
 
     def __str__(self):
-        return "%d %d" % (self.id, self.label)
+        return "%s %s" % (self.id, self.name)
     
 
 

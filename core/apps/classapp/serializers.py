@@ -29,7 +29,7 @@ class RoomSerializer(serializers.ModelSerializer):
 
 class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
 
-    # days = serializers.ListField(required=True)
+    end_time = serializers.TimeField(format='%H:%M', input_formats='%H:%M')
 
     class Meta:
         model = local_models.Class
@@ -76,7 +76,7 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
         initial_data = self.initial_data
         start_time = initial_data.get("start_time", None)
         end_time = initial_data.get("end_time", None)
-        if start_time < end_time:
+        if start_time > end_time:
             raise serializers.ValidationError("End time should be later than the start time!")
         return value
 
@@ -87,7 +87,7 @@ class ClassDetailSerializer(serializers.ModelSerializer):
     teacher_firstname = serializers.CharField(source="teacher.firstname", read_only=True)
     teacher_lastname = serializers.CharField(source="teacher.lastname", read_only=True)
     lesson_name = serializers.CharField(source="lesson.name", read_only=True)
-    room_name = serializers.CharField(source="room.name", read_only=True)
+    students_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = local_models.Class

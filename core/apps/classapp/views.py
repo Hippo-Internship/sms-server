@@ -1,6 +1,7 @@
 # Python imports
 from datetime import datetime
 from django.core.exceptions import PermissionDenied
+from django.db.models import Count
 # Django built-in imports
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
@@ -25,6 +26,11 @@ from core.apps.studentapp import \
         serializers as studentapp_serializers
         
 
+school_query_model = {
+    "school": "branch__school",
+    "branch": "branch"
+}
+
 class LessonViewSet(viewsets.ModelViewSet):
 
     queryset = local_models.Lesson.objects.all()
@@ -35,8 +41,16 @@ class LessonViewSet(viewsets.ModelViewSet):
     ]
 
     def list(self, request):
+        query_params = core_utils.normalize_data(
+            { 
+                "school": "int",
+                "branch": "int"
+            },
+            dict(request.query_params)
+        )
+        filter_queries = core_utils.build_filter_query(school_query_model, query_params)
         request_user = request.user
-        lessons = local_services.list_lessons(request_user, self.get_queryset())
+        lessons = local_services.list_lessons(request_user, self.get_queryset(), filter_queries)
         p_lessons = self.paginate_queryset(lessons)
         lessons = self.get_serializer_class()(p_lessons, many=True)
         return self.get_paginated_response(lessons.data)
@@ -66,8 +80,16 @@ class RoomViewSet(viewsets.ModelViewSet):
     ]
 
     def list(self, request):
+        query_params = core_utils.normalize_data(
+            { 
+                "school": "int",
+                "branch": "int"
+            },
+            dict(request.query_params)
+        )
+        filter_queries = core_utils.build_filter_query(school_query_model, query_params)
         request_user = request.user
-        rooms = local_services.list_rooms(request_user, self.get_queryset())
+        rooms = local_services.list_rooms(request_user, self.get_queryset(), filter_queries)
         p_rooms = self.paginate_queryset(rooms)
         rooms = self.get_serializer_class()(p_rooms, many=True)
         return self.get_paginated_response(rooms.data)
@@ -114,8 +136,10 @@ class ClassViewSet(viewsets.GenericViewSet):
             { 
                 "teacher": "int",
                 "lesson": "int",
+                "branch": "int",
+                "school": "int",
                 "search": "str",
-                "status": "str"
+                "status": "str",
             },
             dict(request.query_params)
         )
@@ -124,6 +148,8 @@ class ClassViewSet(viewsets.GenericViewSet):
             "teacher": "teacher",
             "lesson": "lesson",
             "search": "name__icontains",
+            "branch": "branch",
+            "school": "branch__school",
             "status": {
                 "active": [
                     {
@@ -147,6 +173,7 @@ class ClassViewSet(viewsets.GenericViewSet):
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
         classes = local_services.list_classes(request_user, self.get_queryset(), filter_queries)
+        classes = classes.annotate(students_count=Count("students")).order_by("id")
         p_classes = self.paginate_queryset(classes)
         classes = self.get_serializer_class()(p_classes, many=True)
         return self.get_paginated_response(classes.data)
@@ -157,6 +184,7 @@ class ClassViewSet(viewsets.GenericViewSet):
         return core_responses.request_success_with_data(_class.data)
 
     def create(self, request):
+        print(request.data["end_time"])
         class_request_data = request.data
         _class = self.get_serializer_class()(data=class_request_data)
         _class.is_valid(raise_exception=True)

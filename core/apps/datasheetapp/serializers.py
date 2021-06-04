@@ -10,7 +10,9 @@ from . import models as local_models
 class DatasheetCreateSerializer(serializers.ModelSerializer):
 
     user_phone = serializers.CharField(source="user.phone", read_only=True)
-    user_firstname = serializers.CharField(source="user.lastname", read_only=True)
+    user_firstname = serializers.CharField(source="user.firstname", read_only=True)
+    user_lasttname = serializers.CharField(source="user.lastname", read_only=True)
+    operator_firstname = serializers.CharField(source="operator.firstname", read_only=True)
 
     class Meta:
         model = local_models.Datasheet
@@ -46,7 +48,9 @@ class DatasheetCreateSerializer(serializers.ModelSerializer):
 class DatasheetUpdateSerializer(serializers.ModelSerializer):
 
     user_phone = serializers.CharField(source="user.phone", read_only=True)
-    user_firstname = serializers.CharField(source="user.lastname", read_only=True)
+    user_firstname = serializers.CharField(source="user.firstname", read_only=True)
+    user_lasttname = serializers.CharField(source="user.lastname", read_only=True)
+    operator_firstname = serializers.CharField(source="operator.firstname", read_only=True)
 
     class Meta:
         model = local_models.Datasheet
@@ -70,3 +74,10 @@ class DatasheetStatuSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Status
         fields = "__all__"
+
+
+class ShortDatasheetStatuSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Status
+        fields = [ "id", "name", "branch" ]

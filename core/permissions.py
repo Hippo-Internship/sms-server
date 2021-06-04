@@ -147,6 +147,7 @@ class SchoolGetOrModifyPermission(BasePermission):
     def has_permission(self, request, view):
         user = request.user
         switch = generate_basic_permission_switch("schoolapp", "school")
+        switch["list_school_branch"] = "schoolapp.view_branch"
         return user.has_perm(switch.get(view.action, ""))
 
 
