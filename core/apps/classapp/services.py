@@ -43,12 +43,12 @@ def list_rooms(user, queryset, filter_queries={}):
 
 def list_lessons(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
-        lessons = queryset.filter(is_active=True, **filter_queries)
+        lessons = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
         filter_queries.pop("school", 0)
-        lessons = queryset.filter(is_active=True, branch__school=user.school.id, **filter_queries)
+        lessons = queryset.filter(branch__school=user.school.id, **filter_queries)
     elif user.groups.role_id == User.OPERATOR:
-        lessons = queryset.filter(is_active=True, branch=user.branch)
+        lessons = queryset.filter(branch=user.branch)
     else:
         lessons = []
     return lessons

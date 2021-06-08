@@ -29,8 +29,6 @@ class RoomSerializer(serializers.ModelSerializer):
 
 class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
 
-    end_time = serializers.TimeField(format='%H:%M', input_formats='%H:%M')
-
     class Meta:
         model = local_models.Class
         fields = "__all__"
@@ -56,13 +54,15 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Teacher doesn't exist!")
         return value
 
-    def validate_start_date(self, value):
-        initial_data = self.initial_data
-        start_date = initial_data.get("start_date", None)
-        start_date = datetime.strptime(start_date, "%Y-%m-%d")
-        if start_date < datetime.now():
-            raise serializers.ValidationError("Start date should be later than the today's date!")
-        return value
+    # def validate_start_date(self, value):
+    #     if self.instance is not None and value == self.instance.start_date:
+    #         return value
+    #     initial_data = self.initial_data
+    #     start_date = initial_data.get("start_date", None)
+    #     start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    #     if start_date < datetime.now():
+    #         raise serializers.ValidationError("Start date should be later than the today's date!")
+    #     return value
 
     def validate_end_date(self, value):
         initial_data = self.initial_data
@@ -88,6 +88,7 @@ class ClassDetailSerializer(serializers.ModelSerializer):
     teacher_lastname = serializers.CharField(source="teacher.lastname", read_only=True)
     lesson_name = serializers.CharField(source="lesson.name", read_only=True)
     students_count = serializers.IntegerField(read_only=True)
+    branch_image = serializers.ImageField(source="branch.image", read_only=True)
 
     class Meta:
         model = local_models.Class
@@ -182,4 +183,4 @@ class ShortLessonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.Lesson
-        fields = [ "id", "name" ]
+        fields = [ "id", "name", "branch" ]

@@ -172,4 +172,4 @@ class Exam(models.Model):
     date = DateField(null=False, blank=False)
 
     def __str__(self):
-        return "%s %s %s" % (self.id, self._class)
+        return "%s %s %s" % (self.id, self._class, self.name)

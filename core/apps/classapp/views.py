@@ -157,7 +157,7 @@ class ClassViewSet(viewsets.GenericViewSet):
                         "value": today_date
                     },
                     {
-                        "name": "start_date__lt",
+                        "name": "start_date__lte",
                         "value": today_date
                     }
                 ],
@@ -204,7 +204,14 @@ class ClassViewSet(viewsets.GenericViewSet):
         upd_class.save()
         return core_responses.request_success_with_data(upd_class.data)
 
-    @rest_decorator.action(detail=True, methods=[ "POST" ], url_path="calendar")
+    @rest_decorator.action(detail=True, methods=[ "GET" ], url_path="calendar")
+    @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    def list_calendar(self, request, _class=None):
+        calendar = _class.calendar
+        calendar = self.get_serializer_class()(calendar, many=True)
+        return core_responses.request_success_with_data(calendar.data)
+
+    @list_calendar.mapping.post
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def create_calendar(self, request, _class=None):
         calendar_request_data = request.data
@@ -214,7 +221,7 @@ class ClassViewSet(viewsets.GenericViewSet):
         calendar.save()
         return core_responses.request_success_with_data(calendar.data)
 
-    @create_calendar.mapping.delete
+    @list_calendar.mapping.delete
     @core_decorators.has_key("days")
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def destroy_calendar(self, request, _class=None):
@@ -289,6 +296,8 @@ class ClassViewSet(viewsets.GenericViewSet):
         elif self.action == "retrieve":
             return local_serializers.ClassFullDetailSerializer
         elif self.action == "create_calendar":
+            return local_serializers.CalendarSerializer
+        elif self.action == "list_calendar":
             return local_serializers.CalendarSerializer
         elif self.action == "create_student":
             return studentapp_serializers.StudentCreateSerializer

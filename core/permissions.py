@@ -191,6 +191,7 @@ class ClassGetOrModifyPermission(BasePermission):
         model_name = "class"
         switch = generate_basic_permission_switch(app_name, model_name)
         switch["create_calendar"] = app_name + ".add_calendar"
+        switch["list_calendar"] = app_name + ".view_calendar"
         switch["destroy_calendar"] = app_name + ".delete_calendar"
         switch["list_students"] = "studentapp.view_student"
         switch["create_student"] = "studentapp.add_student"

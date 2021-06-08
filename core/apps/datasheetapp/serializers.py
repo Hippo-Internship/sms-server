@@ -56,6 +56,7 @@ class DatasheetUpdateSerializer(serializers.ModelSerializer):
         model = local_models.Datasheet
         exclude = [ "created", "modified" ]
         extra_kwargs = {
+            "id": { "read_only": True },
             "user": { "read_only": True },
             "operator": { "read_only": True },
             "branch": { "read_only": True },
@@ -63,8 +64,8 @@ class DatasheetUpdateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         branch = self.instance.branch
-        if (("lesson" in data and branch.id != data["lesson"].branch.id) or
-            ("status" in data and branch.id != data["status"].branch.id)):
+        if (("lesson" in data and data["lesson"] is not None and branch.id != data["lesson"].branch.id) or
+            ("status" in data and data["status"] is not None and branch.id != data["status"].branch.id)):
             raise PermissionDenied()
         return data
 

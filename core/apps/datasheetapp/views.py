@@ -35,7 +35,8 @@ class DatasheetViewSet(viewsets.GenericViewSet):
                 "lesson": "int",
                 "search": "str",
                 "status": "str",
-                "branch": "int"
+                "branch": "int",
+                "school": "int",
             },
             dict(request.query_params)
         )
@@ -44,7 +45,8 @@ class DatasheetViewSet(viewsets.GenericViewSet):
             "lesson": "lesson",
             "search": "phone__icontains",
             "status": "status",
-            "branch": "branch"
+            "branch": "branch",
+            "school": "branch__school"
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
         datasheets = local_services.list_datasheet(request_user, self.get_queryset(), filter_queries)
@@ -76,6 +78,7 @@ class DatasheetViewSet(viewsets.GenericViewSet):
         datasheet_request_data = request.data
         datasheet = self.get_serializer_class()(datasheet, data=datasheet_request_data)
         datasheet.is_valid(raise_exception=True)
+        datasheet.save()
         return core_responses.request_success_with_data(datasheet.data)
 
     @core_decorators.object_exists(model=local_models.Datasheet, detail="Datasheet")
