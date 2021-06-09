@@ -11,7 +11,7 @@ class DatasheetCreateSerializer(serializers.ModelSerializer):
 
     user_phone = serializers.CharField(source="user.phone", read_only=True)
     user_firstname = serializers.CharField(source="user.firstname", read_only=True)
-    user_lasttname = serializers.CharField(source="user.lastname", read_only=True)
+    user_lastname = serializers.CharField(source="user.lastname", read_only=True)
     operator_firstname = serializers.CharField(source="operator.firstname", read_only=True)
 
     class Meta:
@@ -25,10 +25,14 @@ class DatasheetCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         branch = data["branch"]
-        if (("user" in data and branch.id != data["user"].branch.id) or
-            ("lesson" in data and branch.id != data["lesson"].branch.id) or
-            branch.id != data["operator"].branch.id or 
-            ("status" in data and branch.id != data["status"].branch.id)):
+        operator = data["operator"]
+        if operator.groups.role_id == local_models.User.OPERATOR and operator.branch.id != branch.id:
+            raise PermissionDenied()
+        if operator.groups.role_id == local_models.User.ADMIN and operator.branch.school.id != branch.school.id:
+            raise PermissionDenied()
+        if (("user" in data and data["user"] is not None and branch.id != data["user"].branch.id) or
+            ("lesson" in data and data["lesson"] is not None and branch.id != data["lesson"].branch.id) or
+            ("status" in data and data["status"] is not None and branch.id != data["status"].branch.id)):
             raise PermissionDenied()
         return data
 

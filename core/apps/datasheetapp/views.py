@@ -26,6 +26,7 @@ class DatasheetViewSet(viewsets.GenericViewSet):
         core_permissions.DatasheetGetOrModifyPermission,
         core_permissions.BranchContentManagementPermission,
     ]
+    pagination_class = None
 
     def list(self, request):
         request_user = request.user
@@ -50,9 +51,8 @@ class DatasheetViewSet(viewsets.GenericViewSet):
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
         datasheets = local_services.list_datasheet(request_user, self.get_queryset(), filter_queries)
-        p_datasheets = self.paginate_queryset(datasheets)
-        datasheets = self.get_serializer_class()(p_datasheets, many=True)
-        return self.get_paginated_response(datasheets.data)
+        datasheets = self.get_serializer_class()(datasheets, many=True)
+        return core_responses.request_success_with_data(datasheets.data)
 
     def create(self, request, pk=None):
         datasheet_request_data = request.data
@@ -76,10 +76,14 @@ class DatasheetViewSet(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=local_models.Datasheet, detail="Datasheet")
     def update(self, request, datasheet=None):
         datasheet_request_data = request.data
-        datasheet = self.get_serializer_class()(datasheet, data=datasheet_request_data)
-        datasheet.is_valid(raise_exception=True)
-        datasheet.save()
-        return core_responses.request_success_with_data(datasheet.data)
+        _datasheet = self.get_serializer_class()(datasheet, data=datasheet_request_data)
+        _datasheet.is_valid(raise_exception=True)
+        if "with_user" in datasheet_request_data:
+            user = authapp_serializers.CustomUserUpdateSerializer(datasheet.user, data=datasheet_request_data, user=request.user)
+            user.is_valid(raise_exception=True)
+            user = user.save()
+        _datasheet.save()
+        return core_responses.request_success()
 
     @core_decorators.object_exists(model=local_models.Datasheet, detail="Datasheet")
     def destroy(self, request, datasheet=None):

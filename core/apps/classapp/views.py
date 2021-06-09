@@ -2,6 +2,7 @@
 from datetime import datetime
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
+from django.db.models.aggregates import Sum
 # Django built-in imports
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
@@ -180,7 +181,9 @@ class ClassViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def retrieve(self, request, _class=None):
-        _class = self.get_serializer_class()(_class)
+        _class = self.get_queryset().annotate(total_paid=Sum("students__payments__paid")).filter(id=_class.id)
+        # print(_class[0].students[0].total_paid)
+        _class = self.get_serializer_class()(_class[0])
         return core_responses.request_success_with_data(_class.data)
 
     def create(self, request):
@@ -269,9 +272,8 @@ class ClassViewSet(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def list_exams(self, request, _class=None):
         exams = _class.exams.all()
-        p_exams = self.paginate_queryset(exams)
-        exams = self.get_serializer_class()(p_exams, many=True)
-        return self.get_paginated_response(exams.data)
+        exams = self.get_serializer_class()(exams, many=True)
+        return core_responses.request_success_with_data(exams.data)
 
     @list_exams.mapping.post
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
@@ -287,7 +289,7 @@ class ClassViewSet(viewsets.GenericViewSet):
     @core_decorators.has_key("exams")
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def destroy_exam(self, request, _class=None):
-        _class.exams.filter(id__in=request.data["days"]).delete()
+        _class.exams.filter(id__in=request.data["exams"]).delete()
         return core_responses.request_success()
 
     def get_serializer_class(self):
@@ -367,7 +369,7 @@ class ExamViewSet(viewsets.GenericViewSet):
         exam_result.save()
         return core_responses.request_success_with_data(exam_result.data)
 
-    @rest_decorator.action(detail=True, methods=[ "PUT" ], url_path="result")
+    @create_exam_result.mapping.put
     @core_decorators.has_keys("id", "mark")
     @core_decorators.object_exists(model=local_models.Exam, detail="Exam")
     @core_decorators.has_access_to_class
@@ -381,4 +383,4 @@ class ExamViewSet(viewsets.GenericViewSet):
         exam_result = exam_result[0]
         exam_result.mark = mark
         exam_result.save()
-        return core_responses.request_success_with_data(exam_result.data)
+        return core_responses.request_success()

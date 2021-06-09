@@ -26,7 +26,7 @@ class School(base_models.BaseWithDate):
     logo = models.ImageField(upload_to=path_and_rename_school_logo, null=True, blank=True)
 
     class Meta: 
-        ordering = [ "id" ]
+        ordering = [ "-id" ]
 
     def save(self, *args, **kwargs):
         if self.image:
@@ -63,7 +63,7 @@ class Branch(base_models.BaseWithDate):
     image = models.ImageField(upload_to=path_and_rename_branch, null=False, blank=True, default="image/branches/default_min.jpg")
 
     class Meta: 
-        ordering = [ "id" ]
+        ordering = [ "-id" ]
 
     def save(self, *args, **kwargs):
         if self.image == None:

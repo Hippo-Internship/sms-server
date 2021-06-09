@@ -171,5 +171,8 @@ class Exam(models.Model):
     total_mark = models.IntegerField(null=False, blank=False, default=0)
     date = DateField(null=False, blank=False)
 
+    class Meta:
+        ordering = [ "id" ]
+
     def __str__(self):
         return "%s %s %s" % (self.id, self._class, self.name)

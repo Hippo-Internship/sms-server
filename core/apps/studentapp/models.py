@@ -156,6 +156,14 @@ class Journal(models.Model):
         blank=False,
         db_index=True
     )
+    calendar = models.ForeignKey(
+        classapp_models.Calendar,
+        on_delete=models.CASCADE,
+        related_name="journals",
+        null=False,
+        blank=False,
+        db_index=True   
+    )
     date = models.DateField(null=False, blank=False)
     state = models.BooleanField(null=True, blank=True, default=False)
 

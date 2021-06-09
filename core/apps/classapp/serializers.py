@@ -88,6 +88,7 @@ class ClassDetailSerializer(serializers.ModelSerializer):
     teacher_lastname = serializers.CharField(source="teacher.lastname", read_only=True)
     lesson_name = serializers.CharField(source="lesson.name", read_only=True)
     students_count = serializers.IntegerField(read_only=True)
+    total_paid = serializers.IntegerField(read_only=True)
     branch_image = serializers.ImageField(source="branch.image", read_only=True)
 
     class Meta:
@@ -95,11 +96,24 @@ class ClassDetailSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class ExamSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Exam
+        fields = "__all__"
+
+    def validate_date(self, value):
+        if value < datetime.date(datetime.now()):
+            raise serializers.ValidationError("Start date should be later than the today's date!")
+        return value
+
+
 class ClassFullDetailSerializer(serializers.ModelSerializer):
 
     teacher_firstname = authapp_serializers.CustomUserSerializer(read_only=True)
     lesson_name = serializers.CharField(source="lesson.name", read_only=True)
     room_name = serializers.CharField(source="room.name", read_only=True)
+    total_paid = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = local_models.Class
@@ -138,18 +152,6 @@ class CalendarSerializer(serializers.ModelSerializer):
         if classes.exists():
             raise serializers.ValidationError("Room is occupied!")
         return data
-
-
-class ExamSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = local_models.Exam
-        fields = "__all__"
-
-    def validate_date(self, value):
-        if value < datetime.date(datetime.now()):
-            raise serializers.ValidationError("Start date should be later than the today's date!")
-        return value
 
 
 class ExamUpdateSerializer(serializers.ModelSerializer):

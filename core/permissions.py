@@ -198,6 +198,7 @@ class ClassGetOrModifyPermission(BasePermission):
         switch["update_student"] = "studentapp.delete_student"
         switch["list_exams"] = "classapp.view_exam"
         switch["create_exam"] = "classapp.add_exam"
+        switch["destroy_exam"] = "classapp.delete_exam"
         switch["update_exam"] = "classapp.change_exam"
         return user.has_perm(switch.get(view.action, ""))
 

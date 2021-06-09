@@ -80,7 +80,8 @@ class Datasheet(base_models.BaseWithDate):
     )
     register_type = models.IntegerField(choices=REGISTER_TYPES, null=True, blank=True)
     description = models.CharField(max_length=255, null=True, blank=True)
-    time = models.TimeField(null=False, blank=False, auto_now_add=True)
+    time = models.TimeField(null=True, blank=True)
+    date = models.DateField(null=True, blank=True)
 
     class Meta: 
         ordering  = [ "id" ]

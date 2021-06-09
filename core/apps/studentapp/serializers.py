@@ -112,6 +112,13 @@ class JournalSerializer(serializers.ModelSerializer):
             "student": { "write_only": True },
         }
 
+    def validate(self, data):
+        student = data["student"]
+        calendar = data["calendar"]
+        if student._class.id != calendar._class.id:
+            raise PermissionDenied()
+        return data
+
 
 class StudentShortDetailSerializer(serializers.ModelSerializer):
 

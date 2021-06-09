@@ -85,6 +85,10 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
 
     profile = UserProfileSerializer(read_only=True)
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super(CustomUserUpdateSerializer, self).__init__(*args, **kwargs)
+
     class Meta:
         model = User
         fields = [
@@ -101,12 +105,17 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [ "school", "branch" ]
 
+    def validate(self, data):
+        if data["groups"].role_id <= self.user.groups.role_id:
+            raise PermissionDenied()
+        return data
+
 
 class ShortUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = [ "id", "firstname", "lastname" ]
+        fields = [ "id", "firstname", "lastname", "phone" ]
 
 
 class GroupsSerializer(serializers.ModelSerializer):
