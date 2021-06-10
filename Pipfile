@@ -12,6 +12,9 @@ pillow = "*"
 dj-rest-auth = "*"
 djangorestframework-simplejwt = "*"
 django-cors-headers = "*"
+django-storages = "*"
+boto3 = "*"
+gunicorn = "*"
 
 [dev-packages]
 
