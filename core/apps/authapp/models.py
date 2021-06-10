@@ -29,7 +29,7 @@ class CustomUserManager(BaseUserManager):
         kwargs.setdefault("is_staff", True)
         kwargs.setdefault("is_superuser", True)
         kwargs.setdefault("is_active", True)
-        kwargs.setdefault("groups", Group.objects.get(role_id=1))
+        kwargs.setdefault("groups", Group.objects.get(id=1))
         kwargs.setdefault("phone", "99999999")
 
         if kwargs.get("is_staff") is not True:
