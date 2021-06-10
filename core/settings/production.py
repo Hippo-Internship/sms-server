@@ -17,7 +17,6 @@ MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
 DEFAULT_FILE_STORAGE = 'core.storages.PublicMediaStorage'
 
 STATICFILES_DIRS = (path.join(BASE_DIR, 'static'),)
-print(AWS_S3_CUSTOM_DOMAIN + "dqwdqwdwqdwq")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
