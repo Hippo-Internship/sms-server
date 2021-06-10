@@ -62,7 +62,7 @@ class DatasheetViewSet(viewsets.GenericViewSet):
             datasheet_request_data["school"] = datasheet.validated_data["branch"].school.id
             datasheet_request_data["groups"] = Group.objects.get(role_id=local_models.User.STUDENT).id
             datasheet_request_data["seen_datasheet"] = local_models.User.CREATED_FROM_DATASHEET
-            user = authapp_serializers.CustomUserSerializer(data=datasheet_request_data)
+            user = authapp_serializers.CustomUserSerializer(data=datasheet_request_data, user=request.user)
             user.is_valid(raise_exception=True)
             user = user.save()
             datasheet.validated_data["user"] = user

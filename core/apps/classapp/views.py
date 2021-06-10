@@ -129,6 +129,7 @@ class ClassViewSet(viewsets.GenericViewSet):
         "list_exams",
         "create_exam",
         "destroy_exam",
+        "cancel_student",
     ]
 
     def list(self, request):
@@ -238,6 +239,21 @@ class ClassViewSet(viewsets.GenericViewSet):
         students = self.get_serializer_class()(p_student, many=True)
         return self.get_paginated_response(students.data)
 
+    # @list_students.mapping.delete
+    # @core_decorators.has_key("student")
+    # @core_decorators.object_exists(model=local_models.Class, detail="Class")
+    # def cancel_student(self, request, _class=None):
+    #     student = request.data["student"]
+    #     if type(student).__name__ != "list":
+    #         return core_responses.request_denied()
+    #     student = _class.students.filter(id=student)
+    #     if student.exists():
+    #         return core_responses.request_denied()
+    #     student = student[0]
+    #     student.canceled = False
+    #     student.save()
+    #     return core_responses.request_success()
+
     @list_students.mapping.post
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def create_student(self, request, _class=None):
@@ -253,11 +269,11 @@ class ClassViewSet(viewsets.GenericViewSet):
         return core_responses.request_success_with_data(student.data)
 
     @list_students.mapping.put
-    @core_decorators.has_key("user")
+    @core_decorators.has_key("student")
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def update_student(self, request, _class=None):
         student_request_data = request.data
-        student = studentapp_models.Student.objects.filter(user=request.data["user"])
+        student = studentapp_models.Student.objects.filter(id=request.data["student"])
         if not student.exists():
             return core_responses.request_denied()
         student = self.get_serializer_class()(student[0], data=student_request_data)

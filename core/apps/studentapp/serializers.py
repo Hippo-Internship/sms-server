@@ -56,8 +56,6 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         _class = self.instance._class
-        print(self.instance.status)
-        print(data)
         if (_class.branch.id is not data["status"].branch.id or
             "payment_paid" in data or "discount_amount" in data):
             raise PermissionDenied()
@@ -136,8 +134,6 @@ class StudentShortDetailSerializer(serializers.ModelSerializer):
             "_class", 
             "created", 
             "modified",
-            "start_date",
-            "end_date"
         ]
 
 

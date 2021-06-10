@@ -13,6 +13,7 @@ class DatasheetCreateSerializer(serializers.ModelSerializer):
     user_firstname = serializers.CharField(source="user.firstname", read_only=True)
     user_lastname = serializers.CharField(source="user.lastname", read_only=True)
     operator_firstname = serializers.CharField(source="operator.firstname", read_only=True)
+    groups = serializers.IntegerField(source="user.groups.id", read_only=True)
 
     class Meta:
         model = local_models.Datasheet

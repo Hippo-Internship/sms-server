@@ -77,8 +77,8 @@ class Student(base_models.BaseWithDate):
     payment_paid = models.IntegerField(null=False, default=0)
     discount_amount = models.FloatField(null=False, default=0)
     discounts = models.ManyToManyField(Discount, blank=True)
-    start_date = models.DateField(null=True)
-    end_date = models.DateField(null=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
     note = models.CharField(max_length = 255, null=True, blank=True)
     canceled = models.BooleanField(null=False, default=False)
 

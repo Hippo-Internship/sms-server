@@ -195,7 +195,7 @@ class ClassGetOrModifyPermission(BasePermission):
         switch["destroy_calendar"] = app_name + ".delete_calendar"
         switch["list_students"] = "studentapp.view_student"
         switch["create_student"] = "studentapp.add_student"
-        switch["update_student"] = "studentapp.delete_student"
+        switch["update_student"] = "studentapp.change_student"
         switch["list_exams"] = "classapp.view_exam"
         switch["create_exam"] = "classapp.add_exam"
         switch["destroy_exam"] = "classapp.delete_exam"
