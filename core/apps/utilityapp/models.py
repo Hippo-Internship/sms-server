@@ -15,8 +15,11 @@ class Status(base_models.BaseWithDate):
         blank=False,
         db_index=True
     )
-    name = models.CharField(max_length=26, unique=True, null=False, blank=False)
+    name = models.CharField(max_length=26, null=False, blank=False)
     color = models.CharField(max_length=7, null=False, default="#3d3f56")
+
+    class Meta:
+        unique_together = [ "branch", "name" ]
 
     def __str__(self):
         return "%s %s" % (self.id, self.branch)
