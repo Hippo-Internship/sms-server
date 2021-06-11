@@ -1,3 +1,5 @@
+# Python imports
+from datetime import datetime, timedelta
 # Django built-in imports
 from django.shortcuts import render
 from django.contrib.auth.models import Group
@@ -38,16 +40,37 @@ class DatasheetViewSet(viewsets.GenericViewSet):
                 "status": "str",
                 "branch": "int",
                 "school": "int",
+                "day": "int",
+                "date": "str"
             },
             dict(request.query_params)
         )
+        today_date = datetime.now()
         filter_model = {
-            "operator": "teacher",
+            "operator": "operator",
             "lesson": "lesson",
-            "search": "phone__icontains",
+            "search": "user__phone__startswith",
             "status": "status",
             "branch": "branch",
-            "school": "branch__school"
+            "school": "branch__school",
+            "day": {
+                1: {
+                    "name": "created__gte",
+                    "value": today_date - timedelta(days=1)
+                },
+                3: {
+                    "name": "created__gte",
+                    "value": today_date - timedelta(days=3)
+                },
+                7: {
+                    "name": "created__gte",
+                    "value": today_date - timedelta(days=7)
+                },
+                -1: {
+                    "name": "created",
+                    "value": query_params.get("date", "2001-05-20")
+                }
+            }
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
         datasheets = local_services.list_datasheet(request_user, self.get_queryset(), filter_queries)
