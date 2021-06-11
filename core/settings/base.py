@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Third party apps
-    'corsheaders',
     'rest_framework',
     'dj_rest_auth',
     # Local apps
