@@ -20,6 +20,7 @@ STATICFILES_DIRS = (path.join(BASE_DIR, 'static'),)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+CORS_ALLOW_ALL_ORIGINS = True
 ALLOWED_HOSTS = [ "*" ]
 
 SIMPLE_JWT = {
