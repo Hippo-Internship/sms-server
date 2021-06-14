@@ -85,17 +85,17 @@ class Class(models.Model):
     lesson = models.ForeignKey(
         Lesson,
         related_name='classes', 
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.DO_NOTHING,
+        null=False,
+        blank=False,
         db_index=True
     )
     teacher = models.ForeignKey(
         User, 
         related_name='classes', 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True,
+        on_delete=models.DO_NOTHING, 
+        null=False, 
+        blank=False,
         db_index=True
     )
     name = models.CharField(max_length=56, null=False, blank=False)

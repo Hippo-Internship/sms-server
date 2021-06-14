@@ -1,11 +1,9 @@
 # Python imports
+from calendar import monthrange
 from datetime import datetime
-from django.core.exceptions import PermissionDenied
-from django.db.models import Count
-from django.db.models.aggregates import Sum
 # Django built-in imports
-from django.shortcuts import render
-from django.contrib.auth import get_user_model
+from django.db.models import Count, Q
+from django.db.models.aggregates import Sum
 # Third party imports
 from rest_framework import viewsets
 from rest_framework import decorators as rest_decorator
@@ -360,16 +358,50 @@ class CalendarViewSet(viewsets.GenericViewSet):
 
     def list(self, request):
         request_user = request.user
-        today_date = datetime.now()
-        filter_queries = {
-            # "_class__start_date__gte": today_date,
-            # "_class__end_date__lte": today_date
+        query_params = core_utils.normalize_data(
+            { 
+                "branch": "int",
+                "school": "int",
+                "teacher": "int",
+                "room": "int",
+                "filter": "str",
+                "year": "int",
+                "month": "int",
+            },
+            dict(request.query_params)
+        )
+        if "filter" in query_params:
+            today_date = datetime.now()
+            month = query_params.get("month", today_date.month)
+            year = query_params.get("year", today_date.year)
+            month_date = datetime(2021, month, monthrange(year, month)[1])
+        filter_model = {
+            "school": "_class__branch__school",
+            "branch": "_class__branch",
+            "teacher": "_class__teacher",
+            "room": "room",
+            "filter": {
+                "month": [
+                    {
+                        "name": "_class__start_date__lte",
+                        "value": month_date
+                    },
+                    {
+                        "name": "_class__end_date__year",
+                        "value": year
+                    },
+                    {
+                        "name": "_class__end_date__month__gte",
+                        "value": month
+                    }
+                ]
+            }
         }
+        filter_queries = core_utils.build_filter_query(filter_model, query_params)
         if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
             calendar = self.get_queryset().filter(**filter_queries)
         elif request_user.groups.role_id == local_models.User.ADMIN:
-            branches = request_user.school.branches.all()
-            calendar = self.get_queryset().filter(_class__branch__in=branches, **filter_queries)
+            calendar = self.get_queryset().filter(_class__branch__school=request_user.school.id, **filter_queries)
         elif request_user.groups.role_id == local_models.User.OPERATOR:
             calendar = self.get_queryset().filter(_class__branch=request_user.branch)
         elif request_user.groups.role_id == local_models.User.TEACHER:
