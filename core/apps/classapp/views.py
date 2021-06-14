@@ -342,10 +342,10 @@ class CalendarViewSet(viewsets.GenericViewSet):
     def list(self, request):
         request_user = request.user
         today_date = datetime.now()
-        # filter_queries = {
-        #     "_class__start_date__gte": today_date,
-        #     "_class__end_date__lte": today_date
-        # }
+        filter_queries = {
+            # "_class__start_date__gte": today_date,
+            # "_class__end_date__lte": today_date
+        }
         if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
             calendar = self.get_queryset().filter(**filter_queries)
         elif request_user.groups.role_id == local_models.User.ADMIN:
