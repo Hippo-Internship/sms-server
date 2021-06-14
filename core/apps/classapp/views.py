@@ -369,11 +369,10 @@ class CalendarViewSet(viewsets.GenericViewSet):
             },
             dict(request.query_params)
         )
-        if "filter" in query_params:
-            today_date = datetime.now()
-            month = query_params.get("month", today_date.month)
-            year = query_params.get("year", today_date.year)
-            month_date = datetime(2021, month, monthrange(year, month)[1])
+        today_date = datetime.now()
+        month = query_params.get("month", today_date.month)
+        year = query_params.get("year", today_date.year)
+        month_date = datetime(2021, month, monthrange(year, month)[1])
         filter_model = {
             "school": "_class__branch__school",
             "branch": "_class__branch",
