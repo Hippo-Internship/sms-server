@@ -202,6 +202,9 @@ class ListDetailView(views.APIView):
         school = request.data.get("school", 0)
         if school != 0 or type(school).__name__ != "int":
             detail_switch["branch"]["params"]["school"] = school
+            filtered = True
+            for item in projection:
+                detail_switch[item]["params"]["filter_queries"]["branch__school"] = school
         else:
             detail_switch["branch"]["params"].pop("school", None)
         branch = request.data.get("branch", 0)
@@ -219,4 +222,5 @@ class ListDetailView(views.APIView):
         if filtered:
             for item in projection:
                 detail_switch[item]["params"]["filter_queries"].pop("branch", None)
+                detail_switch[item]["params"]["filter_queries"].pop("branch__school", None)
         return core_responses.request_success_with_data(data)
