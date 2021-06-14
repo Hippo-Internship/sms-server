@@ -123,6 +123,8 @@ class CalendarSerializer(serializers.ModelSerializer):
 
     room_name = serializers.CharField(source="room.name", read_only=True)
     class_name = serializers.CharField(source="_class.name", read_only=True)
+    class_start_date = serializers.DateField(source="_class.start_date", read_only=True)
+    class_end_date = serializers.DateField(source="_class.end_date", read_only=True)
 
     class Meta:
         model = local_models.Calendar

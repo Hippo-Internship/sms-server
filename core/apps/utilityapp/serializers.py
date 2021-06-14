@@ -23,3 +23,9 @@ class PaymentMethodSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.PaymentMethod
         fields = "__all__"
+
+class ShortPaymentMethodSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.PaymentMethod
+        fields = [ "id", "name" ]

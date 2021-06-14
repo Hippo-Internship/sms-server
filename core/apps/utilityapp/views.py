@@ -31,6 +31,8 @@ from core.apps.datasheetapp import \
         services as datasheetapp_services, \
         serializers as datasheetapp_serializers
 
+detail_with_filter = [ "user", "class", "room", "lesson", "discount", "status", "payment", "datasheet_status" ]
+
 detail_switch = {
     "groups": {
         "service": authapp_services.list_groups,
@@ -88,6 +90,14 @@ detail_switch = {
             "filter_queries": {}
         },
         "serializer": local_serializers.ShortStatusSerializer
+    },
+    "payment": {
+        "service": local_services.list_payment_methods,
+        "params": {
+            "queryset": local_models.PaymentMethod.objects,
+            "filter_queries": {}
+        },
+        "serializer": local_serializers.ShortPaymentMethodSerializer
     },
     "school": {
         "service": schoolapp_services.list_school,
@@ -195,18 +205,18 @@ class ListDetailView(views.APIView):
         else:
             detail_switch["branch"]["params"].pop("school", None)
         branch = request.data.get("branch", 0)
+        filtered = False
         if branch != 0 or type(branch).__name__ != "int":
-            detail_switch["lesson"]["params"]["filter_queries"]["branch"] = branch
-            detail_switch["user"]["params"]["filter_queries"]["branch"] = branch
-            detail_switch["room"]["params"]["filter_queries"]["branch"] = branch
-        else:
-            detail_switch["lesson"]["params"]["filter_queries"].pop("branch", None)
-            detail_switch["user"]["params"]["filter_queries"].pop("branch", None)
-            detail_switch["room"]["params"]["filter_queries"].pop("branch", None)
+            filtered = True
+            for item in projection:
+                detail_switch[item]["params"]["filter_queries"]["branch"] = branch
         data = {}
         for key in projection:
             if key not in detail_switch:
                 continue
             detail = detail_switch[key]
             data[key] = detail["serializer"](detail["service"](user=request_user, **detail["params"]), many=True).data
+        if filtered:
+            for item in projection:
+                detail_switch[item]["params"]["filter_queries"].pop("branch", None)
         return core_responses.request_success_with_data(data)

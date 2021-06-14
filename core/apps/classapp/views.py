@@ -188,7 +188,6 @@ class ClassViewSet(viewsets.GenericViewSet):
         return core_responses.request_success_with_data(_class.data)
 
     def create(self, request):
-        print(request.data["end_time"])
         class_request_data = request.data
         _class = self.get_serializer_class()(data=class_request_data)
         _class.is_valid(raise_exception=True)
@@ -235,7 +234,27 @@ class ClassViewSet(viewsets.GenericViewSet):
     @rest_decorator.action(detail=True, methods=[ "GET" ], url_path="student")
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def list_students(self, request, _class=None):
-        p_student = self.paginate_queryset(_class.students.filter(canceled=False))
+        query_params = core_utils.normalize_data(
+            { 
+                "status": "str",
+            },
+            dict(request.query_params)
+        )
+        today_date = datetime.now()
+        filter_model = {
+            "status": {
+                "active": {
+                    "name": "end_date__gte",
+                    "value": today_date
+                },
+                "completed": {
+                    "name": "end_date__lt",
+                    "value": today_date
+                }
+            }
+        }
+        filter_queries = core_utils.build_filter_query(filter_model, query_params)
+        p_student = self.paginate_queryset(_class.students.filter(canceled=False, **filter_queries))
         students = self.get_serializer_class()(p_student, many=True)
         return self.get_paginated_response(students.data)
 
