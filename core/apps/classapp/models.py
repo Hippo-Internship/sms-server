@@ -109,6 +109,14 @@ class Class(models.Model):
     class Meta:
         ordering = [ "id" ]
 
+    @property
+    def students_count(self):
+        return len(self.students.filter(canceled=False))
+
+    @students_count.setter
+    def students_count(self, value):
+        print(value)
+
     def __str__(self):
         return "%s %s %s" % (self.id, self.branch, self.lesson)
 

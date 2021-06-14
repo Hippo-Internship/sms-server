@@ -172,16 +172,16 @@ class ClassViewSet(viewsets.GenericViewSet):
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
         classes = local_services.list_classes(request_user, self.get_queryset(), filter_queries)
-        classes = classes.annotate(students_count=Count("students")).order_by("id")
+        # classes = classes.annotate(students_count=Count("students")).order_by("id")
         p_classes = self.paginate_queryset(classes)
         classes = self.get_serializer_class()(p_classes, many=True)
         return self.get_paginated_response(classes.data)
 
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def retrieve(self, request, _class=None):
-        _class = self.get_queryset().annotate(students_count=Count("students"), total_paid=Sum("students__payments__paid")).filter(id=_class.id)
-        # print(_class[0].students[0].total_paid)
-        _class = self.get_serializer_class()(_class[0])
+        _class = self.get_queryset().annotate(total_paid=Sum("students__payments__paid")).filter(id=_class.id)
+        _class =_class[0]
+        _class = self.get_serializer_class()(_class)
         return core_responses.request_success_with_data(_class.data)
 
     def create(self, request):
