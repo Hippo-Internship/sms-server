@@ -347,7 +347,7 @@ class CalendarViewSet(viewsets.GenericViewSet):
             "_class__end_date__lte": today_date
         }
         if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
-            calendar = self.get_queryset().all(**filter_queries)
+            calendar = self.get_queryset().filter(**filter_queries)
         elif request_user.groups.role_id == local_models.User.ADMIN:
             branches = request_user.school.branches.all()
             calendar = self.get_queryset().filter(_class__branch__in=branches, **filter_queries)
