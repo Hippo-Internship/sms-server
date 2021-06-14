@@ -2,8 +2,7 @@
 from calendar import monthrange
 from datetime import datetime
 # Django built-in imports
-from django.db.models import Count, Q
-from django.db.models.aggregates import Sum
+from django.db.models.aggregates import Sum, Count
 # Third party imports
 from rest_framework import viewsets
 from rest_framework import decorators as rest_decorator
@@ -180,7 +179,7 @@ class ClassViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def retrieve(self, request, _class=None):
-        _class = self.get_queryset().annotate(total_paid=Sum("students__payments__paid")).filter(id=_class.id)
+        _class = self.get_queryset().annotate(students_count=Count("students"), total_paid=Sum("students__payments__paid")).filter(id=_class.id)
         # print(_class[0].students[0].total_paid)
         _class = self.get_serializer_class()(_class[0])
         return core_responses.request_success_with_data(_class.data)
