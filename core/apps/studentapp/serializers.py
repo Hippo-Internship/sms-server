@@ -125,6 +125,7 @@ class StudentShortDetailSerializer(serializers.ModelSerializer):
     user_lastname = serializers.CharField(source="user.lastname")
     status_name = serializers.CharField(source="status.name")
     total_payment = serializers.FloatField(source="_class.lesson.price")
+    payments_paid = serializers.IntegerField()
     exam_results = ExamResultSerializer(many=True, read_only=True)
     journals = JournalSerializer(many=True, read_only=True)
 

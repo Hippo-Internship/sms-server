@@ -251,7 +251,7 @@ class ClassViewSet(viewsets.GenericViewSet):
             }
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
-        p_student = self.paginate_queryset(_class.students.filter(canceled=False, **filter_queries))
+        p_student = self.paginate_queryset(_class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False, **filter_queries).order_by("id"))
         students = self.get_serializer_class()(p_student, many=True)
         return self.get_paginated_response(students.data)
 

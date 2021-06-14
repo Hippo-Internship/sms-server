@@ -74,7 +74,7 @@ class Student(base_models.BaseWithDate):
         blank=False,
         db_index=True
     )
-    payment_paid = models.IntegerField(null=False, default=0)
+    # payment_paid = models.IntegerField(null=False, default=0)
     discount_amount = models.FloatField(null=False, default=0)
     discounts = models.ManyToManyField(Discount, blank=True)
     start_date = models.DateField(null=True, blank=True)
