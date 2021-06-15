@@ -20,7 +20,8 @@ def list_groups(user, queryset, filter_queries={}):
     }
     return queryset.filter(**groups_switch[user.groups.role_id])
 
-def list_users(user, queryset, filter_queries={}, groups=None):
+def list_users(user, queryset, filter_queries={}):
+    groups = filter_queries.pop("groups", None)
     if groups is None:
         return []
     if user.groups.role_id > groups:

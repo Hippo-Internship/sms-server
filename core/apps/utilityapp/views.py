@@ -33,94 +33,99 @@ from core.apps.datasheetapp import \
 
 detail_with_filter = [ "user", "class", "room", "lesson", "discount", "status", "payment", "datasheet_status" ]
 
+filter_model = {
+    "school": "branch__school",
+    "branch": "branch",
+    "groups": "groups"
+}
+
 detail_switch = {
     "groups": {
         "service": authapp_services.list_groups,
         "params": {
             "queryset": Group.objects,
-            "filter_queries": {}
         },
+        "filter": [],
         "serializer": authapp_serializers.GroupsSerializer
     },
     "user": {
         "service": authapp_services.list_users,
         "params": {
             "queryset": authapp_serializers.User.objects,
-            "groups": 0,
-            "filter_queries": {}
         },
+        "filter": [ "school", "branch", "groups" ],
         "serializer": authapp_serializers.ShortUserSerializer
     },
     "class": {
         "service": classapp_services.list_classes,
         "params": {
             "queryset": classapp_serializers.local_models.Class.objects,
-            "filter_queries": {}
         },
+        "filter": [ "school", "branch" ],
         "serializer": classapp_serializers.ShortClassSerializer
     },
     "room": {
         "service": classapp_services.list_rooms,
         "params": {
             "queryset": classapp_serializers.local_models.Room.objects,
-            "filter_queries": {}
         },
+        "filter": [ "school", "branch" ],
         "serializer": classapp_serializers.ShortRoomSerializer
     },
     "lesson": {
         "service": classapp_services.list_lessons,
         "params": {
             "queryset": classapp_serializers.local_models.Lesson.objects,
-            "filter_queries": {}
         },
+        "filter": [ "school", "branch" ],
         "serializer": classapp_serializers.ShortLessonSerializer
     },
     "discount": {
         "service": studentapp_services.list_discounts,
         "params": {
             "queryset": studentapp_serializers.local_models.Discount.objects,
-            "filter_queries": {}
         },
+        "filter": [ "school", "branch" ],
         "serializer": studentapp_serializers.ShortDiscountSerializer
     },
     "status": {
         "service": local_services.list_status,
         "params": {
             "queryset": local_models.Status.objects,
-            "filter_queries": {}
         },
+        "filter": [ "school", "branch" ],
         "serializer": local_serializers.ShortStatusSerializer
     },
     "payment": {
         "service": local_services.list_payment_methods,
         "params": {
             "queryset": local_models.PaymentMethod.objects,
-            "filter_queries": {}
         },
+        "filter": [ "school", "branch" ],
         "serializer": local_serializers.ShortPaymentMethodSerializer
     },
     "school": {
         "service": schoolapp_services.list_school,
         "params": {
             "queryset": schoolapp_serializers.local_models.School.objects,
-            "filter_queries": {}
         },
+        "filter": [ "school", "branch" ],
         "serializer": schoolapp_serializers.SchoolShortSerializer
     },
     "branch": {
         "service": schoolapp_services.list_branch,
         "params": {
             "queryset": schoolapp_serializers.local_models.Branch.objects,
-            "filter_queries": {}
         },
+        "filter": [ "school" ],
         "serializer": schoolapp_serializers.BranchShortSerializer
     },
     "datasheet_status": {
         "service": datasheetapp_services.list_datasheet_status,
         "params": {
             "queryset": datasheetapp_serializers.local_models.Status.objects,
-            "filter_queries": {}
         },
+        "filter": [ "school", "branch" ],
         "serializer": datasheetapp_serializers.ShortDatasheetStatuSerializer
     },
 }
@@ -193,34 +198,26 @@ class ListDetailView(views.APIView):
     @core_decorators.has_key("projection")
     def post(self, request, format=None):
         request_user = request.user
-        projection = request.data["projection"]
+        request_data = request.data
+        projection = request_data["projection"]
         if type(projection).__name__ != "list":
             return core_responses.request_denied()
         if len(projection) > 5:
             return core_responses.request_denied()
-        detail_switch["user"]["params"]["groups"] = request.data.get("groups", 0)
-        school = request.data.get("school", 0)
-        if school != 0 or type(school).__name__ != "int":
-            detail_switch["branch"]["params"]["school"] = school
-            filtered = True
-            for item in projection:
-                detail_switch[item]["params"]["filter_queries"]["branch__school"] = school
-        else:
-            detail_switch["branch"]["params"].pop("school", None)
-        branch = request.data.get("branch", 0)
-        filtered = False
-        if branch != 0 or type(branch).__name__ != "int":
-            filtered = True
-            for item in projection:
-                detail_switch[item]["params"]["filter_queries"]["branch"] = branch
+        if len(request_data) > 5:
+            return core_responses.request_denied()
+            
+        master_filter = {}
+        for item in projection:
+            master_filter[item] = {}
+            for filter in detail_switch[item]["filter"]:
+                if filter in request_data:
+                    master_filter[item][filter_model[filter]] = request_data[filter]
+
         data = {}
         for key in projection:
             if key not in detail_switch:
                 continue
             detail = detail_switch[key]
-            data[key] = detail["serializer"](detail["service"](user=request_user, **detail["params"]), many=True).data
-        if filtered:
-            for item in projection:
-                detail_switch[item]["params"]["filter_queries"].pop("branch", None)
-                detail_switch[item]["params"]["filter_queries"].pop("branch__school", None)
+            data[key] = detail["serializer"](detail["service"](user=request_user, **detail["params"], filter_queries=master_filter[key]), many=True).data
         return core_responses.request_success_with_data(data)
