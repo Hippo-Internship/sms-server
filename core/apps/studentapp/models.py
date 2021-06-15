@@ -23,14 +23,14 @@ class Discount(models.Model):
         blank=False,
         db_index=True
     )
-    name = models.CharField(max_length=56, null=False, blank=True, unique=True)
+    name = models.CharField(max_length=56, null=False, blank=False, unique=True)
     percent = models.FloatField(null=True, blank=True)
     value = models.IntegerField(null=True, blank=True)
     limited = models.BooleanField(null=True, default=False)
     limit = models.IntegerField(null=False, blank=True, default=0)
     count = models.IntegerField(null=False, blank=True, default=0)
-    start_date = models.DateField(null=True)
-    end_date = models.DateField(null=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
 
     class Meta:
         ordering = [ "id" ]

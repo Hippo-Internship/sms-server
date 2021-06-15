@@ -160,6 +160,11 @@ class StatusViewSet(viewsets.ModelViewSet):
         data = super(StatusViewSet, self).update(request, status.id).data
         return core_responses.request_success_with_data(data)
 
+    def get_serializer_class(self):
+        if self.action == "update":
+            return local_serializers.StatusUpdateSerializer
+        return super().get_serializer_class()
+
 
 class PaymentMethodViewSet(viewsets.ModelViewSet):
 
@@ -191,6 +196,10 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
         data = super(StatusViewSet, self).update(request, pay_method.id).data
         return core_responses.request_success_with_data(data)
 
+    def get_serializer_class(self):
+        if self.action == "update":
+            return local_serializers.PaymentMethodUpdateSerializer
+        return super().get_serializer_class()
 
 class ListDetailView(views.APIView):
 

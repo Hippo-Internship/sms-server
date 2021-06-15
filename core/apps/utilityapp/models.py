@@ -38,6 +38,9 @@ class PaymentMethod(base_models.BaseWithDate):
         db_index=True
     )
 
+    class Meta:
+        unique_together = [ "branch", "name" ]
+
     def __str__(self):
         return "%s %s %s" % (self.id, self.name, self.branch)
     
