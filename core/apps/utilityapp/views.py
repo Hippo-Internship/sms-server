@@ -31,7 +31,6 @@ from core.apps.datasheetapp import \
         services as datasheetapp_services, \
         serializers as datasheetapp_serializers
 
-detail_with_filter = [ "user", "class", "room", "lesson", "discount", "status", "payment", "datasheet_status" ]
 
 filter_model = {
     "school": "branch__school",
@@ -213,7 +212,6 @@ class ListDetailView(views.APIView):
             for filter in detail_switch[item]["filter"]:
                 if filter in request_data:
                     master_filter[item][filter_model[filter]] = request_data[filter]
-
         data = {}
         for key in projection:
             if key not in detail_switch:
