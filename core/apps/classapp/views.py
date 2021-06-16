@@ -234,6 +234,7 @@ class ClassViewSet(viewsets.GenericViewSet):
         query_params = core_utils.normalize_data(
             { 
                 "status": "str",
+                "search": "str"
             },
             dict(request.query_params)
         )
@@ -248,10 +249,12 @@ class ClassViewSet(viewsets.GenericViewSet):
                     "name": "end_date__lt",
                     "value": today_date
                 }
-            }
+            },
+            "search": "user__phone__startswith"
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
-        p_student = self.paginate_queryset(_class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False, **filter_queries).order_by("id"))
+        students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False, **filter_queries).order_by("id")
+        p_student = self.paginate_queryset(students)
         students = self.get_serializer_class()(p_student, many=True)
         return self.get_paginated_response(students.data)
 
