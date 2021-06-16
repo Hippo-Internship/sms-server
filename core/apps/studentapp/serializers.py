@@ -121,10 +121,10 @@ class JournalSerializer(serializers.ModelSerializer):
 class StudentShortDetailSerializer(serializers.ModelSerializer):
 
     discounts = DiscountShortDetailSerializer(many=True)
-    user_firstname = serializers.CharField(source="user.firstname")
-    user_lastname = serializers.CharField(source="user.lastname")
-    status_name = serializers.CharField(source="status.name")
-    total_payment = serializers.FloatField(source="_class.lesson.price")
+    user_firstname = serializers.CharField(source="user.firstname", read_only=True)
+    user_lastname = serializers.CharField(source="user.lastname", read_only=True)
+    status_name = serializers.CharField(source="status.name", read_only=True)
+    total_payment = serializers.FloatField(source="_class.lesson.price", read_only=True)
     payments_paid = serializers.IntegerField(read_only=True)
     exam_results = ExamResultSerializer(many=True, read_only=True)
     journals = JournalSerializer(many=True, read_only=True)

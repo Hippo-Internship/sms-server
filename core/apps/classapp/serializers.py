@@ -127,6 +127,7 @@ class CalendarSerializer(serializers.ModelSerializer):
     class_name = serializers.CharField(source="_class.name", read_only=True)
     class_start_date = serializers.DateField(source="_class.start_date", read_only=True)
     class_end_date = serializers.DateField(source="_class.end_date", read_only=True)
+    lesson_color = serializers.CharField(source="_class.lesson.color", read_only=True)
 
     class Meta:
         model = local_models.Calendar

@@ -19,6 +19,8 @@ from core import \
 
 
 filter_model = {
+    "school": "school",
+    "branch": "branch",
     "class": "students___class",
     "lesson": "students___class__lesson",
     "payment": {
@@ -32,7 +34,7 @@ filter_model = {
         },
         "discount": "students__discount_amount"
     },
-    "search": "phone"
+    "search": "students__user__phone__startswith"
 }
 
 class StudentViewSet(viewsets.GenericViewSet):
@@ -54,6 +56,8 @@ class StudentViewSet(viewsets.GenericViewSet):
     def list(self, request):
         query_params = core_utils.normalize_data(
             {
+                "branch": "int",
+                "school": "int",
                 "class": "int",
                 "lesson": "int",
                 "payment": "str",
@@ -66,7 +70,7 @@ class StudentViewSet(viewsets.GenericViewSet):
         request_user = request.user
         if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
             students = self.get_queryset().filter(
-                groups=local_models.User.STUDENT, 
+                groups__role_id=local_models.User.STUDENT, 
                 **filter_queries
             )
         elif request_user.groups.role_id == local_models.User.ADMIN:
