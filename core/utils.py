@@ -52,11 +52,15 @@ def normalize_data(format, data):
             continue
     return _data
 
-def build_filter_query(query_model, query_params):
+def build_filter_query(query_model, query_params, user=None):
     result = {}
     for key in query_params:
         if not key in query_model:
             continue
+        if (user is not None and 
+            user.groups.role_id in User.FORBIDDEN_FILTER 
+            and key in User.FORBIDDEN_FILTER[user.groups.role_id]):
+                continue
         query_field = query_model[key]
         query_value = query_params[key]
         if type(query_field).__name__ == "dict":

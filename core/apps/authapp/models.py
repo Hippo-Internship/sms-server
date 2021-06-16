@@ -61,6 +61,16 @@ class CustomUser(AbstractUser):
         (STAFF, "Staff"),
     )
 
+    FORBIDDEN_FILTER = {
+        SUPER_ADMIN: [],
+        ADMIN: [ "school" ],
+        OPERATOR: [ "school", "branch" ],
+        TEACHER: [ "school", "branch" ],
+        STUDENT: [ "school", "branch" ],
+        ACCOUNTANT: [ "school", "branch" ],
+        STAFF: [ "school", "branch" ],
+    }
+
     CREATED_FROM_DATASHEET = 1
     DATASHEET_AND_STUDENT = 2
     CREATED_FROM_STUDENT = 3

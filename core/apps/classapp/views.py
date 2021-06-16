@@ -398,13 +398,17 @@ class CalendarViewSet(viewsets.GenericViewSet):
                 ]
             }
         }
-        filter_queries = core_utils.build_filter_query(filter_model, query_params)
+        filter_queries = core_utils.build_filter_query(
+            filter_model, 
+            query_params, 
+            user=request_user
+        )
         if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
             calendar = self.get_queryset().filter(**filter_queries)
         elif request_user.groups.role_id == local_models.User.ADMIN:
             calendar = self.get_queryset().filter(_class__branch__school=request_user.school.id, **filter_queries)
         elif request_user.groups.role_id == local_models.User.OPERATOR:
-            calendar = self.get_queryset().filter(_class__branch=request_user.branch)
+            calendar = self.get_queryset().filter(_class__branch=request_user.branch, **filter_queries)
         elif request_user.groups.role_id == local_models.User.TEACHER:
             calendar = self.get_queryset().filter(_class__teacher=request_user, **filter_queries)
         p_calendar = self.paginate_queryset(calendar)
