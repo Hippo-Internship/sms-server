@@ -19,6 +19,7 @@ class Status(base_models.BaseWithDate):
     color = models.CharField(max_length=7, null=False, default="#3d3f56")
 
     class Meta:
+        ordering = [ "-id" ]
         unique_together = [ "branch", "name" ]
 
     def __str__(self):
@@ -39,6 +40,7 @@ class PaymentMethod(base_models.BaseWithDate):
     )
 
     class Meta:
+        ordering = [ "-id" ]
         unique_together = [ "branch", "name" ]
 
     def __str__(self):
