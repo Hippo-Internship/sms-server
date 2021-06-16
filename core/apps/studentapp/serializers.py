@@ -151,7 +151,8 @@ class StudentShortDetailSerializer(serializers.ModelSerializer):
     payments_paid = serializers.IntegerField(read_only=True)
     exam_results = ExamResultSerializer(many=True, read_only=True)
     journals = JournalSerializer(many=True, read_only=True)
-
+    user_branch = serializers.IntegerField(source="user.branch", read_only=True)
+    
     class Meta:
         model = local_models.Student
         exclude = [ 
