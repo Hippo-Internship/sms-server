@@ -115,6 +115,7 @@ class ClassFullDetailSerializer(serializers.ModelSerializer):
     room_name = serializers.CharField(source="room.name", read_only=True)
     total_paid = serializers.IntegerField(read_only=True)
     students_count = serializers.ReadOnlyField()
+    school = serializers.IntegerField(source="branch.school.id", read_only=True)
     branch_image = serializers.ImageField(source="branch.image", read_only=True)
 
     class Meta:
