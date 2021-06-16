@@ -170,7 +170,7 @@ class ClassViewSet(viewsets.GenericViewSet):
                 }
             }
         }
-        filter_queries = core_utils.build_filter_query(filter_model, query_params)
+        filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
         classes = local_services.list_classes(request_user, self.get_queryset(), filter_queries)
         # classes = classes.annotate(students_count=Count("students")).order_by("id")
         p_classes = self.paginate_queryset(classes)

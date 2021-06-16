@@ -76,7 +76,7 @@ class DatasheetViewSet(viewsets.GenericViewSet):
                 }
             }
         }
-        filter_queries = core_utils.build_filter_query(filter_model, query_params)
+        filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
         datasheets = local_services.list_datasheet(request_user, self.get_queryset(), filter_queries)
         datasheets = self.get_serializer_class()(datasheets, many=True)
         return core_responses.request_success_with_data(datasheets.data)

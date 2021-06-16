@@ -52,14 +52,17 @@ def normalize_data(format, data):
             continue
     return _data
 
-def build_filter_query(query_model, query_params, user=None):
+def build_filter_query(query_model, query_params, user=None, additional_forbidden_filter={}):
     result = {}
     for key in query_params:
         if not key in query_model:
             continue
-        if (user is not None and 
-            user.groups.role_id in User.FORBIDDEN_FILTER 
-            and key in User.FORBIDDEN_FILTER[user.groups.role_id]):
+        if user is not None :
+            if (user.groups.role_id in User.FORBIDDEN_FILTER 
+                and key in User.FORBIDDEN_FILTER[user.groups.role_id]):
+                continue
+            if (user.groups.role_id in additional_forbidden_filter
+                and key in additional_forbidden_filter[user.groups.role_id]):
                 continue
         query_field = query_model[key]
         query_value = query_params[key]

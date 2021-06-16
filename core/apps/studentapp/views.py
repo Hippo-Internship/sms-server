@@ -56,6 +56,7 @@ class StudentViewSet(viewsets.GenericViewSet):
     ]
 
     def list(self, request):
+        request_user = request.user
         query_params = core_utils.normalize_data(
             {
                 "branch": "int",
@@ -68,7 +69,7 @@ class StudentViewSet(viewsets.GenericViewSet):
             },
             dict(request.query_params)
         )
-        filter_queries = core_utils.build_filter_query(filter_model, query_params)
+        filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
         request_user = request.user
         if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
             students = self.get_queryset().filter(

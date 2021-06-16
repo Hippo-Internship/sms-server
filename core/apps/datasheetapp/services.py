@@ -29,7 +29,7 @@ def list_datasheet_status(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
             lessons = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
-        lessons = queryset.filter(branch__school=user.school.id, ** filter_queries)
+        lessons = queryset.filter(branch__school=user.school.id, **filter_queries)
     elif user.groups.role_id == User.OPERATOR:
         lessons = queryset.filter(branch=user.branch)
     else:
