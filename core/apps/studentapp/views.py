@@ -65,7 +65,10 @@ class StudentViewSet(viewsets.GenericViewSet):
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
         request_user = request.user
         if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
-            students = self.get_queryset().filter(groups=local_models.User.STUDENT)
+            students = self.get_queryset().filter(
+                groups=local_models.User.STUDENT, 
+                **filter_queries
+            )
         elif request_user.groups.role_id == local_models.User.ADMIN:
             students = self.get_queryset().filter(
                 branch__school=request_user.school.id, 
