@@ -1,5 +1,6 @@
 # Django built-in imports
 from django.db.models import F
+from django.db.models.aggregates import Count, Sum
 # Third Party imports
 from rest_framework import \
         viewsets, \
@@ -22,6 +23,7 @@ filter_model = {
     "school": "school",
     "branch": "branch",
     "class": "students___class",
+    "status": "students__status",
     "lesson": "students___class__lesson",
     "payment": {
         "incomplete": {
@@ -50,7 +52,7 @@ class StudentViewSet(viewsets.GenericViewSet):
     student_detail_additional_action = [
         "create_note",
         "create_payment",
-        "create_journal"
+        "create_journal",
     ]
 
     def list(self, request):
@@ -93,6 +95,14 @@ class StudentViewSet(viewsets.GenericViewSet):
     def retrieve(self, request, student=None):
         student = self.get_serializer_class()(student.user, many=False)
         return core_responses.request_success_with_data(student.data)
+
+    @rest_decorators.action(detail=True, methods=[ "GET" ], url_path="user")
+    @core_decorators.object_exists(model=local_models.User, detail="User")
+    def list_user_students(self, request, user=None):
+        students = user.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False).order_by("id")
+        p_student = self.paginate_queryset(students)
+        students = self.get_serializer_class()(p_student, many=True)
+        return self.get_paginated_response(students.data)
 
     @rest_decorators.action(detail=True, methods=[ "GET" ], url_path="payment")
     @core_decorators.object_exists(model=local_models.Student, detail="Student")
@@ -161,6 +171,8 @@ class StudentViewSet(viewsets.GenericViewSet):
             return local_serializers.UserStudentsDetailSerializer
         elif self.action == "retrieve":
             return local_serializers.StudentFullDetailSerializer
+        elif self.action == "list_user_students":
+            return local_serializers.StudentSubDetailSerializer
         elif self.action == "list_payments" or self.action == "create_payment":
             return local_serializers.PaymentSerializer
         elif self.action == "list_notes" or self.action == "create_note":

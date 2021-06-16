@@ -56,7 +56,7 @@ class UserViewSet(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=Group, detail="Group", field="role_id")
     def group(self, request, groups=None):
         request_user = request.user
-        users = local_services.list_users(request_user, self.get_queryset(), filter_queries={ "groups": groups.role_id })
+        users = local_services.list_users(request_user, self.get_queryset(), filter_queries={ "groups": groups.id })
         if groups.role_id == User.TEACHER:
             users = users.annotate(job_hour=Sum(F("classes__calendar__end_time") - F("classes__calendar__start_time"), output_field=CharField())).order_by("-id")
         p_users = self.paginate_queryset(users)

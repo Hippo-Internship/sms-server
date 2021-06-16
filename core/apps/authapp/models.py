@@ -118,6 +118,16 @@ class CustomUser(AbstractUser):
     class Meta:
         ordering = [ "-id" ]
 
+    @property
+    def students_count(self):
+        if self.groups.role_id != self.STUDENT:
+            return 0
+        return len(self.students.filter(canceled=False))
+
+    @students_count.setter
+    def students_count(self, value):
+        print(value)
+
     def __str__(self):
         return '%s %s %s: %s' % (self.id, self.phone, self.first_name, self.last_name)
 

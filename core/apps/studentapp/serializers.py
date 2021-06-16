@@ -162,8 +162,7 @@ class StudentFullDetailSerializer(serializers.ModelSerializer):
 
 class UserStudentsDetailSerializer(serializers.ModelSerializer):
 
-    students = StudentShortDetailSerializer(many=True, read_only=True)
-    groups = serializers.IntegerField(source="groups.role_id", read_only=True)
+    students_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = User
@@ -175,7 +174,7 @@ class UserStudentsDetailSerializer(serializers.ModelSerializer):
             'school',
             'branch',
             "groups",
-            "students"
+            "students_count"
         ]
 
 
@@ -215,3 +214,21 @@ class NoteUpdateSerializer(serializers.ModelSerializer):
         model = local_models.Note
         fields = "__all__"
         read_only_fields = [ "id", "student" ]
+
+
+class StudentSubDetailSerializer(serializers.ModelSerializer):
+
+    discounts = DiscountShortDetailSerializer(many=True)
+    status_name = serializers.CharField(source="status.name", read_only=True)
+    total_payment = serializers.FloatField(source="_class.lesson.price", read_only=True)
+    payments_paid = serializers.IntegerField(read_only=True)
+    class_name = serializers.CharField(source="_class.name", read_only=True)
+    lesson_name = serializers.CharField(source="_class.leeson.name", read_only=True)
+
+    class Meta:
+        model = local_models.Student
+        exclude = [ 
+            "_class", 
+            "created", 
+            "modified",
+        ]
