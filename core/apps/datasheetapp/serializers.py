@@ -75,11 +75,26 @@ class DatasheetUpdateSerializer(serializers.ModelSerializer):
         return data
 
 
-class DatasheetStatuSerializer(serializers.ModelSerializer):
+class DatasheetStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.Status
         fields = "__all__"
+
+
+class DatasheetStatusUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Status
+        fields = "__all__"
+        extra_kwargs = {
+            "branch": { "required": False }
+        }
+
+    def validate_branch(self, value):
+        if value.id != self.instance.branch.id:
+            return serializers.ValidationError("Branch can't be changed!")
+        return value
 
 
 class ShortDatasheetStatuSerializer(serializers.ModelSerializer):

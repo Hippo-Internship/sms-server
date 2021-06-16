@@ -19,7 +19,7 @@ class StatusUpdateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "branch": { "required": False }
         }
-        
+
     def validate_branch(self, value):
         if value.id != self.instance.branch.id:
             return serializers.ValidationError("Branch can't be changed!")
@@ -47,4 +47,12 @@ class PaymentMethodUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.PaymentMethod
-        exclude = [ "branch" ]
+        fields = "__all__"
+        extra_kwargs = {
+            "branch": { "required": False }
+        }
+
+    def validate_branch(self, value):
+        if value.id != self.instance.branch.id:
+            return serializers.ValidationError("Branch can't be changed!")
+        return value

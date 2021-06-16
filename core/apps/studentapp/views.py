@@ -226,6 +226,10 @@ class DiscountViewSet(viewsets.ModelViewSet):
         data = super(DiscountViewSet, self).update(request, discount.id).data
         return core_responses.request_success_with_data(data)
 
+    def get_serializer_class(self):
+        if self.action == "update": 
+            return local_serializers.DiscountUpdateSerializer
+        return super().get_serializer_class()
 
 class PaymentViewSet(viewsets.GenericViewSet):
 

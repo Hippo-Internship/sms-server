@@ -14,7 +14,8 @@ from . import \
 from core import \
         decorators as core_decorators, \
         responses as core_responses, \
-        permissions as core_permissions
+        permissions as core_permissions, \
+        utils as core_utils 
 from core.apps.authapp import \
         services as authapp_services, \
         serializers as authapp_serializers
@@ -31,6 +32,10 @@ from core.apps.datasheetapp import \
         services as datasheetapp_services, \
         serializers as datasheetapp_serializers
 
+school_query_model = {
+    "school": "branch__school",
+    "branch": "branch"
+}
 
 filter_model = {
     "school": "branch__school",
@@ -141,7 +146,15 @@ class StatusViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         request_user = request.user
-        statuses = local_services.list_status(request_user, self.get_queryset())
+        query_params = core_utils.normalize_data(
+            { 
+                "school": "int",
+                "branch": "int"
+            },
+            dict(request.query_params)
+        )
+        filter_queries = core_utils.build_filter_query(school_query_model, query_params)
+        statuses = local_services.list_status(request_user, self.get_queryset(), filter_queries=filter_queries)
         p_statuses = self.paginate_queryset(statuses)
         statuses = self.get_serializer_class()(p_statuses, many=True)
         return self.get_paginated_response(statuses.data)
@@ -177,23 +190,31 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         request_user = request.user
-        pay_methods = local_services.list_payment_methods(request_user, self.get_queryset())
+        query_params = core_utils.normalize_data(
+            { 
+                "school": "int",
+                "branch": "int"
+            },
+            dict(request.query_params)
+        )
+        filter_queries = core_utils.build_filter_query(school_query_model, query_params)
+        pay_methods = local_services.list_payment_methods(request_user, self.get_queryset(), filter_queries=filter_queries)
         p_pay_methods = self.paginate_queryset(pay_methods)
         pay_methods = self.get_serializer_class()(p_pay_methods, many=True)
         return self.get_paginated_response(pay_methods.data)
 
     @core_decorators.object_exists(model=local_models.PaymentMethod, detail="PaymentMethod")
     def retrieve(self, request, pay_method=None):
-        data = super(StatusViewSet, self).retrieve(request, pay_method.id).data
+        data = super(PaymentMethodViewSet, self).retrieve(request, pay_method.id).data
         return core_responses.request_success_with_data(data)
 
     def create(self, request):
-        data = super(StatusViewSet, self).create(request).data
+        data = super(PaymentMethodViewSet, self).create(request).data
         return core_responses.request_success_with_data(data)
 
     @core_decorators.object_exists(model=local_models.PaymentMethod, detail="PaymentMethod")
     def update(self, request, pay_method=None):
-        data = super(StatusViewSet, self).update(request, pay_method.id).data
+        data = super(PaymentMethodViewSet, self).update(request, pay_method.id).data
         return core_responses.request_success_with_data(data)
 
     def get_serializer_class(self):

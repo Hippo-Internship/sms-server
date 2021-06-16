@@ -9,10 +9,9 @@ User = get_user_model()
 
 def list_status(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
-        rooms = queryset.all()
+        rooms = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
-        branches = user.school.branches.all()
-        rooms = queryset.filter(branch__in=branches)
+        rooms = queryset.filter(branch__school=user.school.id, **filter_queries)
     elif user.groups.role_id == User.OPERATOR:
         rooms = queryset.filter(branch=user.branch)
     else:

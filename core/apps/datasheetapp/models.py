@@ -24,6 +24,9 @@ class Status(models.Model):
     name = models.CharField(max_length=36, null=False, blank=False)
     priority = models.IntegerField(null=False, default=0)
 
+    class Meta:
+        unique_together = [ "branch", "name" ]
+
     def __str__(self):
         return "%s %s" % (self.id, self.name)
     

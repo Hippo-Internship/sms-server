@@ -19,6 +19,10 @@ from core import \
         utils as core_utils
 from core.apps.authapp import serializers as authapp_serializers
 
+school_query_model = {
+    "school": "branch__school",
+    "branch": "branch"
+}
 
 class DatasheetViewSet(viewsets.GenericViewSet):
 
@@ -122,7 +126,7 @@ class DatasheetViewSet(viewsets.GenericViewSet):
 class DatasheetStatusViewSet(viewsets.ModelViewSet):
 
     queryset = local_models.Status.objects.all()
-    serializer_class = local_serializers.DatasheetStatuSerializer
+    serializer_class = local_serializers.DatasheetStatusSerializer
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
         core_permissions.DatasheetStatusGetOrModifyPermission,
         core_permissions.BranchContentManagementPermission,
@@ -130,7 +134,15 @@ class DatasheetStatusViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         request_user = request.user
-        datasheet_status = local_services.list_datasheet_status(request_user, self.get_queryset())
+        query_params = core_utils.normalize_data(
+            { 
+                "school": "int",
+                "branch": "int"
+            },
+            dict(request.query_params)
+        )
+        filter_queries = core_utils.build_filter_query(school_query_model, query_params)
+        datasheet_status = local_services.list_datasheet_status(request_user, self.get_queryset(), filter_queries=filter_queries)
         p_datasheet_status = self.paginate_queryset(datasheet_status)
         datasheet_status = self.get_serializer_class()(p_datasheet_status, many=True)
         return self.get_paginated_response(datasheet_status.data)
@@ -153,3 +165,8 @@ class DatasheetStatusViewSet(viewsets.ModelViewSet):
     def destroy(self, request, status=None):
         super(DatasheetStatusViewSet, self).destroy(request, status.id)
         return core_responses.request_success()
+    
+    def get_serializer_class(self):
+        if self.action == "update":
+            return local_serializers.DatasheetStatusUpdateSerializer
+        return super().get_serializer_class()

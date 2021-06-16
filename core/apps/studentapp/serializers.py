@@ -76,6 +76,29 @@ class DiscountDetailSerializer(serializers.ModelSerializer):
         model = local_models.Discount
         fields = "__all__"
 
+class DiscountUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Discount
+        fields = "__all__"
+        extra_kwargs = {
+            "branch": { "required": False }
+        }
+
+    def validate(self, data):
+        if "percent" in data:
+            data["value"] = None
+        elif "value" in data:
+            data["percent"] = None
+        elif "percent" not in data and "value" not in data:
+            raise serializers.ValidationError("Should give percent or value!")
+        return data
+        
+    def validate_branch(self, value):
+        if value.id != self.instance.branch.id:
+            return serializers.ValidationError("Branch can't be changed!")
+        return value
+
 
 class DiscountShortDetailSerializer(serializers.ModelSerializer):
 
