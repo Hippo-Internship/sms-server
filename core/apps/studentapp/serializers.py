@@ -194,6 +194,7 @@ class UserStudentsDetailSerializer(serializers.ModelSerializer):
             'id',
             'firstname',
             'lastname',
+            "phone",
             'email',
             'school',
             'branch',

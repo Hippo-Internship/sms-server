@@ -132,7 +132,7 @@ class CustomUser(AbstractUser):
     def students_count(self):
         if self.groups.role_id != self.STUDENT:
             return 0
-        return len(self.students.filter(canceled=False))
+        return self.students.filter(canceled=False).count()
 
     @students_count.setter
     def students_count(self, value):

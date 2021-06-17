@@ -111,7 +111,7 @@ class Class(models.Model):
 
     @property
     def students_count(self):
-        return len(self.students.filter(canceled=False))
+        return self.students.filter(canceled=False).count()
 
     @students_count.setter
     def students_count(self, value):
