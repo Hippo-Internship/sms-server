@@ -1,3 +1,6 @@
+# Python imports
+from datetime import datetime, timedelta
+from re import M
 # Django built-in imports
 from django.contrib.auth import get_user_model
 # Third party imports
@@ -35,3 +38,23 @@ def list_users(user, queryset, filter_queries={}):
     else:
         return []
     return users
+
+def generate_operator_profile_data(user: User):
+    today_date = datetime.now()
+    week_day = today_date.weekday()
+    datasheets = user.registered_datasheets.all()
+    students = user.registered_students.all()
+    generated_data = {
+        "user": user,
+        "datasheet_count": [],
+        "datasheet_total": datasheets.count(),
+        "student_count": [],
+        "student_total": students.count(),
+    }
+    for day in range(week_day + 1):
+        current_day = (today_date - timedelta(days=day)).strftime("%Y-%m-%d")
+        d_count = datasheets.filter(created=current_day).count()
+        s_count = students.filter(created=current_day).count()
+        generated_data["datasheet_count"].append(d_count)
+        generated_data["student_count"].append(s_count)
+    return generated_data

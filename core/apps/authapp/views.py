@@ -1,11 +1,11 @@
 # Django built-in imports
 from django.db.models.aggregates import Count
 from django.db.models.fields import CharField
-from django.shortcuts import render
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db.models import Sum, F
 # Third party imports
+from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.settings import api_settings
@@ -70,8 +70,8 @@ class UserViewSet(viewsets.GenericViewSet):
         request_user = request.user
         if user.groups.role_id == User.OPERATOR:
             a = user.registered_datasheets.annotate(total_datasheets=Count("*"))
-            print(a[0].total_datasheets)
-        user = self.get_serializer_class()(user)
+            generated_data = local_services.generate_operator_profile_data(user)
+        user = self.get_serializer_class()(generated_data)
         return core_responses.request_success_with_data(user.data)
 
     def create(self, request):
@@ -99,7 +99,7 @@ class UserViewSet(viewsets.GenericViewSet):
             (request.user.groups.role_id >= user.groups.role_id or 
              request.user.groups.role_id >= User.OPERATOR)):
             return core_responses.request_denied()
-        user_request_data = dict(request.data)
+        user_request_data = request.data.copy()
         upd_user = self.get_serializer_class()(user, data=user_request_data, user=request.user)
         upd_user.is_valid(raise_exception=True)
         user_request_data["user"] = user.id
@@ -114,4 +114,6 @@ class UserViewSet(viewsets.GenericViewSet):
             return local_serializers.CustomUserUpdateSerializer
         if self.action == "list":
             return local_serializers.ShortUserSerializer
+        if self.action == "retrieve":
+            return local_serializers.OperatorProfileSerializer
         return super().get_serializer_class()

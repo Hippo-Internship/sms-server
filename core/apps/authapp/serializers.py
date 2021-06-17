@@ -121,3 +121,12 @@ class GroupsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = [ "id", "name", "role_id" ]
+
+
+class OperatorProfileSerializer(serializers.Serializer):
+
+    user = CustomUserSerializer()
+    datasheet_count = serializers.ListField()
+    datasheet_total = serializers.IntegerField()
+    student_count = serializers.ListField()
+    student_total = serializers.IntegerField()
