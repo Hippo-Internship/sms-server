@@ -103,13 +103,11 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
             "profile",
             "groups"
         ]
-        read_only_fields = [ "school", "branch" ]
-
-    def validate(self, data):
-        if data["groups"].role_id <= self.user.groups.role_id:
-            raise PermissionDenied()
-        return data
-
+        read_only_fields = [ "school", "branch", "groups" ]
+        extra_kwargs = {
+            "firstname": { "required": False },
+            "phone": { "required": False },
+        }
 
 class ShortUserSerializer(serializers.ModelSerializer):
 

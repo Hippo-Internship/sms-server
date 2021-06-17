@@ -49,7 +49,7 @@ class UserViewSet(viewsets.GenericViewSet):
             dict(request.query_params)
         )
         filter_queries = core_utils.build_filter_query(user_search_filter_model, query_params)
-        filter_queries["groups__role_id"] = User.OPERATOR
+        filter_queries["groups__role_id"] = User.STUDENT
         users = local_services.list_users(request.user, self.get_queryset(), filter_queries=filter_queries)
         users = self.get_serializer_class()(users, many=True)
         return core_responses.request_success_with_data(users.data)
@@ -69,8 +69,8 @@ class UserViewSet(viewsets.GenericViewSet):
     def retrieve(self, request, user):
         request_user = request.user
         if user.groups.role_id == User.OPERATOR:
-            a = user.datasheets.annotate(total_datasheets=Count("*"))
-            print(a)
+            a = user.registered_datasheets.annotate(total_datasheets=Count("*"))
+            print(a[0].total_datasheets)
         user = self.get_serializer_class()(user)
         return core_responses.request_success_with_data(user.data)
 
@@ -99,12 +99,10 @@ class UserViewSet(viewsets.GenericViewSet):
             (request.user.groups.role_id >= user.groups.role_id or 
              request.user.groups.role_id >= User.OPERATOR)):
             return core_responses.request_denied()
-        user_request_data = request.data
+        user_request_data = dict(request.data)
         upd_user = self.get_serializer_class()(user, data=user_request_data, user=request.user)
         upd_user.is_valid(raise_exception=True)
-        request.data._mutable = True
         user_request_data["user"] = user.id
-        request.data._mutable = False
         upd_profile = local_serializers.UserProfileSerializer(user.profile, data=user_request_data)
         upd_profile.is_valid(raise_exception=True)
         upd_profile.save()       
