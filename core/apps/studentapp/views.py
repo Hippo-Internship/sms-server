@@ -73,17 +73,20 @@ class StudentViewSet(viewsets.GenericViewSet):
         request_user = request.user
         if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
             students = self.get_queryset().filter(
+                is_active=True,
                 groups__role_id=local_models.User.STUDENT, 
                 **filter_queries
             )
         elif request_user.groups.role_id == local_models.User.ADMIN:
             students = self.get_queryset().filter(
+                is_active=True,
                 branch__school=request_user.school.id, 
                 groups__role_id=local_models.User.STUDENT, 
                 **filter_queries
             )
         else:
             students = self.get_queryset().filter(
+                is_active=True,
                 branch=request_user.branch, 
                 groups__role_id=local_models.User.STUDENT, 
                 **filter_queries

@@ -1,4 +1,5 @@
 # Django built-in imports
+from django.db.models.aggregates import Count
 from django.db.models.fields import CharField
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
@@ -48,7 +49,8 @@ class UserViewSet(viewsets.GenericViewSet):
             dict(request.query_params)
         )
         filter_queries = core_utils.build_filter_query(user_search_filter_model, query_params)
-        users = local_services.list_users(request.user, self.get_queryset(), filter_queries=filter_queries, groups=User.STUDENT)
+        filter_queries["groups"] = Group.objects.filter(role_id=User.OPERATOR)[0].id
+        users = local_services.list_users(request.user, self.get_queryset(), filter_queries=filter_queries)
         users = self.get_serializer_class()(users, many=True)
         return core_responses.request_success_with_data(users.data)
 
@@ -66,8 +68,9 @@ class UserViewSet(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=User, detail="User")
     def retrieve(self, request, user):
         request_user = request.user
-        if not core_utils.check_if_user_can_procceed(request_user, user.school.id, user.branch.id):
-            return core_responses.request_denied()
+        if user.groups.role_id == User.OPERATOR:
+            a = user.datasheets.annotate(total_datasheets=Count("*"))
+            print(a)
         user = self.get_serializer_class()(user)
         return core_responses.request_success_with_data(user.data)
 
