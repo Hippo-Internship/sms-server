@@ -236,12 +236,17 @@ class ListDetailView(views.APIView):
         if len(request_data) > 5:
             return core_responses.request_denied()
             
+        # master_filter = {}
+        # for item in projection:
+        #     master_filter[item] = {}
+        #     for filter in detail_switch[item]["filter"]:
+        #         if filter in request_data:
+        #             master_filter[item][filter_model[filter]] = request_data[filter]
+
         master_filter = {}
         for item in projection:
-            master_filter[item] = {}
-            for filter in detail_switch[item]["filter"]:
-                if filter in request_data:
-                    master_filter[item][filter_model[filter]] = request_data[filter]
+            master_filter[item] = core_utils.build_filter_query(filter_model, request_data, user=request_user)
+
         data = {}
         for key in projection:
             if key not in detail_switch:
