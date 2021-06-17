@@ -68,6 +68,7 @@ class UserViewSet(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=User, detail="User")
     def retrieve(self, request, user):
         request_user = request.user
+        generated_data = {}
         if user.groups.role_id == User.OPERATOR:
             a = user.registered_datasheets.annotate(total_datasheets=Count("*"))
             generated_data = local_services.generate_operator_profile_data(user)
