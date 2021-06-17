@@ -40,7 +40,7 @@ school_query_model = {
 filter_model = {
     "school": "branch__school",
     "branch": "branch",
-    "groups": "groups"
+    "groups": "groups__role_id"
 }
 
 detail_switch = {
