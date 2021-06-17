@@ -19,6 +19,7 @@ from core import \
         permissions as core_permissions, \
         responses as core_responses, \
         utils as core_utils
+from core.apps.classapp import serializers as classapp_serializers
 
 # User Model
 User = get_user_model()
@@ -70,9 +71,20 @@ class UserViewSet(viewsets.GenericViewSet):
         request_user = request.user
         generated_data = { "user": user }
         if user.groups.role_id == User.OPERATOR:
-            a = user.registered_datasheets.annotate(total_datasheets=Count("*"))
             generated_data = local_services.generate_operator_profile_data(user)
-        user = self.get_serializer_class()(generated_data)
+            serializer = local_serializers.OperatorProfileSerializer
+        elif user.groups.role_id == User.TEACHER:
+            generated_data = {
+                "user": user,
+                "class_count": local_services.generate_teacher_class_data(user),
+                "student_count": local_services.generate_teacher_student_data(user),
+                "classes": user.classes.all()
+            }
+            serializer = classapp_serializers.TeacherProfileSerializer
+        else:
+            generated_data = user
+            serializer = self.get_serializer_class()
+        user = serializer(generated_data)
         return core_responses.request_success_with_data(user.data)
 
     def create(self, request):
@@ -115,6 +127,4 @@ class UserViewSet(viewsets.GenericViewSet):
             return local_serializers.CustomUserUpdateSerializer
         if self.action == "list":
             return local_serializers.ShortUserSerializer
-        if self.action == "retrieve":
-            return local_serializers.OperatorProfileSerializer
         return super().get_serializer_class()

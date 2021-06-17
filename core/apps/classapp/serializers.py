@@ -192,3 +192,11 @@ class ShortLessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Lesson
         fields = [ "id", "name", "branch" ]
+
+
+class TeacherProfileSerializer(serializers.Serializer):
+
+    user = authapp_serializers.CustomUserSerializer()
+    class_count = serializers.DictField()
+    student_count = serializers.DictField()
+    classes = ClassDetailSerializer(many=True)

@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 # Third party imports
 from rest_framework.exceptions import PermissionDenied
 # Local imports
+from core.apps.studentapp import models as studentapp_models
 
 # User model 
 User = get_user_model()
@@ -57,4 +58,30 @@ def generate_operator_profile_data(user: User):
         s_count = students.filter(created=current_day).count()
         generated_data["datasheet_count"].append(d_count)
         generated_data["student_count"].append(s_count)
+    return generated_data
+
+def generate_teacher_student_data(user: User):
+    today_date = datetime.now()
+    students = studentapp_models.Student.objects.filter(_class__teacher=user.id, is_active=False)
+    active_student_count = students.filter(end_date__gte=today_date).count()
+    completed_student_count = students.filter(end_date__lt=today_date).count()
+    generated_data = {
+        "active_student_count": active_student_count,
+        "completed_student_count": completed_student_count,
+        "total": students.count()
+    }
+    return generated_data
+
+def generate_teacher_class_data(user: User):
+    today_date = datetime.now()
+    classes = user.classes.all()
+    active_class_count = classes.filter(end_date__gte=today_date, start_date__lte=today_date).count()
+    finished_class_count = classes.filter(end_date__lt=today_date).count()
+    active_class_count = classes.filter(start_date__gt=today_date).count()
+    generated_data = {
+        "active_class_count": active_class_count,
+        "finished_class_count": finished_class_count,
+        "active_class_count": active_class_count,
+        "total": classes.count()
+    }
     return generated_data
