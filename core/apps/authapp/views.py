@@ -49,7 +49,7 @@ class UserViewSet(viewsets.GenericViewSet):
             dict(request.query_params)
         )
         filter_queries = core_utils.build_filter_query(user_search_filter_model, query_params)
-        filter_queries["groups"] = Group.objects.filter(role_id=User.OPERATOR)[0].id
+        filter_queries["groups__role_id"] = User.OPERATOR
         users = local_services.list_users(request.user, self.get_queryset(), filter_queries=filter_queries)
         users = self.get_serializer_class()(users, many=True)
         return core_responses.request_success_with_data(users.data)
@@ -58,7 +58,7 @@ class UserViewSet(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=Group, detail="Group", field="role_id")
     def group(self, request, groups=None):
         request_user = request.user
-        users = local_services.list_users(request_user, self.get_queryset(), filter_queries={ "groups": groups.id })
+        users = local_services.list_users(request_user, self.get_queryset(), filter_queries={ "groups__role_id": groups.role_id })
         if groups.role_id == User.TEACHER:
             users = users.annotate(job_hour=Sum(F("classes__calendar__end_time") - F("classes__calendar__start_time"), output_field=CharField())).order_by("-id")
         p_users = self.paginate_queryset(users)

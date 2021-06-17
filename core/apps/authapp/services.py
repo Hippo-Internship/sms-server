@@ -21,17 +21,17 @@ def list_groups(user, queryset, filter_queries={}):
     return queryset.filter(**groups_switch[user.groups.role_id])
 
 def list_users(user, queryset, filter_queries={}):
-    groups = filter_queries.pop("groups", None)
+    groups = filter_queries.pop("groups__role_id", None)
     if groups is None:
         return []
     if user.groups.role_id > groups:
         raise PermissionDenied()
     if user.groups.role_id == User.SUPER_ADMIN:
-        users = queryset.filter(groups=groups, is_active=True, **filter_queries)
+        users = queryset.filter(groups__role_id=groups, is_active=True, **filter_queries)
     elif user.groups.role_id == User.ADMIN:
-        users = user.school.users.filter(groups=groups, is_active=True, **filter_queries)
+        users = user.school.users.filter(groups__role_id=groups, is_active=True, **filter_queries)
     elif user.groups.role_id == User.OPERATOR:
-        users = user.branch.users.filter(groups=groups, is_active=True, **filter_queries)
+        users = user.branch.users.filter(groups__role_id=groups, is_active=True, **filter_queries)
     else:
         return []
     return users

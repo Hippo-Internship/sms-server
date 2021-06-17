@@ -17,6 +17,7 @@ from core import \
         permissions as core_permissions, \
         responses as core_responses, \
         utils as core_utils
+from core.apps.authapp import services as authapp_services
 
 
 filter_model = {
@@ -71,26 +72,8 @@ class StudentViewSet(viewsets.GenericViewSet):
         )
         filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
         request_user = request.user
-        if request_user.groups.role_id == local_models.User.SUPER_ADMIN:
-            students = self.get_queryset().filter(
-                is_active=True,
-                groups__role_id=local_models.User.STUDENT, 
-                **filter_queries
-            )
-        elif request_user.groups.role_id == local_models.User.ADMIN:
-            students = self.get_queryset().filter(
-                is_active=True,
-                branch__school=request_user.school.id, 
-                groups__role_id=local_models.User.STUDENT, 
-                **filter_queries
-            )
-        else:
-            students = self.get_queryset().filter(
-                is_active=True,
-                branch=request_user.branch, 
-                groups__role_id=local_models.User.STUDENT, 
-                **filter_queries
-            )
+        filter_queries["groups__role_id"] = local_models.User.STUDENT
+        students = authapp_services.list_users(request_user, self.get_queryset(), filter_queries=filter_queries)
         p_students = self.paginate_queryset(students)
         students = self.get_serializer_class()(p_students, many=True)
         return self.get_paginated_response(students.data)
