@@ -63,7 +63,7 @@ class UserViewSet(viewsets.GenericViewSet):
         if groups.role_id == User.TEACHER:
             users = users.annotate(job_hour=Sum(F("classes__calendar__end_time") - F("classes__calendar__start_time"), output_field=CharField())).order_by("-id")
         p_users = self.paginate_queryset(users)
-        users = self.get_serializer_class()(p_users, many=True)
+        users = self.get_serializer_class()(p_users, many=True, context={ "request": request })
         return self.get_paginated_response(users.data)
 
     @core_decorators.object_exists(model=User, detail="User")

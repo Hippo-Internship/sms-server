@@ -134,6 +134,7 @@ class ClassFullDetailSerializer(serializers.ModelSerializer):
     students_count = serializers.ReadOnlyField()
     school = serializers.IntegerField(source="branch.school.id", read_only=True)
     branch_image = serializers.ImageField(source="branch.image", read_only=True)
+    lesson_price = serializers.IntegerField(source="lesson.price", read_only=True)
 
     class Meta:
         model = local_models.Class
