@@ -1,4 +1,5 @@
 # Django built-in imports
+from django.db import connections
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
 
@@ -34,6 +35,8 @@ class SchoolViewSet(viewsets.ModelViewSet):
     @core_decorators.object_exists(model=local_models.School, detail="School")
     def retrieve(self, request, school):
         data = super(SchoolViewSet, self).retrieve(request, school.id).data
+        print('retrieving school data')
+        print('-----------\nthis is called\n---------------')
         return core_responses.request_success_with_data(data)
 
     def create(self, request):
@@ -74,7 +77,8 @@ class BranchViewSet(viewsets.GenericViewSet):
         request_user = request.user
         branches = local_services.list_branch(request_user, self.get_queryset())
         p_branches = self.paginate_queryset(branches)
-        branches = self.get_serializer_class()(p_branches, many=True)
+        branches = self.get_serializer_class()(p_branches, many=True, context={ "request": request })
+        # print('BRANCHES', request)
         return self.get_paginated_response(branches.data)
 
     def create(self, request):

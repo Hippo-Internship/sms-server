@@ -6,6 +6,7 @@ from django.db.models import Sum, fields
 # Third party imports
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.fields import ReadOnlyField
 # Local imports
 from . import models as local_models
 from core.apps.authapp import serializers as authapp_serializers
@@ -249,6 +250,7 @@ class StudentSubDetailSerializer(serializers.ModelSerializer):
     payments_paid = serializers.IntegerField(read_only=True)
     class_name = serializers.CharField(source="_class.name", read_only=True)
     lesson_name = serializers.CharField(source="_class.leeson.name", read_only=True)
+    class_id = serializers.IntegerField(source="_class.id", read_only=True)
 
     class Meta:
         model = local_models.Student
