@@ -4,7 +4,7 @@ from datetime import datetime
 # Django built-in imports
 from django.db.models.aggregates import Sum, Count
 # Third party imports
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from rest_framework import decorators as rest_decorator
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -252,12 +252,23 @@ class ClassViewSet(viewsets.GenericViewSet):
                 "completed": {
                     "name": "end_date__lt",
                     "value": today_date
+                },
+                "canceled": {
+                    "name": "canceled",
+                    "value": True
                 }
             },
             "search": "user__phone__startswith"
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
-        students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False, **filter_queries).order_by("id")
+        print('\n264', query_params['status'] == "canceled")
+        if (query_params['status'] == "canceled"):
+            students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=True).order_by("id")
+        else:
+            students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False, **filter_queries).order_by("id")
+
+        # students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False, **filter_queries).order_by("id")
+        print(students)
         p_student = self.paginate_queryset(students)
         students = self.get_serializer_class()(p_student, many=True)
         return self.get_paginated_response(students.data)

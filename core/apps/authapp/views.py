@@ -70,6 +70,7 @@ class UserViewSet(viewsets.GenericViewSet):
     def retrieve(self, request, user):
         request_user = request.user
         generated_data = { "user": user }
+        print('ROLE_ID:', user.groups.role_id, '\n')
         if user.groups.role_id == User.OPERATOR:
             generated_data = local_services.generate_operator_profile_data(user)
             serializer = local_serializers.OperatorProfileSerializer
@@ -77,9 +78,11 @@ class UserViewSet(viewsets.GenericViewSet):
             generated_data = {
                 "user": user,
                 "class_count": local_services.generate_teacher_class_data(user),
-                "student_count": local_services.generate_teacher_student_data(user),
+                # "student_count": local_services.generate_teacher_student_data(user),
+                "student_count": {'items': 12},
                 "classes": user.classes.all()
             }
+            print('line 84')
             serializer = classapp_serializers.TeacherProfileSerializer
         else:
             generated_data = user
