@@ -70,7 +70,7 @@ class UserViewSet(viewsets.GenericViewSet):
     def retrieve(self, request, user):
         request_user = request.user
         generated_data = { "user": user }
-        print('ROLE_ID:', user.groups.role_id, '\n')
+        print('ROLE_ID:', user.groups.role_id, User.OPERATOR, '\n')
         if user.groups.role_id == User.OPERATOR:
             generated_data = local_services.generate_operator_profile_data(user)
             serializer = local_serializers.OperatorProfileSerializer
@@ -82,12 +82,16 @@ class UserViewSet(viewsets.GenericViewSet):
                 "student_count": {'items': 12},
                 "classes": user.classes.all()
             }
-            print('line 84')
             serializer = classapp_serializers.TeacherProfileSerializer
         else:
             generated_data = user
-            serializer = self.get_serializer_class()
-        user = serializer(generated_data)
+            generated_data = {
+                "user": user
+            }
+            # serializer = self.get_serializer_class()
+            serializer = classapp_serializers.StaffProfileSerializer
+        user = serializer(generated_data, context={ 'request': request })
+        print(user.data)
         return core_responses.request_success_with_data(user.data)
 
     def create(self, request):

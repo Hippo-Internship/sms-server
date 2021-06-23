@@ -184,6 +184,7 @@ class ClassViewSet(viewsets.GenericViewSet):
         _class = self.get_queryset().filter(id=_class.id).annotate(total_paid=Sum("students__payments__paid"))
         # _class = self.get_queryset().annotate(total_paid=Sum("students__payments__paid")).filter(id=_class.id)
         _class =_class[0]
+        print(_class)
         _class = self.get_serializer_class()(_class, context={ "request": request })
         # print(_class.data)
         return core_responses.request_success_with_data(_class.data)
@@ -261,14 +262,12 @@ class ClassViewSet(viewsets.GenericViewSet):
             "search": "user__phone__startswith"
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
-        print('\n264', query_params['status'] == "canceled")
         if (query_params['status'] == "canceled"):
             students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=True).order_by("id")
         else:
             students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False, **filter_queries).order_by("id")
 
         # students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False, **filter_queries).order_by("id")
-        print(students)
         p_student = self.paginate_queryset(students)
         students = self.get_serializer_class()(p_student, many=True)
         return self.get_paginated_response(students.data)
