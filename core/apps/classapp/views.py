@@ -178,18 +178,10 @@ class ClassViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def retrieve(self, request, _class=None):
-<<<<<<< HEAD
-        _class = self.get_queryset().filter(id=_class.id).annotate(total_discount=Sum("students__discount_amount")).annotate(total_paid=Sum("students__payments__paid"))
-        print(_class.aggregate(Sum("students__discount_amount")), "dwqwdq")
-        print(_class[0].total_paid, _class[0].total_discount)
-        for item in _class[0].students.all():
-            print(item.discount_amount)
-=======
         # __classes = classes.annotate(students_count=Sum("students__discount_amount"))
         # _class = self.get_queryset().filter(id=_class.id).annotate(total_paid=Sum("students__payments__paid")).annotate(total_discount=Sum("students__discount_amount"))
         _class = self.get_queryset().filter(id=_class.id).annotate(total_paid=Sum("students__payments__paid"))
         # _class = self.get_queryset().annotate(total_paid=Sum("students__payments__paid")).filter(id=_class.id)
->>>>>>> a928014acf62f8c2092cb73713fdf1a93d6045a7
         _class =_class[0]
         print(_class)
         _class = self.get_serializer_class()(_class, context={ "request": request })

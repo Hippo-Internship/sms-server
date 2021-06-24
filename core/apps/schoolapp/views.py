@@ -78,10 +78,7 @@ class BranchViewSet(viewsets.GenericViewSet):
         branches = local_services.list_branch(request_user, self.get_queryset())
         p_branches = self.paginate_queryset(branches)
         branches = self.get_serializer_class()(p_branches, many=True, context={ "request": request })
-<<<<<<< HEAD
-=======
         # print('BRANCHES', request)
->>>>>>> a928014acf62f8c2092cb73713fdf1a93d6045a7
         return self.get_paginated_response(branches.data)
 
     def create(self, request):
