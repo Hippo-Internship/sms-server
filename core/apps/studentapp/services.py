@@ -9,12 +9,11 @@ User = get_user_model()
 
 def list_discounts(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
-        discounts = queryset.all()
+        discounts = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
-        branches = user.school.branches.all()
-        discounts = queryset.filter(branch__in=branches)
+        discounts = queryset.filter(branch__school=user.school.id, **filter_queries)
     elif user.groups.role_id == User.OPERATOR:
-        discounts = queryset.filter(branch=user.branch)
+        discounts = queryset.filter(branch=user.branch, **filter_queries)
     else:
         discounts = []
     return discounts

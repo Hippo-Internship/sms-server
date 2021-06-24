@@ -35,7 +35,7 @@ def list_users(user, queryset, filter_queries={}):
     elif user.groups.role_id == User.ADMIN:
         users = user.school.users.filter(groups__role_id=groups, is_active=True, **filter_queries)
     elif user.groups.role_id == User.OPERATOR:
-        users = user.branch.users.filter(groups__role_id=groups, is_active=True, **filter_queries)
+        users = user.branch.users.filter(branch=user.branch, groups__role_id=groups, is_active=True, **filter_queries)
     else:
         return []
     return users

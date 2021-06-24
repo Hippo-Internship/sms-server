@@ -91,7 +91,6 @@ class UserViewSet(viewsets.GenericViewSet):
             # serializer = self.get_serializer_class()
             serializer = classapp_serializers.StaffProfileSerializer
         user = serializer(generated_data, context={ 'request': request })
-        print(user.data)
         return core_responses.request_success_with_data(user.data)
 
     def create(self, request):

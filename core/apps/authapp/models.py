@@ -152,12 +152,12 @@ class Profile(models.Model):
         db_index=True
     )
     image = models.ImageField(upload_to=path_and_rename, null=True, blank=True)
-    address_city = models.CharField(null=True, blank=True, max_length=255)
-    address_district = models.CharField(null=True, blank=True, max_length=255)
-    address_khoroo = models.CharField(null=True, blank=True, max_length=255)
-    address_appartment = models.CharField(null=True, blank=True, max_length=255)
+    address_city = models.CharField(null=True, blank=True, max_length=255, default="")
+    address_district = models.CharField(null=True, blank=True, max_length=255, default="")
+    address_khoroo = models.CharField(null=True, blank=True, max_length=255, default="")
+    address_apartment = models.CharField(null=True, blank=True, max_length=255, default="")
     dob = models.DateField(null=True, blank=True, max_length=255)
-    register = models.CharField(null=True, max_length=255, blank=True)
+    register = models.CharField(null=True, max_length=255, blank=True, default="")
 
     def save(self, *args, **kwargs):
         if not self.image  or self.image == None:

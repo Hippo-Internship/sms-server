@@ -1,3 +1,5 @@
+# Python imports
+from datetime import datetime
 # Django built-in imports
 from django.shortcuts import render
 from django.contrib.auth.models import Group
@@ -39,8 +41,7 @@ school_query_model = {
 
 filter_model = {
     "school": "branch__school",
-    "branch": "branch",
-    "groups": "groups__role_id"
+    "branch": "branch"
 }
 
 detail_switch = {
@@ -49,7 +50,7 @@ detail_switch = {
         "params": {
             "queryset": Group.objects,
         },
-        "filter": [],
+        "filter": filter_model,
         "serializer": authapp_serializers.GroupsSerializer
     },
     "user": {
@@ -57,7 +58,10 @@ detail_switch = {
         "params": {
             "queryset": authapp_serializers.User.objects,
         },
-        "filter": [ "school", "branch", "groups" ],
+        "filter": {
+            **filter_model,
+            "groups": "groups__role_id"
+        },
         "serializer": authapp_serializers.ShortUserSerializer
     },
     "class": {
@@ -65,7 +69,7 @@ detail_switch = {
         "params": {
             "queryset": classapp_serializers.local_models.Class.objects,
         },
-        "filter": [ "school", "branch" ],
+        "filter": filter_model,
         "serializer": classapp_serializers.ShortClassSerializer
     },
     "room": {
@@ -73,7 +77,7 @@ detail_switch = {
         "params": {
             "queryset": classapp_serializers.local_models.Room.objects,
         },
-        "filter": [ "school", "branch" ],
+        "filter": filter_model,
         "serializer": classapp_serializers.ShortRoomSerializer
     },
     "lesson": {
@@ -81,7 +85,7 @@ detail_switch = {
         "params": {
             "queryset": classapp_serializers.local_models.Lesson.objects,
         },
-        "filter": [ "school", "branch" ],
+        "filter": filter_model,
         "serializer": classapp_serializers.ShortLessonSerializer
     },
     "discount": {
@@ -89,7 +93,9 @@ detail_switch = {
         "params": {
             "queryset": studentapp_serializers.local_models.Discount.objects,
         },
-        "filter": [ "school", "branch" ],
+        "filter": {
+            **filter_model,
+        },
         "serializer": studentapp_serializers.ShortDiscountSerializer
     },
     "status": {
@@ -97,7 +103,7 @@ detail_switch = {
         "params": {
             "queryset": local_models.Status.objects,
         },
-        "filter": [ "school", "branch" ],
+        "filter": filter_model,
         "serializer": local_serializers.ShortStatusSerializer
     },
     "payment": {
@@ -105,7 +111,7 @@ detail_switch = {
         "params": {
             "queryset": local_models.PaymentMethod.objects,
         },
-        "filter": [ "school", "branch" ],
+        "filter": filter_model,
         "serializer": local_serializers.ShortPaymentMethodSerializer
     },
     "school": {
@@ -113,7 +119,7 @@ detail_switch = {
         "params": {
             "queryset": schoolapp_serializers.local_models.School.objects,
         },
-        "filter": [ "school", "branch" ],
+        "filter": filter_model,
         "serializer": schoolapp_serializers.SchoolShortSerializer
     },
     "branch": {
@@ -121,7 +127,7 @@ detail_switch = {
         "params": {
             "queryset": schoolapp_serializers.local_models.Branch.objects,
         },
-        "filter": [ "school" ],
+        "filter": filter_model,
         "serializer": schoolapp_serializers.BranchShortSerializer
     },
     "datasheet_status": {
@@ -129,7 +135,7 @@ detail_switch = {
         "params": {
             "queryset": datasheetapp_serializers.local_models.Status.objects,
         },
-        "filter": [ "school", "branch" ],
+        "filter": filter_model,
         "serializer": datasheetapp_serializers.ShortDatasheetStatuSerializer
     },
 }
@@ -235,18 +241,19 @@ class ListDetailView(views.APIView):
             return core_responses.request_denied()
         if len(request_data) > 5:
             return core_responses.request_denied()
-            
-        # master_filter = {}
-        # for item in projection:
-        #     master_filter[item] = {}
-        #     for filter in detail_switch[item]["filter"]:
-        #         if filter in request_data:
-        #             master_filter[item][filter_model[filter]] = request_data[filter]
-
+        detail_switch["discount"]["filter"] = {
+            **detail_switch["discount"]["filter"],
+            "status": {
+                "active": {
+                    "name": "end_date__gt",
+                    "value": datetime.now()
+                }
+            }
+        }
         master_filter = {}
         for item in projection:
-            master_filter[item] = core_utils.build_filter_query(filter_model, request_data, user=request_user)
-
+            master_filter[item] = core_utils.build_filter_query(detail_switch[item]["filter"], request_data, user=request_user)
+        
         data = {}
         for key in projection:
             if key not in detail_switch:

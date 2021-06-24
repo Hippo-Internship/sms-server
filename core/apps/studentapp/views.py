@@ -92,6 +92,14 @@ class StudentViewSet(viewsets.GenericViewSet):
         # print('students', students.data)
         return self.get_paginated_response(students.data)
 
+    @rest_decorators.action(detail=True, methods=[ "GET" ], url_path="user_payment")
+    @core_decorators.object_exists(model=local_models.User, detail="User")
+    def list_user_payment(self, request, user=None):
+        payments = local_models.Payment.objects.filter(student__in=user.students.all()).order_by("-id")
+        p_payments = self.paginate_queryset(payments)
+        payments = self.get_serializer_class()(p_payments, many=True)
+        return self.get_paginated_response(payments.data)
+
     @rest_decorators.action(detail=True, methods=[ "GET" ], url_path="payment")
     @core_decorators.object_exists(model=local_models.Student, detail="Student")
     def list_payments(self, request, student=None):
@@ -161,7 +169,7 @@ class StudentViewSet(viewsets.GenericViewSet):
             return local_serializers.StudentFullDetailSerializer
         elif self.action == "list_user_students":
             return local_serializers.StudentSubDetailSerializer
-        elif self.action == "list_payments" or self.action == "create_payment":
+        elif self.action == "list_payments" or self.action == "create_payment" or self.action == "list_user_payment":
             return local_serializers.PaymentSerializer
         elif self.action == "list_notes" or self.action == "create_note":
             return local_serializers.NoteSerializer

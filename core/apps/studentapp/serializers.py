@@ -57,12 +57,17 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         _class = self.instance._class
-        if (_class.branch.id is not data["status"].branch.id or
-            "payment_paid" in data or "discount_amount" in data):
+        print(_class.branch.id, data["status"].branch.id)
+        if _class.branch.id != data["status"].branch.id:
             raise PermissionDenied()
+        if "payment_paid" in data:
+            data.pop("payment_paid")
+        if "discount_amount" in data:
+            data.pop("discount_amount")
         if "discounts" in data:
             for discount in data["discounts"]:
-                if _class.branch.id is not discount.branch.id:
+                print(_class.branch.id, discount.branch.id)
+                if _class.branch.id != discount.branch.id:
                     raise PermissionDenied()
                 if discount.limited and discount.limit == discount.count:
                     raise serializers.ValidationError("Invalid discount!")
@@ -205,6 +210,8 @@ class UserStudentsDetailSerializer(serializers.ModelSerializer):
 
 
 class PaymentSerializer(serializers.ModelSerializer):
+
+    class_name = serializers.CharField(source="student._class.name", read_only=True)
 
     class Meta:
         model = local_models.Payment

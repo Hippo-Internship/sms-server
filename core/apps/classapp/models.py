@@ -123,16 +123,6 @@ class Class(models.Model):
 
 class Calendar(models.Model):
 
-    DAYS = (
-        (0, "Monday"),
-        (1, "Tuesday"),
-        (2, "Wednesday"),
-        (3, "Thursday"),
-        (4, "Friday"),
-        (5, "Saturday"),
-        (6, "Sunday"),
-    )
-
     id = models.AutoField(primary_key=True)
     _class = models.ForeignKey(
         Class,
@@ -151,16 +141,16 @@ class Calendar(models.Model):
         blank=True, 
         db_index=True
     )
-    day = models.IntegerField(choices=DAYS)
+    date = models.DateField(null=False, blank=False)
     start_time = models.TimeField(null=False, blank=False)
     end_time = models.TimeField(null=False, blank=False)
 
     class Meta:
         ordering = [ "id" ]
-        unique_together = [ "room", "day", "start_time" ]
+        unique_together = [ "room", "date", "start_time" ]
 
     def __str__(self):
-        return "%s %s %s" % (self.id, self.day, self._class)
+        return "%s %s %s" % (self.id, self.date, self._class)
 
 
 class Exam(models.Model):

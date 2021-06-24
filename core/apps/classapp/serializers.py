@@ -3,6 +3,7 @@ from datetime import datetime
 # Django built-in imports
 from django.contrib.auth import get_user_model
 from django.db.models.aggregates import Sum
+from django.db.models import Q
 # Third party imports
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -159,24 +160,23 @@ class CalendarSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, data):
-        _class = data["_class"]
-        if data["room"].branch.id is not _class.branch.id:
+        _class = data["_class"] if self.instance is None else self.instance._class
+        if data["room"].branch.id != _class.branch.id:
             raise PermissionDenied
-        if data["day"] > 6:
+        if data["date"] > _class.end_date or data["date"] < _class.start_date:
             raise serializers.ValidationError("Day should be between 0 and 6")
         if data["end_time"] < data["start_time"]:
             raise serializers.ValidationError("End time should be later than the start time!")
-        branch = _class.branch
         today_date = datetime.now()
-        classes = branch.classes.filter(
-            start_date__lte=today_date, 
-            end_date__gte=today_date,
-            calendar__room=data["room"].id,
-            calendar__day=data["day"],
-            calendar__start_time__lte=data["start_time"],
-            calendar__end_time__gte=data["start_time"]
+        calendar = local_models.Calendar.objects.filter(
+            room=data["room"].id,
+            date=data["date"],
+            start_time__lte=data["start_time"],
+            end_time__gte=data["start_time"],
         )
-        if classes.exists():
+        if self.instance is not None:
+            calendar = calendar.exclude(id=self.instance.id)
+        if calendar.exists():
             raise serializers.ValidationError("Room is occupied!")
         return data
 
@@ -226,3 +226,13 @@ class TeacherProfileSerializer(serializers.Serializer):
 class StaffProfileSerializer(serializers.Serializer):
 
     user = authapp_serializers.CustomUserSerializer()
+
+
+class CalendarCreateSerializer(serializers.ModelSerializer):
+    
+    repeat = serializers.BooleanField(default=False)
+
+    class Meta:
+        model = local_models.Calendar
+        field = "__all__"
+

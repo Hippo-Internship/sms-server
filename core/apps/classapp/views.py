@@ -1,8 +1,9 @@
 # Python imports
 from calendar import monthrange
-from datetime import datetime
+from datetime import datetime, timedelta
 # Django built-in imports
 from django.db.models import Sum, Count
+from django.db import transaction as django_transaction
 # Third party imports
 from rest_framework import status, viewsets
 from rest_framework import decorators as rest_decorator
@@ -217,13 +218,38 @@ class ClassViewSet(viewsets.GenericViewSet):
 
     @list_calendar.mapping.post
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
-    def create_calendar(self, request, _class=None):
-        calendar_request_data = request.data
-        calendar_request_data["_class"] = _class.id
-        calendar = self.get_serializer_class()(data=calendar_request_data)
+    @django_transaction.atomic
+    def create_calendar(self, request, _class:local_models.Class=None):
+        calendar_data = request.data
+        calendar_data["_class"] = _class.id
+        calendar = self.get_serializer_class()(data=calendar_data)
         calendar.is_valid(raise_exception=True)
-        calendar.save()
-        return core_responses.request_success_with_data(calendar.data)
+        start_date = calendar.validated_data["date"]
+        all_dates = []
+        interval = getattr(_class, "interval", 0)
+        print(interval)
+        if interval != None and interval <= _class.calendar.count() + len(all_dates):
+            return Response({ "detail": "Interval has reached the limit!" }, status=400)
+        for i in range(int((_class.end_date - start_date).days / 7) + 1):
+            all_dates.append(start_date)
+            start_date += timedelta(days=7)
+        possible_occupied_date = local_models.Calendar.objects.filter(
+            date__in=all_dates,
+            room=calendar.validated_data["room"],
+            start_time = calendar.validated_data.get("start_time", None),
+            end_time = calendar.validated_data.get("end_time", None)
+        )
+        if possible_occupied_date.exists():
+            return Response({ "detail": "Day cannot be repeated because room is occupied for some days!" }, status=400)
+        for new_date in all_dates:
+            new_calendar = local_models.Calendar()
+            new_calendar._class = _class
+            new_calendar.date = new_date
+            new_calendar.room = calendar.validated_data["room"]
+            new_calendar.start_time = calendar.validated_data.get("start_time", None)
+            new_calendar.end_time = calendar.validated_data.get("end_time", None)
+            new_calendar.save()
+        return core_responses.request_success()
 
     @list_calendar.mapping.delete
     @core_decorators.has_key("days")
@@ -245,14 +271,26 @@ class ClassViewSet(viewsets.GenericViewSet):
         today_date = datetime.now()
         filter_model = {
             "status": {
-                "active": {
-                    "name": "end_date__gte",
-                    "value": today_date
-                },
-                "completed": {
-                    "name": "end_date__lt",
-                    "value": today_date
-                },
+                "active": [
+                    {
+                        "name": "end_date__gte",
+                        "value": today_date
+                    },
+                    {
+                        "name": "canceled",
+                        "value": False
+                    }
+                ],
+                "completed": [
+                    {
+                        "name": "end_date__lt",
+                        "value": today_date
+                    },
+                    {
+                        "name": "canceled",
+                        "value": False
+                    }
+                ],
                 "canceled": {
                     "name": "canceled",
                     "value": True
@@ -261,12 +299,8 @@ class ClassViewSet(viewsets.GenericViewSet):
             "search": "user__phone__startswith"
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
-        if (query_params['status'] == "canceled"):
-            students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=True).order_by("id")
-        else:
-            students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False, **filter_queries).order_by("id")
-
-        # students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False, **filter_queries).order_by("id")
+        print(filter_queries, "dwqwdqw")
+        students = _class.students.filter(**filter_queries).annotate(payments_paid=Sum("payments__paid")).order_by("id")
         p_student = self.paginate_queryset(students)
         students = self.get_serializer_class()(p_student, many=True)
         return self.get_paginated_response(students.data)
@@ -427,6 +461,14 @@ class CalendarViewSet(viewsets.GenericViewSet):
         p_calendar = self.paginate_queryset(calendar)
         calendar = self.get_serializer_class()(p_calendar, many=True)
         return self.get_paginated_response(calendar.data)
+
+    @core_decorators.object_exists(model=local_models.Calendar, detail="Calendar")
+    def update(self, request, calendar):
+        calendar_data = request.data
+        calendar = self.get_serializer_class()(calendar, data=calendar_data)
+        calendar.is_valid(raise_exception=True)
+        calendar.save()
+        return core_responses.request_success_with_data(calendar.data)
 
 
 class ExamViewSet(viewsets.GenericViewSet):
