@@ -2,6 +2,7 @@
 from datetime import datetime
 # Django built-in imports
 from django.contrib.auth import get_user_model
+from django.db.models.aggregates import Sum
 # Third party imports
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -114,6 +115,7 @@ class ClassFullDetailSerializer(serializers.ModelSerializer):
     lesson_name = serializers.CharField(source="lesson.name", read_only=True)
     room_name = serializers.CharField(source="room.name", read_only=True)
     total_paid = serializers.IntegerField(read_only=True)
+    total_discount = serializers.SerializerMethodField(read_only=True)
     students_count = serializers.ReadOnlyField()
     school = serializers.IntegerField(source="branch.school.id", read_only=True)
     branch_image = serializers.ImageField(source="branch.image", read_only=True)
@@ -121,6 +123,9 @@ class ClassFullDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Class
         fields = "__all__"
+
+    def get_total_discount(self, value):
+        return value.students.aggregate(Sum("discount_amount"))["discount_amount__sum"]
 
 class CalendarSerializer(serializers.ModelSerializer):
 

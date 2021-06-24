@@ -2,7 +2,7 @@
 from calendar import monthrange
 from datetime import datetime
 # Django built-in imports
-from django.db.models.aggregates import Sum, Count
+from django.db.models import Sum, Count
 # Third party imports
 from rest_framework import viewsets
 from rest_framework import decorators as rest_decorator
@@ -172,14 +172,17 @@ class ClassViewSet(viewsets.GenericViewSet):
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
         classes = local_services.list_classes(request_user, self.get_queryset(), filter_queries)
-        # classes = classes.annotate(students_count=Count("students")).order_by("id")
         p_classes = self.paginate_queryset(classes)
         classes = self.get_serializer_class()(p_classes, many=True)
         return self.get_paginated_response(classes.data)
 
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def retrieve(self, request, _class=None):
-        _class = self.get_queryset().annotate(total_paid=Sum("students__payments__paid")).filter(id=_class.id)
+        _class = self.get_queryset().filter(id=_class.id).annotate(total_discount=Sum("students__discount_amount")).annotate(total_paid=Sum("students__payments__paid"))
+        print(_class.aggregate(Sum("students__discount_amount")), "dwqwdq")
+        print(_class[0].total_paid, _class[0].total_discount)
+        for item in _class[0].students.all():
+            print(item.discount_amount)
         _class =_class[0]
         _class = self.get_serializer_class()(_class)
         return core_responses.request_success_with_data(_class.data)
