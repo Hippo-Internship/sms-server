@@ -62,7 +62,8 @@ def generate_operator_profile_data(user: User):
 
 def generate_teacher_student_data(user: User):
     today_date = datetime.now()
-    students = studentapp_models.Student.objects.filter(_class__teacher=user.id, is_active=False)
+    # students = studentapp_models.Student.objects.filter(_class__teacher=user.id, is_active=False)
+    students = studentapp_models.Student.objects.filter(canceled=False, _class__teacher=user.id)
     active_student_count = students.filter(end_date__gte=today_date).count()
     completed_student_count = students.filter(end_date__lt=today_date).count()
     generated_data = {

@@ -19,6 +19,7 @@ class BranchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.Branch
+        print(model)
         fields = "__all__"
 
 

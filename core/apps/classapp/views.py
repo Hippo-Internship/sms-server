@@ -4,7 +4,7 @@ from datetime import datetime
 # Django built-in imports
 from django.db.models import Sum, Count
 # Third party imports
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from rest_framework import decorators as rest_decorator
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -173,18 +173,27 @@ class ClassViewSet(viewsets.GenericViewSet):
         filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
         classes = local_services.list_classes(request_user, self.get_queryset(), filter_queries)
         p_classes = self.paginate_queryset(classes)
-        classes = self.get_serializer_class()(p_classes, many=True)
+        classes = self.get_serializer_class()(p_classes, many=True, context={ "request": request })
         return self.get_paginated_response(classes.data)
 
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def retrieve(self, request, _class=None):
+<<<<<<< HEAD
         _class = self.get_queryset().filter(id=_class.id).annotate(total_discount=Sum("students__discount_amount")).annotate(total_paid=Sum("students__payments__paid"))
         print(_class.aggregate(Sum("students__discount_amount")), "dwqwdq")
         print(_class[0].total_paid, _class[0].total_discount)
         for item in _class[0].students.all():
             print(item.discount_amount)
+=======
+        # __classes = classes.annotate(students_count=Sum("students__discount_amount"))
+        # _class = self.get_queryset().filter(id=_class.id).annotate(total_paid=Sum("students__payments__paid")).annotate(total_discount=Sum("students__discount_amount"))
+        _class = self.get_queryset().filter(id=_class.id).annotate(total_paid=Sum("students__payments__paid"))
+        # _class = self.get_queryset().annotate(total_paid=Sum("students__payments__paid")).filter(id=_class.id)
+>>>>>>> a928014acf62f8c2092cb73713fdf1a93d6045a7
         _class =_class[0]
-        _class = self.get_serializer_class()(_class)
+        print(_class)
+        _class = self.get_serializer_class()(_class, context={ "request": request })
+        # print(_class.data)
         return core_responses.request_success_with_data(_class.data)
 
     def create(self, request):
@@ -251,12 +260,21 @@ class ClassViewSet(viewsets.GenericViewSet):
                 "completed": {
                     "name": "end_date__lt",
                     "value": today_date
+                },
+                "canceled": {
+                    "name": "canceled",
+                    "value": True
                 }
             },
             "search": "user__phone__startswith"
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
-        students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False, **filter_queries).order_by("id")
+        if (query_params['status'] == "canceled"):
+            students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=True).order_by("id")
+        else:
+            students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False, **filter_queries).order_by("id")
+
+        # students = _class.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False, **filter_queries).order_by("id")
         p_student = self.paginate_queryset(students)
         students = self.get_serializer_class()(p_student, many=True)
         return self.get_paginated_response(students.data)
