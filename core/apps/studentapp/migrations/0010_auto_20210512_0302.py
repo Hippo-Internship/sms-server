@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('classapp', '0006_alter_calendar_unique_together'),
+        # ('classapp', '0006_alter_calendar_unique_together'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('studentapp', '0009_auto_20210511_1004'),
     ]

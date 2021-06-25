@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('schoolapp', '0007_alter_school_image'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('classapp', '0006_alter_calendar_unique_together'),
+        # ('classapp', '0006_alter_calendar_unique_together'),
         ('datasheetapp', '0001_initial'),
     ]
 
