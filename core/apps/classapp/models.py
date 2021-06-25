@@ -1,5 +1,5 @@
 # Django built-in imports
-from datetime import datetime
+from django.utils import timezone
 from django.db.models.fields import DateField
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -142,8 +142,7 @@ class Calendar(models.Model):
         blank=True, 
         db_index=True
     )
-    day  = models.IntegerField(null=True, blank=True)
-    date = models.DateField(null=False, blank=False, default=datetime.now())
+    date = models.DateField(null=False, blank=False)
     start_time = models.TimeField(null=False, blank=False)
     end_time = models.TimeField(null=False, blank=False)
 

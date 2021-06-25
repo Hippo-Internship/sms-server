@@ -14,5 +14,5 @@ class DashboardViewset(viewsets.GenericViewSet):
 
     @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="payment")
     def list_payment_data(self, request):
-        local_services.generate_total_income_data(request.user)
-        return core_responses.request_success()
+        income_data = local_services.generate_total_income_data(request.user)
+        return core_responses.request_success_with_data()

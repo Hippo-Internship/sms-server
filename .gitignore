@@ -37,7 +37,8 @@ MANIFEST
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
-
+manage.py
+wsgi.py
 # Unit test / coverage reports
 htmlcov/
 .tox/
