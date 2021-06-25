@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('classapp', '0006_alter_calendar_unique_together'),
+        ('classapp', '0005_alter_calendar_unique_together'),
     ]
 
     operations = [
