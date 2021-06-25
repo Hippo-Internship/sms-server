@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'core.apps.studentapp.apps.StudentappConfig',
     'core.apps.utilityapp.apps.UtilityappConfig',
     'core.apps.datasheetapp.apps.DatasheetappConfig',
+    'core.apps.dashboardapp.apps.DashboardappConfig',
 ]
 
 MIDDLEWARE = [

@@ -11,4 +11,5 @@ urlpatterns = [
     path("api/student/", include("core.apps.studentapp.urls")),
     path("api/datasheet/", include("core.apps.datasheetapp.urls")),
     path("api/utility/", include("core.apps.utilityapp.urls")),
+    path("api/dashboard/", include("core.apps.dashboardapp.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
