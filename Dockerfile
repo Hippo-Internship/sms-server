@@ -5,8 +5,8 @@ COPY requirements.txt requirements.txt
 RUN apt-get install default-libmysqlclient-dev
 RUN pip3 install -U pip
 RUN pip install -r requirements.txt
-RUN python manage.py makemigrations
-RUN python manage.py migrate
-RUN python manage.py creategroups
-RUN python manage.py createdevgroups
+RUN python3 manage.py makemigrations
+RUN python3 manage.py migrate
+RUN python3 manage.py creategroups
+RUN python3 manage.py createdevgroups
 COPY . .
