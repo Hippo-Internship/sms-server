@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        # ('classapp', '0006_alter_calendar_unique_together'),
+        ('classapp', '0006_alter_calendar_unique_together'),
     ]
 
     operations = [
