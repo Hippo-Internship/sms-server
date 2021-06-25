@@ -9,4 +9,4 @@ COPY . .
 RUN python3 manage.py makemigrations
 RUN python3 manage.py migrate
 RUN python3 manage.py creategroups
-RUN python3 manage.py createdevgroups
+RUN python3 manage.py createdevusers
