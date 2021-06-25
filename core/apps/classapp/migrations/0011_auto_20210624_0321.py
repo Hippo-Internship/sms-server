@@ -12,12 +12,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='calendar',
-            name='date',
-            field=models.DateField(default=datetime.datetime(2021, 6, 24, 3, 21, 4, 285781, tzinfo=utc)),
-            preserve_default=False,
-        ),
+        # migrations.AddField(
+        #     model_name='calendar',
+        #     name='date',
+        #     field=models.DateField(default=datetime.datetime(2021, 6, 24, 3, 21, 4, 285781, tzinfo=utc)),
+        #     preserve_default=False,
+        # ),
         migrations.AlterUniqueTogether(
             name='calendar',
             unique_together={('room', 'date', 'start_time')},
