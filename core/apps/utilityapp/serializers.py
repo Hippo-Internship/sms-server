@@ -37,6 +37,26 @@ class PaymentMethodSerializer(serializers.ModelSerializer):
         model = local_models.PaymentMethod
         fields = "__all__"
 
+class PaymentMethodWithAnnotation(serializers.ModelSerializer):
+
+    total = serializers.FloatField(read_only=True)
+    branch_name = serializers.CharField(source="branch.name", read_only=True)
+
+    class Meta:
+        model = local_models.PaymentMethod
+        exclude = [ "created", "modified" ]
+
+
+class StatusWithAnnotation(serializers.ModelSerializer):
+
+    count = serializers.IntegerField(read_only=True)
+    branch_name = serializers.CharField(source="branch.name", read_only=True)
+
+    class Meta:
+        model = local_models.Status
+        exclude = [ "created", "modified" ]
+
+
 class ShortPaymentMethodSerializer(serializers.ModelSerializer):
 
     class Meta:

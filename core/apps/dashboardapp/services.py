@@ -3,12 +3,15 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 # Django imports
 from django.contrib.auth import get_user_model
-from django.db.models.aggregates import Min, Sum
+from django.db.models.aggregates import Count, Min, Sum
+from django.db.models.expressions import F
 from django.db.models.query import QuerySet
+from django.db.models.query_utils import Q
 # Third party imports
 # Local imports
 from core.apps.studentapp import models as studentapp_models
 from core.apps.classapp import models as classapp_models
+from core.apps.utilityapp import models as utilityapp_models
 
 User = get_user_model()
 
@@ -81,5 +84,52 @@ def generate_total_income_data(user: User, filter_queries: dict={}, filter: int=
     return generated_data
 
 def generate_students_data(user, filter_queries: dict={}, filter: int=3) -> dict:
+    queryset: QuerySet = User.objects
+    if user.groups.role_id == User.SUPER_ADMIN:
+        students = queryset.filter(groups__role_id=User.STUDENT, **filter_queries)
+    elif user.groups.role_id == User.ADMIN:
+        students = queryset.filter(groups__role_id=User.STUDENT, school=user.school.id, **filter_queries)
+    else:
+        students = queryset.filter(groups__role_id=User.STUDENT, branch=user.branch, **filter_queries)
+    today_date = datetime.now()
+    _students = studentapp_models.Student.objects.filter(
+        user__in=students, 
+        canceled=False
+    )
+    active_students = students.filter(
+        students__end_date__gte=today_date, 
+        students__canceled=False
+    ).distinct()
+    recurring_students = _students.values('user').annotate(cnt=Count('_class')).filter(cnt__gt = 1)
+    total_graduates = _students.aggregate(count=Count("id", filter=Q(end_date__lte=today_date, end_date=F("_class__end_date"))))
+    total_cancellation = studentapp_models.Student.objects.aggregate(count=Count("canceled", filter=Q(canceled=True)))
+    generated_data: dict = {
+        "active_students": active_students.count(),
+        "recurring_students": recurring_students.count(),
+        "total_students": students.count(),
+        "total_graduates": total_graduates["count"],
+        "total_cancellation": total_cancellation["count"]
+    }
+    return generated_data
 
-    return 12
+def generate_payment_by_type_data(user, filter_queries: dict={}, filter: int=3) -> QuerySet:
+    queryset: QuerySet = utilityapp_models.PaymentMethod.objects
+    if user.groups.role_id == User.SUPER_ADMIN:
+        payments = queryset.filter(**filter_queries)
+    elif user.groups.role_id == User.ADMIN:
+        payments = queryset.filter(school=user.school.id, **filter_queries)
+    else:
+        payments = queryset.filter(branch=user.branch, **filter_queries)
+    annotated_payments = payments.annotate(total=Sum("payments__paid")).order_by("branch")
+    return annotated_payments
+
+def generate_student_by_status_data(user, filter_queries: dict={}, filter: int=3) -> QuerySet:
+    queryset: QuerySet = utilityapp_models.Status.objects
+    if user.groups.role_id == User.SUPER_ADMIN:
+        statuses = queryset.filter(**filter_queries)
+    elif user.groups.role_id == User.ADMIN:
+        statuses = queryset.filter(school=user.school.id, **filter_queries)
+    else:
+        statuses = queryset.filter(branch=user.branch, **filter_queries)
+    annotated_statuses = statuses.annotate(count=Count("students")).order_by("branch")
+    return annotated_statuses
