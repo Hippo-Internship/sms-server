@@ -113,6 +113,7 @@ class StudentViewSet(viewsets.GenericViewSet):
     def create_payment(self, request, student=None):
         payment_request_data = request.data
         payment_request_data["student"] = student.id
+        payment_request_data["branch"] = student.user.branch.id
         payment = self.get_serializer_class()(data=payment_request_data) 
         payment.is_valid(raise_exception=True)
         payment.save()

@@ -101,6 +101,14 @@ class Payment(models.Model):
         blank=False,
         db_index=True
     )
+    branch = models.ForeignKey(
+        schoolapp_models.Branch,
+        on_delete = models.CASCADE, 
+        related_name="payments", 
+        null=False,
+        blank=False, 
+        db_index=True
+    )
     pay_type = models.ForeignKey(
         utilityapp_models.PaymentMethod,
         on_delete = models.CASCADE, 

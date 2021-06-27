@@ -223,7 +223,7 @@ class PaymentUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Payment
         fields = "__all__"
-        read_only_fields = [ "id", "student" ]
+        read_only_fields = [ "id", "student", "branch" ]
 
 
 

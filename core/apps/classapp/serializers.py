@@ -2,7 +2,7 @@
 from datetime import datetime
 # Django built-in imports
 from django.contrib.auth import get_user_model
-from django.db.models.aggregates import Sum
+from django.db.models.aggregates import Count, Sum
 from django.db.models import Q
 # Third party imports
 from rest_framework import serializers
@@ -214,6 +214,22 @@ class ShortLessonSerializer(serializers.ModelSerializer):
         model = local_models.Lesson
         fields = [ "id", "name", "branch" ]
 
+
+class LessonWithAnnotationSerializer(serializers.ModelSerializer):
+
+    total = serializers.FloatField(read_only=True)
+    students_count = serializers.SerializerMethodField(read_only=True)
+    total_discount = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = local_models.Lesson
+        fields = [ "id", "name", "branch", "total", "total_discount", "students_count" ]
+
+    def get_total_discount(self, value):
+        return value.classes.aggregate(total=Sum("students__discount_amount"))["total"]
+
+    def get_students_count(self, value):
+        return value.classes.aggregate(count=Count("students"))["count"]
 
 class TeacherProfileSerializer(serializers.Serializer):
 

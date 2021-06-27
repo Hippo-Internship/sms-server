@@ -35,3 +35,12 @@ class BranchShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Branch
         fields = [ "id", "name" ]
+
+
+class BranchWithAnnotationSerializer(serializers.ModelSerializer):
+
+    total = serializers.FloatField(read_only=True)
+
+    class Meta:
+        model = local_models.Branch
+        fields = [ "id", "name", "total" ]

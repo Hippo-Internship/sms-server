@@ -12,6 +12,7 @@ from django.db.models.query_utils import Q
 from core.apps.studentapp import models as studentapp_models
 from core.apps.classapp import models as classapp_models
 from core.apps.utilityapp import models as utilityapp_models
+from core.apps.schoolapp import models as schoolapp_models
 
 User = get_user_model()
 
@@ -133,3 +134,23 @@ def generate_student_by_status_data(user, filter_queries: dict={}, filter: int=3
         statuses = queryset.filter(branch=user.branch, **filter_queries)
     annotated_statuses = statuses.annotate(count=Count("students")).order_by("branch")
     return annotated_statuses
+
+def generate_payment_by_branch_data(user, filter_queries: dict={}, filter: int=3) -> QuerySet:
+    queryset: QuerySet = schoolapp_models.Branch.objects
+    if user.groups.role_id == User.SUPER_ADMIN:
+        branches = queryset.filter(**filter_queries)
+    elif user.groups.role_id == User.ADMIN:
+        branches = queryset.filter(school=user.school.id, **filter_queries)
+    annotated_branches = branches.annotate(total=Sum("payments__paid")).order_by("total")
+    return annotated_branches                              
+
+def generate_payment_by_lesson_data(user, filter_queries: dict={}, filter: int=3) -> QuerySet:
+    queryset: QuerySet = classapp_models.Lesson.objects
+    if user.groups.role_id == User.SUPER_ADMIN:
+        lessons = queryset.filter(**filter_queries)
+    elif user.groups.role_id == User.ADMIN:
+        lessons = queryset.filter(school=user.school.id, **filter_queries)
+    else:
+        lessons = queryset.filter(branch=user.branch, **filter_queries)
+    annotated_lessons = lessons.annotate(total=Sum("classes__students__payments__paid")).order_by("total")
+    return annotated_lessons
