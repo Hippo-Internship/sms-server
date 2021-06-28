@@ -34,12 +34,20 @@ class Status(models.Model):
 
 class Datasheet(base_models.BaseWithDate):
 
+    OTHER = 0
+    PHONE = 1
+    IN_PERSON = 2
+    FACEBOOK = 3
+    INSTAGRAM = 4
+    WEBSITE = 5
+
     REGISTER_TYPES = (
-        (1, "Phone"),
-        (2, "In Person"),
-        (3, "Facebook"),
-        (4, "Instagram"),
-        (5, "Website")
+        (OTHER, "Other"),
+        (PHONE, "Phone"),
+        (IN_PERSON, "In Person"),
+        (FACEBOOK, "Facebook"),
+        (INSTAGRAM, "Instagram"),
+        (WEBSITE, "Website")
     )
 
     id = models.BigAutoField(primary_key=True)
@@ -81,7 +89,7 @@ class Datasheet(base_models.BaseWithDate):
         blank=False,
         db_index=True
     )
-    register_type = models.IntegerField(choices=REGISTER_TYPES, null=True, blank=True)
+    register_type = models.IntegerField(choices=REGISTER_TYPES, null=False, blank=False, default=OTHER)
     description = models.CharField(max_length=255, null=True, blank=True)
     time = models.TimeField(null=True, blank=True)
     date = models.DateField(null=True, blank=True)

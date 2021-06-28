@@ -11,6 +11,7 @@ from core import \
 from core.apps.utilityapp import serializers as utilityapp_serializer
 from core.apps.schoolapp import serializers as schoolapp_serializer
 from core.apps.classapp import serializers as classapp_serializer
+from core.apps.authapp import serializers as authapp_serializer
 from . import services as local_services
 
 
@@ -134,3 +135,81 @@ class DashboardViewset(viewsets.GenericViewSet):
         p_student_data = self.paginate_queryset(student_data)
         student_data = classapp_serializer.LessonWithAnnotationSerializer(p_student_data, many=True)
         return self.get_paginated_response(student_data.data)
+
+    @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="datasheet")
+    def list_datasheet_data(self, request):
+        request_user = request.user
+        query_params = core_utils.normalize_data(
+            {
+                "branch": "int",
+                "school": "int",
+                "filter": "int"
+            },
+            dict(request.query_params)
+        )
+        filter_model = {
+            "branch": "branch",
+            "school": "branch__school",
+        }
+        filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
+        datasheet_data = local_services.generate_datasheet_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
+        return core_responses.request_success_with_data(datasheet_data) 
+
+    @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="datasheet")
+    def list_datasheet_data(self, request):
+        request_user = request.user
+        query_params = core_utils.normalize_data(
+            {
+                "branch": "int",
+                "school": "int",
+                "filter": "int"
+            },
+            dict(request.query_params)
+        )
+        filter_model = {
+            "branch": "branch",
+            "school": "branch__school",
+        }
+        filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
+        datasheet_data = local_services.generate_datasheet_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
+        return core_responses.request_success_with_data(datasheet_data) 
+
+    @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="datasheet/operator")
+    def list_datasheet_by_operator(self, request):
+        request_user = request.user
+        query_params = core_utils.normalize_data(
+            {
+                "branch": "int",
+                "school": "int",
+                "filter": "int"
+            },
+            dict(request.query_params)
+        )
+        filter_model = {
+            "branch": "branch",
+            "school": "branch__school",
+        }
+        filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
+        student_data = local_services.generate_datasheet_by_operator_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
+        p_student_data = self.paginate_queryset(student_data)
+        student_data = authapp_serializer.OperatorWithAnnotationSerializer(p_student_data, many=True)
+        return self.get_paginated_response(student_data.data)
+
+    @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="datasheet/type")
+    def list_datasheet_by_register_type_data(self, request):
+        request_user = request.user
+        query_params = core_utils.normalize_data(
+            {
+                "branch": "int",
+                "school": "int",
+                "filter": "int"
+            },
+            dict(request.query_params)
+        )
+        filter_model = {
+            "branch": "branch",
+            "school": "branch__school",
+        }
+        filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
+        datasheet_data = local_services.generate_datasheet_by_register_type_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
+        return core_responses.request_success_with_data(datasheet_data) 

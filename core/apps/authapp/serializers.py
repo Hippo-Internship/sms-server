@@ -132,3 +132,13 @@ class OperatorProfileSerializer(serializers.Serializer):
     datasheet_total = serializers.IntegerField()
     student_count = serializers.ListField()
     student_total = serializers.IntegerField()
+
+
+class OperatorWithAnnotationSerializer(serializers.ModelSerializer):
+
+    datasheet_count = serializers.IntegerField(read_only=True)
+    branch_name = serializers.CharField(source="branch.name")
+
+    class Meta:
+        model = User
+        fields = [ "id", "firstname", "lastname", "datasheet_count", "branch_name" ]
