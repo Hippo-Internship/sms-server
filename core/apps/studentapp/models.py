@@ -1,4 +1,5 @@
 # Django built-in imports
+from django.utils import timezone
 from re import T
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -119,7 +120,7 @@ class Payment(models.Model):
     )
     paid = models.FloatField(null=False, blank=False)
     is_debit = models.BooleanField(null=False, default=False)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(null=False, blank=False, default=timezone.now)
 
     class Meta:
         ordering = [ "id" ]

@@ -223,7 +223,7 @@ class LessonWithAnnotationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.Lesson
-        fields = [ "id", "name", "branch", "total", "total_discount", "students_count" ]
+        fields = [ "id", "name", "branch", "total", "total_discount", "students_count", "price" ]
 
     def get_total_discount(self, value):
         return value.classes.aggregate(total=Sum("students__discount_amount"))["total"]

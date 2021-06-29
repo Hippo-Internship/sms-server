@@ -35,7 +35,12 @@ class DashboardViewset(viewsets.GenericViewSet):
             dict(request.query_params)
         )
         filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
-        income_data = local_services.generate_total_income_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
+        _filter_model = {
+            "branch": "branch",
+            "school": "branch__school",
+        }
+        _filter_queries = core_utils.build_filter_query(_filter_model, query_params, user=request_user)
+        income_data = local_services.generate_total_income_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1), add_filter_queries=_filter_queries)
         return core_responses.request_success_with_data(income_data)
 
     @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="payment/branch")
@@ -50,9 +55,8 @@ class DashboardViewset(viewsets.GenericViewSet):
         )
         filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
         branch_income_data = local_services.generate_payment_by_branch_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
-        p_branch_income_data = self.paginate_queryset(branch_income_data)
-        branch_income_data = schoolapp_serializer.BranchWithAnnotationSerializer(p_branch_income_data, many=True)
-        return self.get_paginated_response(branch_income_data.data)
+        branch_income_data = schoolapp_serializer.BranchWithAnnotationSerializer(branch_income_data, many=True, context={ "request": request })
+        return core_responses.request_success_with_data(branch_income_data.data)
         
     @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="student")
     def list_student_data(self, request):
@@ -132,9 +136,8 @@ class DashboardViewset(viewsets.GenericViewSet):
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
         student_data = local_services.generate_payment_by_lesson_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
-        p_student_data = self.paginate_queryset(student_data)
-        student_data = classapp_serializer.LessonWithAnnotationSerializer(p_student_data, many=True)
-        return self.get_paginated_response(student_data.data)
+        student_data = classapp_serializer.LessonWithAnnotationSerializer(student_data, many=True)
+        return core_responses.request_success_with_data(student_data.data)
 
     @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="datasheet")
     def list_datasheet_data(self, request):

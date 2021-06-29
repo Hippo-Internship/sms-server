@@ -217,6 +217,7 @@ class StudentGetOrModifyPermission(BasePermission):
         user = request.user
         switch = generate_basic_permission_switch("studentapp", "student")
         switch["list_payments"] = "studentapp.view_payment"
+        switch["list_user_payment"] = "studentapp.view_payment"
         switch["create_payment"] = "studentapp.add_payment"
         switch["list_notes"] = "studentapp.view_note"
         switch["list_user_students"] = "studentapp.view_student"

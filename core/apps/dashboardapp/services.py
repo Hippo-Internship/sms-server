@@ -17,24 +17,24 @@ from core.apps.datasheetapp import models as datasheetapp_models
 
 User = get_user_model()
 
-def generate_total_income_data(user: User, filter_queries: dict={}, filter: int=1) -> dict:
+def generate_total_income_data(user: User, filter_queries: dict={}, filter: int=1, add_filter_queries: dict={}) -> dict:
     queryset: QuerySet = studentapp_models.Payment.objects
     class_queryset: QuerySet = classapp_models.Class.objects
     if user.groups.role_id == User.SUPER_ADMIN:
         payments = queryset.filter(**filter_queries)
-        classes = class_queryset.filter(**filter_queries)
+        classes = class_queryset.filter(**add_filter_queries)
     elif user.groups.role_id == User.ADMIN:
         payments = queryset.filter(student__user__branch__school=user.school.id, **filter_queries)
-        classes = class_queryset.filter(branch__school=user.school.id, **filter_queries)
+        classes = class_queryset.filter(branch__school=user.school.id, **add_filter_queries)
     else:
         payments = queryset.filter(student__user__branch=user.branch, **filter_queries)
-        classes = class_queryset.filter(branch=user.branch, **filter_queries)
+        classes = class_queryset.filter(branch=user.branch, **add_filter_queries)
+    today_date = datetime.now()
     all_time_start_date = payments.aggregate(min_date=Min("date"))["min_date"]
-    all_time_start_date = datetime(all_time_start_date.year, all_time_start_date.month, all_time_start_date.day)
+    all_time_start_date = datetime(all_time_start_date.year, all_time_start_date.month, all_time_start_date.day) if all_time_start_date is not None else today_date
     income_by_filter: list = []
     income_dates: list = []
     total_income_by_filter: int = 0
-    today_date = datetime.now()
     if filter == 1:
         for i in range(6, -1, -1):
             temp_date = today_date - timedelta(days=i)
@@ -63,11 +63,12 @@ def generate_total_income_data(user: User, filter_queries: dict={}, filter: int=
         remainder_days = delta_days - _delta_days * 12
         for i in range(12, 0, -1):
             temp_date = today_date - timedelta(days=(_delta_days * (i - 1)) + remainder_days if i - 1 != 0 else 0)  
+            print("a", today_date - timedelta(days=(_delta_days * i) + remainder_days))
+            print("b ", today_date - timedelta(days=(_delta_days * (i - 1)) + remainder_days if i - 1 != 0 else 0))
             temp_income = payments.filter(
-                date__range=[ 
-                    today_date - timedelta(days=(_delta_days * i) + remainder_days), 
-                    temp_date
-                ]).aggregate(income=Sum("paid"))
+                date__gt=today_date - timedelta(days=(_delta_days * i) + remainder_days), 
+                date__lte=temp_date
+            ).aggregate(income=Sum("paid"))
             real_income = temp_income["income"] if temp_income["income"] is not None else 0
             income_by_filter.append(real_income)
             total_income_by_filter += real_income
@@ -142,7 +143,7 @@ def generate_payment_by_branch_data(user, filter_queries: dict={}, filter: int=3
         branches = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
         branches = queryset.filter(school=user.school.id, **filter_queries)
-    annotated_branches = branches.annotate(total=Sum("payments__paid")).order_by("total")
+    annotated_branches = branches.annotate(total=Sum("payments__paid")).order_by("-total")[:5]
     return annotated_branches                              
 
 def generate_payment_by_lesson_data(user, filter_queries: dict={}, filter: int=3) -> QuerySet:
@@ -150,7 +151,7 @@ def generate_payment_by_lesson_data(user, filter_queries: dict={}, filter: int=3
     if user.groups.role_id == User.SUPER_ADMIN:
         lessons = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
-        lessons = queryset.filter(school=user.school.id, **filter_queries)
+        lessons = queryset.filter(branch__school=user.school.id, **filter_queries)
     else:
         lessons = queryset.filter(branch=user.branch, **filter_queries)
     annotated_lessons = lessons.annotate(total=Sum("classes__students__payments__paid")).order_by("total")

@@ -43,4 +43,4 @@ class BranchWithAnnotationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.Branch
-        fields = [ "id", "name", "total" ]
+        fields = [ "id", "name", "total", "image", "website" ]
