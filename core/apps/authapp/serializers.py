@@ -138,7 +138,8 @@ class OperatorWithAnnotationSerializer(serializers.ModelSerializer):
 
     datasheet_count = serializers.IntegerField(read_only=True)
     branch_name = serializers.CharField(source="branch.name")
+    image = serializers.ImageField(source="profile.image")
 
     class Meta:
         model = User
-        fields = [ "id", "firstname", "lastname", "datasheet_count", "branch_name" ]
+        fields = [ "id", "firstname", "lastname", "datasheet_count", "branch_name", "phone", "image" ]

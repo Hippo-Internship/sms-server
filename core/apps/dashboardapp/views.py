@@ -77,6 +77,25 @@ class DashboardViewset(viewsets.GenericViewSet):
         student_data = local_services.generate_students_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
         return core_responses.request_success_with_data(student_data)
 
+    @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="student/registered")
+    def list_registered_student_data(self, request):
+        request_user = request.user
+        query_params = core_utils.normalize_data(
+            {
+                "branch": "int",
+                "school": "int",
+                "filter": "int"
+            },
+            dict(request.query_params)
+        )
+        filter_model = {
+            "branch": "user__branch",
+            "school": "user__branch__school",
+        }
+        filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
+        student_data = local_services.generate_registered_students_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
+        return core_responses.request_success_with_data(student_data)
+
     @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="payment/type")
     def list_payment_by_type(self, request):
         request_user = request.user
@@ -165,13 +184,15 @@ class DashboardViewset(viewsets.GenericViewSet):
             {
                 "branch": "int",
                 "school": "int",
-                "filter": "int"
+                "filter": "int",
+                "id": "int"
             },
             dict(request.query_params)
         )
         filter_model = {
             "branch": "branch",
             "school": "branch__school",
+            "id": "operator__id"
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
         datasheet_data = local_services.generate_datasheet_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
@@ -194,9 +215,8 @@ class DashboardViewset(viewsets.GenericViewSet):
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
         student_data = local_services.generate_datasheet_by_operator_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
-        p_student_data = self.paginate_queryset(student_data)
-        student_data = authapp_serializer.OperatorWithAnnotationSerializer(p_student_data, many=True)
-        return self.get_paginated_response(student_data.data)
+        student_data = authapp_serializer.OperatorWithAnnotationSerializer(student_data, many=True, context={ "request": request })
+        return core_responses.request_success_with_data(student_data.data)
 
     @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="datasheet/type")
     def list_datasheet_by_register_type_data(self, request):

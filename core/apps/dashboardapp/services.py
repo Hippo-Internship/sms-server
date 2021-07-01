@@ -59,15 +59,14 @@ def generate_total_income_data(user: User, filter_queries: dict={}, filter: int=
         temp_total_lesson_price = classes.filter(start_date__range=[ today_date - relativedelta(months=12) , today_date ]).aggregate(total=Sum("lesson__price"))
     elif filter == 3:
         delta_days: int = (today_date.date() - all_time_start_date.date()).days
-        _delta_days = int(delta_days / 12)
-        remainder_days = delta_days - _delta_days * 12
+        gap = 12 if delta_days > 12 else 1
+        _delta_days = int(delta_days / gap)
+        remainder_days = delta_days - _delta_days * gap
         for i in range(12, 0, -1):
             temp_date = today_date - timedelta(days=(_delta_days * (i - 1)) + remainder_days if i - 1 != 0 else 0)  
-            print("a", today_date - timedelta(days=(_delta_days * i) + remainder_days))
-            print("b ", today_date - timedelta(days=(_delta_days * (i - 1)) + remainder_days if i - 1 != 0 else 0))
             temp_income = payments.filter(
-                date__gt=today_date - timedelta(days=(_delta_days * i) + remainder_days), 
-                date__lte=temp_date
+                date__gte=today_date - timedelta(days=(_delta_days * i) + remainder_days), 
+                date__lt=temp_date
             ).aggregate(income=Sum("paid"))
             real_income = temp_income["income"] if temp_income["income"] is not None else 0
             income_by_filter.append(real_income)
@@ -197,15 +196,18 @@ def generate_datasheet_data(user: User, filter_queries: dict={}, filter: int=1) 
         _delta_days = int(delta_days / gap)
         remainder_days = delta_days - _delta_days * gap
         for i in range(gap, 0, -1):
+            start_date = today_date - timedelta(days=(_delta_days * i) + remainder_days)
             temp_date = today_date - timedelta(days=(_delta_days * (i - 1)) + remainder_days if i - 1 != 0 else 0)  
             temp_count = datasheets.filter(
-                created__range=[ 
-                    today_date - timedelta(days=(_delta_days * i) + remainder_days), 
-                    temp_date
-                ]).aggregate(count=Count("id"))
+                    created__gte=start_date,
+                    created__lt=temp_date
+                ).aggregate(count=Count("id"))
             real_count = temp_count["count"] if temp_count["count"] is not None else 0
             count_by_filter.append(real_count)
             total_count_by_filter += real_count
+            if gap == 1:
+                count_dates.append(start_date.strftime("%Y-%m-%d"))
+                count_by_filter.append(0)
             count_dates.append(temp_date.strftime("%Y-%m-%d"))
     generated_data: dict = {
         "total": total_count_by_filter,
@@ -222,7 +224,7 @@ def generate_datasheet_by_operator_data(user, filter_queries: dict={}, filter: i
         operators = queryset.filter(groups__role_id=user.OPERATOR, school=user.school.id, **filter_queries)
     else:
         operators = queryset.filter(groups__role_id=user.OPERATOR, branch=user.branch, **filter_queries)
-    annotated_operators = operators.annotate(datasheet_count=Count("registered_datasheets")).order_by("datasheet_count")
+    annotated_operators = operators.annotate(datasheet_count=Count("registered_datasheets")).order_by("-datasheet_count")[:5]
     return annotated_operators
 
 def generate_datasheet_by_register_type_data(user: User, filter_queries: dict={}, filter: int=1) -> dict:
@@ -241,4 +243,30 @@ def generate_datasheet_by_register_type_data(user: User, filter_queries: dict={}
         website_count=Count("id", filter=Q(register_type=datasheetapp_models.Datasheet.WEBSITE)),
         other_count=Count("id", filter=Q(register_type=datasheetapp_models.Datasheet.OTHER)),
     )
+    return generated_data
+
+def generate_registered_students_data(user: User, filter_queries: dict={}, filter: int=1) -> dict:
+    queryset: QuerySet = studentapp_models.Student.objects
+    if user.groups.role_id == User.SUPER_ADMIN:
+        students = queryset.filter(**filter_queries)
+    elif user.groups.role_id == User.ADMIN:
+        students = queryset.filter(user__branch__school=user.school.id, **filter_queries)
+    else:
+        students = queryset.filter(user__branch=user.branch, **filter_queries)
+    today_date = datetime.now()
+    count_by_filter: list = []
+    count_dates: list = []
+    total_count_by_filter: int = 0
+    for i in range(6, -1, -1):
+        temp_date = today_date - timedelta(days=i)
+        temp_count = students.filter(created=temp_date).aggregate(count=Count("id"))
+        real_count = temp_count["count"] if temp_count["count"] is not None else 0
+        count_by_filter.append(real_count)
+        total_count_by_filter += real_count
+        count_dates.append(temp_date.strftime("%Y-%m-%d"))
+    generated_data: dict = {
+        "total": total_count_by_filter,
+        "data": count_by_filter,
+        "dates": count_dates
+    }
     return generated_data
