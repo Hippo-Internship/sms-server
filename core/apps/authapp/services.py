@@ -3,10 +3,13 @@ from datetime import datetime, timedelta
 from re import M
 # Django built-in imports
 from django.contrib.auth import get_user_model
+from django.db.models.aggregates import Count
+from django.db.models.query_utils import Q
 # Third party imports
 from rest_framework.exceptions import PermissionDenied
 # Local imports
 from core.apps.studentapp import models as studentapp_models
+from core.apps.datasheetapp import models as datasheetapp_models
 
 # User model 
 User = get_user_model()
@@ -51,6 +54,7 @@ def generate_operator_profile_data(user: User):
         "datasheet_total": datasheets.count(),
         "student_count": [],
         "student_total": students.count(),
+        "register_statistics": generate_datasheet_by_register_type_data(user)
     }
     for day in range(week_day + 1):
         current_day = (today_date - timedelta(days=day)).strftime("%Y-%m-%d")
@@ -85,4 +89,15 @@ def generate_teacher_class_data(user: User):
         "active_class_count": active_class_count,
         "total": classes.count()
     }
+    return generated_data
+
+def generate_datasheet_by_register_type_data(user: User, filter_queries: dict={}, filter: int=1) -> dict:
+    generated_data = user.registered_datasheets.aggregate(
+        in_person_count=Count("id", filter=Q(register_type=datasheetapp_models.Datasheet.IN_PERSON)),
+        phone_count=Count("id", filter=Q(register_type=datasheetapp_models.Datasheet.PHONE)),
+        facebook_count=Count("id", filter=Q(register_type=datasheetapp_models.Datasheet.FACEBOOK)),
+        instagram_count=Count("id", filter=Q(register_type=datasheetapp_models.Datasheet.INSTAGRAM)),
+        website_count=Count("id", filter=Q(register_type=datasheetapp_models.Datasheet.WEBSITE)),
+        other_count=Count("id", filter=Q(register_type=datasheetapp_models.Datasheet.OTHER)),
+    )
     return generated_data
