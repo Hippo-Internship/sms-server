@@ -53,6 +53,10 @@ class DashboardViewset(viewsets.GenericViewSet):
             },
             dict(request.query_params)
         )
+        filter_model = {
+            "branch": "branch",
+            "school": "school",
+        }
         filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
         branch_income_data = local_services.generate_payment_by_branch_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
         branch_income_data = schoolapp_serializer.BranchWithAnnotationSerializer(branch_income_data, many=True, context={ "request": request })

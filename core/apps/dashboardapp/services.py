@@ -43,7 +43,7 @@ def generate_total_income_data(user: User, filter_queries: dict={}, filter: int=
             income_by_filter.append(real_income)
             total_income_by_filter += real_income
             income_dates.append(temp_date.strftime("%Y-%m-%d"))
-        temp_total_lesson_price = classes.filter(start_date__range=[ today_date - timedelta(days=7), today_date ]).aggregate(total=Sum("lesson__price"))
+        lesson_classes = classes.filter(start_date__range=[ today_date - timedelta(days=7), today_date ])
     elif filter == 2:
         for i in range(12, 0, -1):
             temp_date = today_date - relativedelta(months=i - 1) 
@@ -56,7 +56,7 @@ def generate_total_income_data(user: User, filter_queries: dict={}, filter: int=
             income_by_filter.append(real_income)
             total_income_by_filter += real_income
             income_dates.append(temp_date.strftime("%Y-%m-%d"))
-        temp_total_lesson_price = classes.filter(start_date__range=[ today_date - relativedelta(months=12) , today_date ]).aggregate(total=Sum("lesson__price"))
+        lesson_classes = classes.filter(start_date__range=[ today_date - relativedelta(months=12) , today_date ])
     elif filter == 3:
         delta_days: int = (today_date.date() - all_time_start_date.date()).days
         gap = 12 if delta_days > 12 else 1
@@ -72,9 +72,12 @@ def generate_total_income_data(user: User, filter_queries: dict={}, filter: int=
             income_by_filter.append(real_income)
             total_income_by_filter += real_income
             income_dates.append(temp_date.strftime("%Y-%m-%d"))
-        temp_total_lesson_price = classes.filter(start_date__range=[ today_date - timedelta(days=delta_days), today_date ]).aggregate(total=Sum("lesson__price"))
+        lesson_classes = classes.filter(start_date__range=[ today_date - timedelta(days=delta_days), today_date ])
+    temp_total_lesson_price = lesson_classes.aggregate(total=Sum("lesson__price"))
+    temp_total_lesson_payment = lesson_classes.aggregate(total=Sum("students__payments__paid"))
     temp_pending = temp_total_lesson_price["total"] if temp_total_lesson_price["total"] is not None else 0
-    real_pending = temp_pending - total_income_by_filter
+    temp_total = temp_total_lesson_payment["total"] if temp_total_lesson_payment["total"] is not None else 0
+    real_pending = temp_pending - temp_total
     generated_data: dict = {
         "income": {
             "total": total_income_by_filter,
