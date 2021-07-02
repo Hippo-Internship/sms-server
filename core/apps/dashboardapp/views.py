@@ -240,3 +240,41 @@ class DashboardViewset(viewsets.GenericViewSet):
         filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
         datasheet_data = local_services.generate_datasheet_by_register_type_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
         return core_responses.request_success_with_data(datasheet_data) 
+
+    @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="class")
+    def list_class_student_data(self, request):
+        request_user = request.user
+        query_params = core_utils.normalize_data(
+            {
+                "branch": "int",
+                "school": "int",
+                "filter": "int"
+            },
+            dict(request.query_params)
+        )
+        filter_model = {
+            "branch": "branch",
+            "school": "branch__school",
+        }
+        filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
+        class_data = local_services.generate_class_student_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
+        return core_responses.request_success_with_data(class_data) 
+
+    @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="class/stats")
+    def list_class_student_statistics_data(self, request):
+        request_user = request.user
+        query_params = core_utils.normalize_data(
+            {
+                "branch": "int",
+                "school": "int",
+                "filter": "int"
+            },
+            dict(request.query_params)
+        )
+        filter_model = {
+            "branch": "branch",
+            "school": "branch__school",
+        }
+        filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
+        class_data = local_services.generate_class_student_statistics_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1))
+        return core_responses.request_success_with_data(class_data) 

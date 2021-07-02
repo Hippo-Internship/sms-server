@@ -273,3 +273,51 @@ def generate_registered_students_data(user: User, filter_queries: dict={}, filte
         "dates": count_dates
     }
     return generated_data
+
+def generate_class_student_data(user: User, filter_queries: dict={}, filter: int=1) -> dict:
+    queryset: QuerySet = classapp_models.Class.objects
+    if user.groups.role_id == User.SUPER_ADMIN:
+        classes = queryset.filter(**filter_queries)
+    elif user.groups.role_id == User.ADMIN:
+        classes = queryset.filter(branch__school=user.school.id, **filter_queries)
+    elif user.groups.role_id == User.TEACHER:
+        classes = user.classes 
+    else:
+        classes = queryset.filter(branch=user.branch, **filter_queries)
+    today_date = datetime.now()
+    total_interval = 0
+    count_by_filter = []
+    count_dates = []
+    for i in range(12, 0, -1):
+        temp_date = today_date - relativedelta(months=i - 1) 
+        print(temp_date.year, temp_date.month)
+        temp_count = classes.aggregate(count=Count("calendar", filter=Q(calendar__date__year=temp_date.year, calendar__date__month=temp_date.month)))
+        real_count = temp_count["count"] if temp_count["count"] is not None else 0
+        count_by_filter.append(real_count)
+        total_interval += real_count
+        count_dates.append(temp_date.strftime("%Y-%m-%d"))
+    generated_data: dict = {
+        "total": total_interval,
+        "data": count_by_filter,
+        "dates": count_dates
+    }
+    return generated_data
+
+def generate_class_student_statistics_data(user: User, filter_queries: dict={}, filter: int=1) -> dict:
+    queryset: QuerySet = classapp_models.Class.objects
+    if user.groups.role_id == User.SUPER_ADMIN:
+        classes = queryset.filter(**filter_queries)
+    elif user.groups.role_id == User.ADMIN:
+        classes = queryset.filter(branch__school=user.school.id, **filter_queries)
+    elif user.groups.role_id == User.TEACHER:
+        classes = user.classes 
+    else:
+        classes = queryset.filter(branch=user.branch, **filter_queries)
+    today_date = datetime.now()
+    result = classes.aggregate(
+        active=Count("id", filter=Q(start_date__lte=today_date, end_date__gt=today_date)),
+        finished=Count("id", filter=Q(end_date__lt=today_date)),
+        upcomming=Count("id", filter=Q(start_date__gt=today_date)),
+        total=Count("id")
+    )
+    return result

@@ -68,9 +68,7 @@ class UserViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=User, detail="User")
     def retrieve(self, request, user):
-        request_user = request.user
         generated_data = { "user": user }
-        print('ROLE_ID:', user.groups.role_id, User.OPERATOR, '\n')
         if user.groups.role_id == User.OPERATOR:
             generated_data = local_services.generate_operator_profile_data(user)
             serializer = local_serializers.OperatorProfileSerializer
