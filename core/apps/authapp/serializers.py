@@ -132,6 +132,7 @@ class OperatorProfileSerializer(serializers.Serializer):
     datasheet_total = serializers.IntegerField()
     student_count = serializers.ListField()
     student_total = serializers.IntegerField()
+    register_statistics = serializers.DictField()
 
 
 class OperatorWithAnnotationSerializer(serializers.ModelSerializer):
