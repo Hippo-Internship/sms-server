@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('schoolapp', '0001_initial'),
-        ('auth', '0013_group_role_id'),
+        # ('auth', '0013_group_role_id'),
     ]
 
     operations = [
