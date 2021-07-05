@@ -25,4 +25,4 @@ def auto_delete_profile_on_change(sender, instance, **kwargs):
         profile = local_models.Profile.objects.get(id=instance.pk)
     except local_models.School.DoesNotExist:
         return False
-    core_functions.handle_image_upload(instance, profile, "image")
+    return core_functions.handle_image_upload(instance, profile, "image", "images/profiles")

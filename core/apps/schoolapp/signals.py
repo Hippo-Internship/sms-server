@@ -21,8 +21,8 @@ def auto_delete_school_on_change(sender, instance, **kwargs):
         school = local_models.School.objects.get(id=instance.pk)
     except local_models.School.DoesNotExist:
         return False
-    core_functions.handle_image_upload(instance, school, "image")
-    core_functions.handle_image_upload(instance, school, "logo")
+    core_functions.handle_image_upload(instance, school, "image", "image/schools")
+    core_functions.handle_image_upload(instance, school, "logo", "image/schools-logo")
 
 @receiver(pre_save, sender=local_models.Branch)
 def auto_delete_branch_on_change(sender, instance, **kwargs):
@@ -30,4 +30,4 @@ def auto_delete_branch_on_change(sender, instance, **kwargs):
         branch = local_models.Branch.objects.get(id=instance.pk)
     except local_models.School.DoesNotExist:
         return False
-    core_functions.handle_image_upload(instance, branch, "image")
+    core_functions.handle_image_upload(instance, branch, "image", "image/branches")

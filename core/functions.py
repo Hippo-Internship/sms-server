@@ -8,8 +8,7 @@ from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils.deconstruct import deconstructible
 from django.conf import settings
-
-
+from django.core.files.storage import default_storage
 
 @deconstructible
 class PathAndRename(object):
@@ -46,15 +45,15 @@ def compress_image(image):
         None
     )
 
-def handle_image_upload(instance, real_instance, field):
+def handle_image_upload(instance, real_instance, field, path=""):
     new_file = getattr(instance, field)
     filename = new_file.name.split(".") if new_file.name is not None else None
     if not instance.pk:
         return False
     old_file = getattr(real_instance, field)
     if not old_file.name.split("/")[-1] == new_file.name:
-        if old_file and os.path.isfile(old_file.path):
-            os.remove(old_file.path)
+        if old_file and default_storage.exists(old_file.name):
+            default_storage.delete(old_file.name)
         if new_file.name is not None:
             new_file.name = '{}.{}'.format(uuid4().hex, filename[-1])
     else:
