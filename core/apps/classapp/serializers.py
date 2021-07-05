@@ -236,7 +236,6 @@ class TeacherProfileSerializer(serializers.Serializer):
     user = authapp_serializers.CustomUserSerializer()
     class_count = serializers.DictField()
     student_count = serializers.DictField()
-    classes = ClassDetailSerializer(many=True)
 
 
 class StaffProfileSerializer(serializers.Serializer):
