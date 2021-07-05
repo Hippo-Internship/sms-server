@@ -76,9 +76,7 @@ class UserViewSet(viewsets.GenericViewSet):
             generated_data = {
                 "user": user,
                 "class_count": local_services.generate_teacher_class_data(user),
-                "student_count": local_services.generate_teacher_student_data(user),
-                # "student_count": {'items': 12},
-                "classes": user.classes.all()
+                "student_count": local_services.generate_teacher_student_data(user)
             }
             serializer = classapp_serializers.TeacherProfileSerializer
         else:

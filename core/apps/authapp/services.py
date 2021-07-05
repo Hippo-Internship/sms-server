@@ -80,16 +80,13 @@ def generate_teacher_student_data(user: User):
 def generate_teacher_class_data(user: User):
     today_date = datetime.now()
     classes = user.classes.all()
-    active_class_count = classes.filter(end_date__gte=today_date, start_date__lte=today_date).count()
-    finished_class_count = classes.filter(end_date__lt=today_date).count()
-    active_class_count = classes.filter(start_date__gt=today_date).count()
-    generated_data = {
-        "active_class_count": active_class_count,
-        "finished_class_count": finished_class_count,
-        "active_class_count": active_class_count,
-        "total": classes.count()
-    }
-    return generated_data
+    result = classes.aggregate(
+        active_class_count=Count("id", filter=Q(start_date__lte=today_date, end_date__gt=today_date)),
+        finished_class_count=Count("id", filter=Q(end_date__lt=today_date)),
+        upcoming_class=Count("id", filter=Q(start_date__gt=today_date)),
+        total=Count("id")
+    )
+    return result
 
 def generate_datasheet_by_register_type_data(user: User, filter_queries: dict={}, filter: int=1) -> dict:
     generated_data = user.registered_datasheets.aggregate(

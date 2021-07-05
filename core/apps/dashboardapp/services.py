@@ -290,7 +290,6 @@ def generate_class_student_data(user: User, filter_queries: dict={}, filter: int
     count_dates = []
     for i in range(12, 0, -1):
         temp_date = today_date - relativedelta(months=i - 1) 
-        print(temp_date.year, temp_date.month)
         temp_count = classes.aggregate(count=Count("calendar", filter=Q(calendar__date__year=temp_date.year, calendar__date__month=temp_date.month)))
         real_count = temp_count["count"] if temp_count["count"] is not None else 0
         count_by_filter.append(real_count)
@@ -317,7 +316,7 @@ def generate_class_student_statistics_data(user: User, filter_queries: dict={}, 
     result = classes.aggregate(
         active=Count("id", filter=Q(start_date__lte=today_date, end_date__gt=today_date)),
         finished=Count("id", filter=Q(end_date__lt=today_date)),
-        upcomming=Count("id", filter=Q(start_date__gt=today_date)),
+        upcoming=Count("id", filter=Q(start_date__gt=today_date)),
         total=Count("id")
     )
     return result
