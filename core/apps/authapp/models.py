@@ -1,8 +1,11 @@
 # Django imports
+import os
+from uuid import uuid4
 from django.db import models
 from django.utils.translation import gettext as _
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import BaseUserManager, AbstractUser, Group
+from django.dispatch import receiver
 # Local imports
 from . import validators as local_validators
 from core import functions as core_functions
@@ -64,8 +67,8 @@ class CustomUser(AbstractUser):
     FORBIDDEN_FILTER = {
         SUPER_ADMIN: [],
         ADMIN: [ "school" ],
-        OPERATOR: [ "school", "branch" ],
-        TEACHER: [ "school", "branch" ],
+        OPERATOR: [ "school", "branch", "operator" ],
+        TEACHER: [ "school", "branch", "teacher" ],
         STUDENT: [ "school", "branch" ],
         ACCOUNTANT: [ "school", "branch" ],
         STAFF: [ "school", "branch" ],
@@ -151,7 +154,7 @@ class Profile(models.Model):
         related_name='profile',
         db_index=True
     )
-    image = models.ImageField(upload_to=path_and_rename, null=True, blank=True)
+    image = models.ImageField(upload_to="image/profiles", null=True, blank=True)
     address_city = models.CharField(null=True, blank=True, max_length=255, default="")
     address_district = models.CharField(null=True, blank=True, max_length=255, default="")
     address_khoroo = models.CharField(null=True, blank=True, max_length=255, default="")

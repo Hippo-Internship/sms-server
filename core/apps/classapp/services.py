@@ -21,10 +21,7 @@ def list_classes(user, queryset, filter_queries={}):
             **filter_queries
         )
     elif user.groups.role_id == User.TEACHER:
-        classes = queryset.filter(
-            teacher=user, 
-            **filter_queries
-        )
+        classes = user.classes.filter(**filter_queries)
     else:
         classes = []
     return classes

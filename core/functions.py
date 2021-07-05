@@ -19,11 +19,18 @@ class PathAndRename(object):
         self.field = field
 
     def __call__(self, instance, filename):
+        print("dwqwdq")
         ext = filename.split('.')[-1]
         old_image = getattr(instance, self.field, instance.image)
-        old_image_file_path = os.path.join(settings.MEDIA_ROOT, self.path, old_image.name)
-        if os.path.exists(old_image_file_path):
-            os.remove(old_image_file_path)
+        print(filename, old_image, instance.pk)
+        if filename == old_image:
+            return os.path.join(self.path, filename)
+        # old_image_file_path = os.path.join(settings.MEDIA_ROOT, self.path, old_image.name)
+        # print(old_image)
+        # print(old_image_file_path)
+
+        # if os.path.exists(old_image_file_path):
+        #     os.remove(old_image_file_path)
         filename = '{}.{}'.format(uuid4().hex, ext)
         return os.path.join(self.path, filename)
 
@@ -38,3 +45,18 @@ def compress_image(image):
         sys.getsizeof(output), 
         None
     )
+
+def handle_image_upload(instance, real_instance, field):
+    new_file = getattr(instance, field)
+    filename = new_file.name.split(".") if new_file.name is not None else None
+    if not instance.pk:
+        return False
+    old_file = getattr(real_instance, field)
+    if not old_file.name.split("/")[-1] == new_file.name:
+        if old_file and os.path.isfile(old_file.path):
+            os.remove(old_file.path)
+        if new_file.name is not None:
+            new_file.name = '{}.{}'.format(uuid4().hex, filename[-1])
+    else:
+        setattr(instance, field, old_file)
+    return True
