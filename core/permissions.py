@@ -48,7 +48,7 @@ class BranchContentManagementPermission(BasePermission):
                 raise NotFound({ "detail": "Object does not exist!", "success": False })
             _object = _object[0]
             if user.groups.role_id == User.ADMIN:
-                if _object.branch.school.id != user.school.id:
+                if user != _object and _object.branch.school.id != user.school.id:
                     return False
                 else:
                     return True
