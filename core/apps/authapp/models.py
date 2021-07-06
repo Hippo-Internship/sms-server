@@ -74,6 +74,16 @@ class CustomUser(AbstractUser):
         STAFF: [ "school", "branch" ],
     }
 
+    FORBIDDEN_USER_ACCESS = {
+        SUPER_ADMIN: [],
+        ADMIN: [ SUPER_ADMIN ],
+        OPERATOR: [ ADMIN, SUPER_ADMIN ],
+        TEACHER: [ SUPER_ADMIN, ADMIN, OPERATOR ],
+        STUDENT: [ SUPER_ADMIN, ADMIN, OPERATOR ],
+        ACCOUNTANT: [ SUPER_ADMIN, ADMIN, OPERATOR ],
+        STAFF: [ SUPER_ADMIN, ADMIN, OPERATOR ],
+    }
+
     CREATED_FROM_DATASHEET = 1
     DATASHEET_AND_STUDENT = 2
     CREATED_FROM_STUDENT = 3

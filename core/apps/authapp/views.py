@@ -93,6 +93,17 @@ class UserViewSet(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=User, detail="User")
     def action_profile(self, request, user):
         generated_data = { "user": user }
+        request_user = request.user
+        request_user_role_id = request_user.groups.role_id
+        print(request_user_role_id)
+        if user.groups.role_id in User.FORBIDDEN_USER_ACCESS[request_user_role_id]:
+            return core_responses.request_denied()
+        if request_user_role_id == User.ADMIN:
+            if request_user.school.id != user.school.id:
+                return core_responses.request_denied()
+        elif request_user_role_id != User.SUPER_ADMIN:
+            if request_user.branch.id != user.branch.id:
+                return core_responses.request_denied()
         if user.groups.role_id == User.OPERATOR:
             generated_data = local_services.generate_operator_profile_data(user)
             serializer = local_serializers.OperatorProfileSerializer
@@ -108,7 +119,6 @@ class UserViewSet(viewsets.GenericViewSet):
             generated_data = {
                 "user": user
             }
-            # serializer = self.get_serializer_class()
             serializer = classapp_serializers.StaffProfileSerializer
         user = serializer(generated_data, context={ 'request': request })
         return core_responses.request_success_with_data(user.data)
