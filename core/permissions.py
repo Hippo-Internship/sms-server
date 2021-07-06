@@ -24,6 +24,7 @@ class BranchContentManagementPermission(BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
+        print(user.groups.role_id)
         if user.groups.role_id == User.SUPER_ADMIN:
             return True
         if view.action == "create" or view.action == "update" or (hasattr(view, "additional_action") and view.action in view.additional_action):
@@ -48,7 +49,7 @@ class BranchContentManagementPermission(BasePermission):
                 raise NotFound({ "detail": "Object does not exist!", "success": False })
             _object = _object[0]
             if user.groups.role_id == User.ADMIN:
-                if user != _object and _object.branch.school.id != user.school.id:
+                if _object.branch.school.id != user.school.id:
                     return False
                 else:
                     return True
@@ -139,6 +140,7 @@ class UserGetOrModifyPermission(BasePermission):
         model_name = "customuser"
         switch = generate_basic_permission_switch(app_name, model_name)
         switch["group"] = app_name + ".view_" + model_name
+        switch["action_profile"] = app_name + ".view_" + model_name
         return user.has_perm(switch.get(view.action, ""))
 
 

@@ -145,6 +145,8 @@ def generate_payment_by_branch_data(user, filter_queries: dict={}, filter: int=3
         branches = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
         branches = queryset.filter(school=user.school.id, **filter_queries)
+    else:
+        branches = queryset.none()
     annotated_branches = branches.annotate(total=Sum("payments__paid")).order_by("-total")[:5]
     return annotated_branches                              
 

@@ -89,6 +89,30 @@ class UserViewSet(viewsets.GenericViewSet):
         user = serializer(generated_data, context={ 'request': request })
         return core_responses.request_success_with_data(user.data)
 
+    @action(detail=True, methods=[ "GET" ], url_path="profile")
+    @core_decorators.object_exists(model=User, detail="User")
+    def action_profile(self, request, user):
+        generated_data = { "user": user }
+        if user.groups.role_id == User.OPERATOR:
+            generated_data = local_services.generate_operator_profile_data(user)
+            serializer = local_serializers.OperatorProfileSerializer
+        elif user.groups.role_id == User.TEACHER:
+            generated_data = {
+                "user": user,
+                "class_count": local_services.generate_teacher_class_data(user),
+                "student_count": local_services.generate_teacher_student_data(user)
+            }
+            serializer = classapp_serializers.TeacherProfileSerializer
+        else:
+            generated_data = user
+            generated_data = {
+                "user": user
+            }
+            # serializer = self.get_serializer_class()
+            serializer = classapp_serializers.StaffProfileSerializer
+        user = serializer(generated_data, context={ 'request': request })
+        return core_responses.request_success_with_data(user.data)
+
     def create(self, request):
         user_request_data = request.data
         user = self.get_serializer_class()(data=user_request_data, user=request.user)
