@@ -21,6 +21,8 @@ def auto_delete_profile_on_delete(sender, instance, **kwargs):
 
 @receiver(pre_save, sender=local_models.Profile)
 def auto_delete_profile_on_change(sender, instance, **kwargs):
+    if not instance.pk:
+        return False
     try:
         profile = local_models.Profile.objects.get(id=instance.pk)
     except local_models.Profile.DoesNotExist:
