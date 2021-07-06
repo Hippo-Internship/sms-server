@@ -10,6 +10,10 @@ class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Status
         fields = "__all__"
+        extra_kwargs = {
+            "default": { "read_only": True },
+            "branch": { "required": True },
+        }
 
 class StatusUpdateSerializer(serializers.ModelSerializer):
 
@@ -17,7 +21,8 @@ class StatusUpdateSerializer(serializers.ModelSerializer):
         model = local_models.Status
         fields = "__all__"
         extra_kwargs = {
-            "branch": { "required": False }
+            "branch": { "required": False },
+            "default": { "read_only": True }
         }
 
     def validate_branch(self, value):
@@ -29,13 +34,17 @@ class ShortStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.Status
-        fields = [ "id", "name" ]
+        fields = [ "id", "name", "default" ]
 
 class PaymentMethodSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.PaymentMethod
         fields = "__all__"
+        extra_kwargs = {
+            "default": { "read_only": True },
+            "branch": { "required": True },
+        }
 
 class PaymentMethodWithAnnotation(serializers.ModelSerializer):
 
@@ -45,7 +54,9 @@ class PaymentMethodWithAnnotation(serializers.ModelSerializer):
     class Meta:
         model = local_models.PaymentMethod
         exclude = [ "created", "modified" ]
-
+        extra_kwargs = {
+            "default": { "read_only": True }
+        }
 
 class StatusWithAnnotation(serializers.ModelSerializer):
 
@@ -61,7 +72,7 @@ class ShortPaymentMethodSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.PaymentMethod
-        fields = [ "id", "name" ]
+        fields = [ "id", "name", "default" ]
         
 class PaymentMethodUpdateSerializer(serializers.ModelSerializer):
 
@@ -69,7 +80,8 @@ class PaymentMethodUpdateSerializer(serializers.ModelSerializer):
         model = local_models.PaymentMethod
         fields = "__all__"
         extra_kwargs = {
-            "branch": { "required": False }
+            "branch": { "required": False },
+            "default": { "read_only": True }
         }
 
     def validate_branch(self, value):

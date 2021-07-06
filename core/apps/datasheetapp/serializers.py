@@ -80,6 +80,10 @@ class DatasheetStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Status
         fields = "__all__"
+        extra_kwargs = {
+            "default": { "read_only": True },
+            "branch": { "required": True },
+        }
 
 
 class DatasheetStatusUpdateSerializer(serializers.ModelSerializer):
@@ -88,7 +92,8 @@ class DatasheetStatusUpdateSerializer(serializers.ModelSerializer):
         model = local_models.Status
         fields = "__all__"
         extra_kwargs = {
-            "branch": { "required": False }
+            "branch": { "required": False },
+            "default": { "read_only": True }
         }
 
     def validate_branch(self, value):
@@ -101,4 +106,4 @@ class ShortDatasheetStatuSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.Status
-        fields = [ "id", "name", "branch" ]
+        fields = [ "id", "name", "branch", "default" ]

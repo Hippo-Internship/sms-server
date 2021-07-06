@@ -17,15 +17,17 @@ class Status(models.Model):
         schoolapp_models.Branch,
         on_delete=models.CASCADE,
         related_name="datasheet_statuses",
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         db_index=True
     )
-    name = models.CharField(max_length=36, null=False, blank=False)
+    name = models.CharField(max_length=26, null=False, blank=False)
     priority = models.IntegerField(null=False, default=0)
+    default = models.BooleanField(null=False, blank=False, default=False)
 
     class Meta:
         unique_together = [ "branch", "name" ]
+        ordering = [ "-default" ]
 
     def __str__(self):
         return "%s %s" % (self.id, self.name)

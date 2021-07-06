@@ -11,15 +11,16 @@ class Status(base_models.BaseWithDate):
         schoolapp_models.Branch,
         on_delete=models.CASCADE,
         related_name="status",
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         db_index=True
     )
     name = models.CharField(max_length=26, null=False, blank=False)
     color = models.CharField(max_length=7, null=False, default="#3d3f56")
+    default = models.BooleanField(null=False, blank=False, default=False)
 
     class Meta:
-        ordering = [ "-id" ]
+        ordering = [ "-default", "-id" ]
         unique_together = [ "branch", "name" ]
 
     def __str__(self):
@@ -29,18 +30,19 @@ class Status(base_models.BaseWithDate):
 class PaymentMethod(base_models.BaseWithDate):
 
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length = 100)
+    name = models.CharField(max_length=26, null=False, blank=False)
     branch = models.ForeignKey(
         schoolapp_models.Branch,
         on_delete=models.CASCADE,
         related_name="payment_method",
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         db_index=True
     )
+    default = models.BooleanField(null=False, blank=False, default=False)
 
     class Meta:
-        ordering = [ "-id" ]
+        ordering = [ "-default", "-id" ]
         unique_together = [ "branch", "name" ]
 
     def __str__(self):

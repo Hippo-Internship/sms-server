@@ -159,7 +159,7 @@ class StatusViewSet(viewsets.ModelViewSet):
             },
             dict(request.query_params)
         )
-        filter_queries = core_utils.build_filter_query(school_query_model, query_params)
+        filter_queries = core_utils.build_filter_query(school_query_model, query_params, user=request_user)
         statuses = local_services.list_status(request_user, self.get_queryset(), filter_queries=filter_queries)
         p_statuses = self.paginate_queryset(statuses)
         statuses = self.get_serializer_class()(p_statuses, many=True)
