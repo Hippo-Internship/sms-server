@@ -4,6 +4,7 @@ from django.db.models.fields import CharField
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db.models import Sum, F
+from rest_framework.exceptions import PermissionDenied
 # Third party imports
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from rest_framework import viewsets
@@ -13,7 +14,8 @@ from rest_framework.settings import api_settings
 from . import \
         models as local_models, \
         serializers as local_serializers, \
-        services as local_services
+        services as local_services, \
+        utils as local_utils
 from core import \
         decorators as core_decorators, \
         permissions as core_permissions, \
@@ -95,7 +97,6 @@ class UserViewSet(viewsets.GenericViewSet):
         generated_data = { "user": user }
         request_user = request.user
         request_user_role_id = request_user.groups.role_id
-        print(request_user_role_id)
         if user.groups.role_id in User.FORBIDDEN_USER_ACCESS[request_user_role_id]:
             return core_responses.request_denied()
         if request_user_role_id == User.ADMIN:
@@ -127,6 +128,8 @@ class UserViewSet(viewsets.GenericViewSet):
         user_request_data = request.data
         user = self.get_serializer_class()(data=user_request_data, user=request.user)
         user.is_valid(raise_exception=True)
+        if not local_utils.can_user_manage(request.user.groups, user.validated_data["groups"]):
+            raise PermissionDenied()
         user = user.save()
         profile = local_serializers.UserProfileSerializer(user.profile, data=user_request_data)
         profile.is_valid(raise_exception=True)
@@ -136,18 +139,16 @@ class UserViewSet(viewsets.GenericViewSet):
 
     @core_decorators.object_exists(model=User, detail="User")
     def destroy(self, request, user=None):
-        if request.user.groups.role_id >= user.groups.role_id:
-            return core_responses.request_denied()
+        if not local_utils.can_user_manage(request.user.groups, user.groups):
+            raise PermissionDenied()
         user.is_active = False
         user.save()
         return core_responses.request_success()
 
     @core_decorators.object_exists(model=User, detail="User")
     def update(self, request, user=None):
-        if (request.user.id is not user.id and 
-            (request.user.groups.role_id >= user.groups.role_id or 
-             request.user.groups.role_id >= User.OPERATOR)):
-            return core_responses.request_denied()
+        if not local_utils.can_user_manage(request.user.groups, user.groups, request.user, user):
+            raise PermissionDenied()
         user_request_data = request.data.copy()
         upd_user = self.get_serializer_class()(user, data=user_request_data, user=request.user)
         upd_user.is_valid(raise_exception=True)

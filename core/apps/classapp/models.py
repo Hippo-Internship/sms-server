@@ -66,6 +66,7 @@ class Room(base_models.BaseWithDate):
     capacity = models.PositiveIntegerField(null=False, blank=False, default=0)
 
     class Meta:
+        unique_together = [ "branch", "name" ]
         ordering = [ "id" ]
 
     def __str__(self):

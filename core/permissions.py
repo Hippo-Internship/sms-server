@@ -24,10 +24,9 @@ class BranchContentManagementPermission(BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        print(user.groups.role_id)
         if user.groups.role_id == User.SUPER_ADMIN:
             return True
-        if view.action == "create" or view.action == "update" or (hasattr(view, "additional_action") and view.action in view.additional_action):
+        if view.action == "create" or (hasattr(view, "additional_action") and view.action in view.additional_action):
             request_data = request.data
             branch_id = request_data.get("branch", -1)
             if branch_id == -1:
@@ -43,7 +42,7 @@ class BranchContentManagementPermission(BasePermission):
                     return False
             if branch_id != user.branch.id:
                 return False
-        elif view.action == "retrieve" or view.action == "destroy" or (hasattr(view, "detail_additional_action") and view.action in view.detail_additional_action):
+        elif view.action == "retrieve" or view.action == "update" or view.action == "destroy" or (hasattr(view, "detail_additional_action") and view.action in view.detail_additional_action):
             _object = view.get_queryset().filter(id=view.kwargs["pk"])
             if not _object.exists():
                 raise NotFound({ "detail": "Object does not exist!", "success": False })
@@ -64,7 +63,7 @@ class SchoolContentManagementPermission(BasePermission):
         user = request.user
         if user.groups.role_id == User.SUPER_ADMIN:
             return True
-        if view.action == "create" or view.action == "update":
+        if view.action == "create":
             request_data = request.data
             try:
                 school_id = int(request_data.get("school", -1))
@@ -76,11 +75,10 @@ class SchoolContentManagementPermission(BasePermission):
                 if school_id != user.school.id:
                     return False
                 else:
-                    print("dqwdwq")
                     return True
             if school_id != user.school.id:
                 return False
-        elif view.action == "retrieve" or view.action == "destroy":
+        elif view.action == "retrieve" or view.action == "destroy" or view.action == "update":
             _object = view.get_queryset().filter(id=view.kwargs["pk"])
             if not _object.exists():
                 raise NotFound({ "detail": "Object does not exist!", "success": False })

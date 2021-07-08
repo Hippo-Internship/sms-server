@@ -21,12 +21,31 @@ class LessonSerializer(serializers.ModelSerializer):
         model = local_models.Lesson
         fields = "__all__"
 
+class LessonUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Lesson
+        fields = "__all__"
+        extra_kwargs = {
+            "branch": { "read_only": True }
+        }
+
 
 class RoomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.Room
         fields = "__all__"
+
+
+class RoomUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Room
+        fields = "__all__"
+        extra_kwargs = {
+            "branch": { "read_only": True }
+        }
 
 
 class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
@@ -109,21 +128,6 @@ class ExamSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Start date should be later than the today's date!")
         return value
 
-
-# class ClassFullDetailSerializer(serializers.ModelSerializer):
-
-#     teacher_firstname = authapp_serializers.CustomUserSerializer(read_only=True)
-#     lesson_name = serializers.CharField(source="lesson.name", read_only=True)
-#     room_name = serializers.CharField(source="room.name", read_only=True)
-#     total_paid = serializers.IntegerField(read_only=True)
-#     students_count = serializers.ReadOnlyField()
-#     school = serializers.IntegerField(source="branch.school.id", read_only=True)
-#     branch_image = serializers.ImageField(source="branch.image", read_only=True)
-#     total_discount = serializers.IntegerField(read_only=True)
-
-#     class Meta:
-#         model = local_models.Class
-#         fields = "__all__"
 
 class ClassFullDetailSerializer(serializers.ModelSerializer):
 

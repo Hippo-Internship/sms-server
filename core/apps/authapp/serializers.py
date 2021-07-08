@@ -70,10 +70,10 @@ class CustomUserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Email cannot be null!")
         return data
 
-    def validate_groups(self, value):
-        if value.role_id <= self.user.groups.role_id:
-            raise PermissionDenied()
-        return value
+    # def validate_groups(self, value):
+    #     if value.role_id <= self.user.groups.role_id:
+    #         raise PermissionDenied()
+    #     return value
 
     def create(self, validated_data):
         if "password" not in validated_data:

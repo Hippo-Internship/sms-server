@@ -84,6 +84,16 @@ class CustomUser(AbstractUser):
         STAFF: [ SUPER_ADMIN, ADMIN, OPERATOR ],
     }
 
+    ALLOWED_USER_MANAGEMENT = {
+        SUPER_ADMIN: [ "*" ],
+        ADMIN: [ "-", SUPER_ADMIN, ADMIN ],
+        OPERATOR: [ "-", ADMIN, SUPER_ADMIN ],
+        TEACHER: [],
+        STUDENT: [],
+        ACCOUNTANT: [],
+        STAFF: [ SUPER_ADMIN, ADMIN, OPERATOR ],
+    }
+
     CREATED_FROM_DATASHEET = 1
     DATASHEET_AND_STUDENT = 2
     CREATED_FROM_STUDENT = 3

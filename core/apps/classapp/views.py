@@ -68,6 +68,10 @@ class LessonViewSet(viewsets.ModelViewSet):
         data = super(LessonViewSet, self).update(request, lesson.id).data
         return core_responses.request_success_with_data(data)
 
+    def get_serializer_class(self):
+        if self.action == "update":
+            return local_serializers.LessonUpdateSerializer
+        return super().get_serializer_class()
 
 class RoomViewSet(viewsets.ModelViewSet):
 
@@ -106,6 +110,11 @@ class RoomViewSet(viewsets.ModelViewSet):
     def update(self, request, room=None):
         data = super(RoomViewSet, self).update(request, room.id).data
         return core_responses.request_success_with_data(data)
+
+    def get_serializer_class(self):
+        if self.action == "update":
+            return local_serializers.RoomUpdateSerializer
+        return super().get_serializer_class()
 
 
 class ClassViewSet(viewsets.GenericViewSet):
