@@ -193,9 +193,7 @@ class ClassViewSet(viewsets.GenericViewSet):
         _class = self.get_queryset().filter(id=_class.id).annotate(total_paid=Sum("students__payments__paid"))
         # _class = self.get_queryset().annotate(total_paid=Sum("students__payments__paid")).filter(id=_class.id)
         _class =_class[0]
-        print(_class)
         _class = self.get_serializer_class()(_class, context={ "request": request })
-        # print(_class.data)
         return core_responses.request_success_with_data(_class.data)
 
     def create(self, request):
@@ -236,7 +234,6 @@ class ClassViewSet(viewsets.GenericViewSet):
         start_date = calendar.validated_data["date"]
         all_dates = []
         interval = getattr(_class, "interval", 0)
-        print(interval)
         if interval != None and interval <= _class.calendar.count() + len(all_dates):
             return Response({ "detail": "Interval has reached the limit!" }, status=400)
         for i in range(int((_class.end_date - start_date).days / 7) + 1):
@@ -308,7 +305,6 @@ class ClassViewSet(viewsets.GenericViewSet):
             "search": "user__phone__startswith"
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params)
-        print(filter_queries, "dwqwdqw")
         students = _class.students.filter(**filter_queries).annotate(payments_paid=Sum("payments__paid")).order_by("id")
         p_student = self.paginate_queryset(students)
         students = self.get_serializer_class()(p_student, many=True)

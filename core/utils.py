@@ -84,7 +84,6 @@ def build_filter_query(query_model, query_params, user=None, additional_forbidde
 def path_and_rename(path):
     def wrapper(instance, filename):
         ext = filename.split('.')[-1]
-        print(instance)
         filename = '{}.{}'.format(uuid4().hex, ext)
         return os.path.join(path, filename)
     return wrapper

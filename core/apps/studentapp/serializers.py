@@ -57,7 +57,6 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         _class = self.instance._class
-        print(_class.branch.id, data["status"].branch.id)
         if _class.branch.id != data["status"].branch.id:
             raise PermissionDenied()
         if "payment_paid" in data:
@@ -66,7 +65,6 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
             data.pop("discount_amount")
         if "discounts" in data:
             for discount in data["discounts"]:
-                print(_class.branch.id, discount.branch.id)
                 if _class.branch.id != discount.branch.id:
                     raise PermissionDenied()
                 if discount.limited and discount.limit == discount.count:
@@ -216,6 +214,13 @@ class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Payment
         fields = "__all__"
+
+    def validate(self, data):
+        student = data["student"]
+        remaining_fee = student._class.lesson.price - student.payments.aggregate(total=Sum("paid"))["total"]
+        if data["paid"] > remaining_fee:
+            raise serializers.ValidationError("Value can't be more than remainder!")
+        return data
 
     
 class PaymentUpdateSerializer(serializers.ModelSerializer):

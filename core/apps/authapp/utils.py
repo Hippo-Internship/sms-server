@@ -13,7 +13,6 @@ User = get_user_model()
 def path_and_rename(path):
     def wrapper(instance, filename):
         ext = filename.split('.')[-1]
-        print(instance)
         filename = '{}.{}'.format(uuid4().hex, ext)
         return os.path.join(path, filename)
     return wrapper

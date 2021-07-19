@@ -117,7 +117,7 @@ class Class(models.Model):
 
     @students_count.setter
     def students_count(self, value):
-        print(value)
+        pass
 
     def __str__(self):
         return "%s %s %s" % (self.id, self.branch, self.lesson)

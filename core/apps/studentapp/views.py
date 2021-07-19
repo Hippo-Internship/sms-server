@@ -89,7 +89,6 @@ class StudentViewSet(viewsets.GenericViewSet):
         students = user.students.annotate(payments_paid=Sum("payments__paid")).filter(canceled=False).order_by("id")
         p_student = self.paginate_queryset(students)
         students = self.get_serializer_class()(p_student, many=True)
-        # print('students', students.data)
         return self.get_paginated_response(students.data)
 
     @rest_decorators.action(detail=True, methods=[ "GET" ], url_path="user_payment")

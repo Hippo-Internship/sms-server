@@ -9,7 +9,6 @@ User = get_user_model()
 
 def list_datasheet(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
-        print(filter_queries, user.groups.name)
         datasheets = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
         datasheets = queryset.filter(

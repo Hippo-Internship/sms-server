@@ -15,7 +15,6 @@ from core.apps.datasheetapp import models as datasheetapp_models
 User = get_user_model()
 
 def list_groups(user, queryset, filter_queries={}):
-    print(user.groups.role_id)
     groups_switch = {
         User.SUPER_ADMIN: {},
         User.ADMIN: {

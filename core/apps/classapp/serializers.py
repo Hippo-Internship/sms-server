@@ -75,16 +75,6 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Teacher doesn't exist!")
         return value
 
-    # def validate_start_date(self, value):
-    #     if self.instance is not None and value == self.instance.start_date:
-    #         return value
-    #     initial_data = self.initial_data
-    #     start_date = initial_data.get("start_date", None)
-    #     start_date = datetime.strptime(start_date, "%Y-%m-%d")
-    #     if start_date < datetime.now():
-    #         raise serializers.ValidationError("Start date should be later than the today's date!")
-    #     return value
-
     def validate_end_date(self, value):
         initial_data = self.initial_data
         start_date = initial_data.get("start_date", None)
@@ -131,15 +121,22 @@ class ExamSerializer(serializers.ModelSerializer):
 
 class ClassFullDetailSerializer(serializers.ModelSerializer):
 
-    teacher_firstname = authapp_serializers.CustomUserSerializer(read_only=True)
+    teacher_firstname = serializers.CharField(source="teacher.firstname", read_only=True)
+    teacher_lastname = serializers.CharField(source="teacher.lastname", read_only=True)
+    teacher_is_active = serializers.BooleanField(source="teacher.is_active", read_only=True)
     lesson_name = serializers.CharField(source="lesson.name", read_only=True)
+    lesson_price = serializers.IntegerField(source="lesson.price", read_only=True)
+    lesson_color = serializers.CharField(source="lesson.color", read_only=True)
+    lesson_interval = serializers.CharField(source="lesson.interval", read_only=True)
+    lesson_exam = serializers.CharField(source="lesson.exam", read_only=True)
+    lesson_desc = serializers.CharField(source="lesson.description", read_only=True)
+    lesson_is_active = serializers.CharField(source="lesson.is_active", read_only=True)
     room_name = serializers.CharField(source="room.name", read_only=True)
     total_paid = serializers.IntegerField(read_only=True)
     total_discount = serializers.SerializerMethodField(read_only=True)
     students_count = serializers.ReadOnlyField()
     school = serializers.IntegerField(source="branch.school.id", read_only=True)
     branch_image = serializers.ImageField(source="branch.image", read_only=True)
-    lesson_price = serializers.IntegerField(source="lesson.price", read_only=True)
 
     class Meta:
         model = local_models.Class

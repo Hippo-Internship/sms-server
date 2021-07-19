@@ -18,15 +18,11 @@ class PathAndRename(object):
         self.field = field
 
     def __call__(self, instance, filename):
-        print("dwqwdq")
         ext = filename.split('.')[-1]
         old_image = getattr(instance, self.field, instance.image)
-        print(filename, old_image, instance.pk)
         if filename == old_image:
             return os.path.join(self.path, filename)
         # old_image_file_path = os.path.join(settings.MEDIA_ROOT, self.path, old_image.name)
-        # print(old_image)
-        # print(old_image_file_path)
 
         # if os.path.exists(old_image_file_path):
         #     os.remove(old_image_file_path)
