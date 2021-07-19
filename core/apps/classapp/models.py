@@ -102,11 +102,8 @@ class Class(models.Model):
     )
     name = models.CharField(max_length=56, null=False, blank=False)
     start_date = models.DateField(null=False, blank=False)
-    start_time = models.TimeField(null=False, blank=False)
     end_date = models.DateField(null=False, blank=False)
-    end_time = models.TimeField(null=False, blank=False)
     note = models.CharField(max_length=255, null=True, blank=True)
-    interval = models.PositiveIntegerField(null = True, blank = True)
 
     class Meta:
         ordering = [ "id" ]

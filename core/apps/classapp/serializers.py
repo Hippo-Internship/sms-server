@@ -83,14 +83,6 @@ class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("End date should be later than the start date!")
         return value
 
-    def validate_end_time(self, value):
-        initial_data = self.initial_data
-        start_time = initial_data.get("start_time", None)
-        end_time = initial_data.get("end_time", None)
-        if start_time > end_time:
-            raise serializers.ValidationError("End time should be later than the start time!")
-        return value
-
 
 class ClassDetailSerializer(serializers.ModelSerializer):
 

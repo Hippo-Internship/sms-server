@@ -21,7 +21,8 @@ class DatasheetCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "operator": { "required": True },
             "time": { "required": False },
-            "user": { "required": False }
+            "user": { "required": False },
+            "register_type": { "required": False },
         }
 
     def validate(self, data):
@@ -29,7 +30,7 @@ class DatasheetCreateSerializer(serializers.ModelSerializer):
         operator = data["operator"]
         if operator.groups.role_id == local_models.User.OPERATOR and operator.branch.id != branch.id:
             raise PermissionDenied()
-        if operator.groups.role_id == local_models.User.ADMIN and operator.branch.school.id != branch.school.id:
+        if operator.groups.role_id == local_models.User.ADMIN and operator.school.id != branch.school.id:
             raise PermissionDenied()
         if (("user" in data and data["user"] is not None and branch.id != data["user"].branch.id) or
             ("lesson" in data and data["lesson"] is not None and branch.id != data["lesson"].branch.id) or
