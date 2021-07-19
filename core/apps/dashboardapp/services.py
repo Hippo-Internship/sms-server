@@ -74,10 +74,7 @@ def generate_total_income_data(user: User, filter_queries: dict={}, filter: int=
             income_dates.append(temp_date.strftime("%Y-%m-%d"))
         lesson_classes = classes.filter(start_date__range=[ today_date - timedelta(days=delta_days), today_date ])
     temp_total_lesson_price = lesson_classes.annotate(students_count=Count("students")).aggregate(total=Sum(F("lesson__price") * F("students_count")))
-    print(len(lesson_classes))
-    print(lesson_classes.annotate(students_count=Count("students"))[0].lesson.price)
     temp_total_lesson_payment = lesson_classes.aggregate(total=Sum("students__payments__paid"))
-    print(temp_total_lesson_price, temp_total_lesson_payment)
     temp_pending = temp_total_lesson_price["total"] if temp_total_lesson_price["total"] is not None else 0
     temp_total = temp_total_lesson_payment["total"] if temp_total_lesson_payment["total"] is not None else 0
     real_pending = temp_pending - temp_total
