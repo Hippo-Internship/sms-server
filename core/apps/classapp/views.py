@@ -40,6 +40,7 @@ class LessonViewSet(viewsets.ModelViewSet):
     ]
 
     def list(self, request):
+        request_user = request.user
         query_params = core_utils.normalize_data(
             { 
                 "school": "int",
@@ -47,8 +48,7 @@ class LessonViewSet(viewsets.ModelViewSet):
             },
             dict(request.query_params)
         )
-        filter_queries = core_utils.build_filter_query(school_query_model, query_params)
-        request_user = request.user
+        filter_queries = core_utils.build_filter_query(school_query_model, query_params, user=request_user)
         lessons = local_services.list_lessons(request_user, self.get_queryset(), filter_queries)
         p_lessons = self.paginate_queryset(lessons)
         lessons = self.get_serializer_class()(p_lessons, many=True)
@@ -83,6 +83,7 @@ class RoomViewSet(viewsets.ModelViewSet):
     ]
 
     def list(self, request):
+        request_user = request.user
         query_params = core_utils.normalize_data(
             { 
                 "school": "int",
@@ -90,7 +91,7 @@ class RoomViewSet(viewsets.ModelViewSet):
             },
             dict(request.query_params)
         )
-        filter_queries = core_utils.build_filter_query(school_query_model, query_params)
+        filter_queries = core_utils.build_filter_query(school_query_model, query_params, user=request_user)
         request_user = request.user
         rooms = local_services.list_rooms(request_user, self.get_queryset(), filter_queries)
         p_rooms = self.paginate_queryset(rooms)

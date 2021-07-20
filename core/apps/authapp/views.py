@@ -33,7 +33,7 @@ user_search_filter_model = {
 }
 
 school_query_model = {
-    "school": "branch__school",
+    "school": "school",
     "branch": "branch"
 }
 
@@ -56,7 +56,7 @@ class UserViewSet(viewsets.GenericViewSet):
             },
             dict(request.query_params)
         )
-        filter_queries = core_utils.build_filter_query(user_search_filter_model, query_params)
+        filter_queries = core_utils.build_filter_query(user_search_filter_model, query_params, user=request.user)
         filter_queries["groups__role_id"] = User.STUDENT
         users = local_services.list_users(request.user, self.get_queryset(), filter_queries=filter_queries)
         users = self.get_serializer_class()(users, many=True)
@@ -73,7 +73,7 @@ class UserViewSet(viewsets.GenericViewSet):
             },
             dict(request.query_params)
         )
-        filter_queries = core_utils.build_filter_query(school_query_model, query_params)
+        filter_queries = core_utils.build_filter_query(school_query_model, query_params, user=request_user)
         filter_queries["groups__role_id"] = groups.role_id
         users = local_services.list_users(request_user, self.get_queryset(), filter_queries=filter_queries)
         if groups.role_id == User.TEACHER:
@@ -140,7 +140,7 @@ class UserViewSet(viewsets.GenericViewSet):
 
     def create(self, request):
         user_request_data = request.data
-        user = self.get_serializer_class()(data=user_request_data, user=request.user)
+        user = self.get_serializer_class()(data=user_request_data)
         user.is_valid(raise_exception=True)
         if not local_utils.can_user_manage(request.user.groups, user.validated_data["groups"]):
             raise PermissionDenied()

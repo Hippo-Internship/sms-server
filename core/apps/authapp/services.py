@@ -28,6 +28,7 @@ def list_groups(user, queryset, filter_queries={}):
 
 def list_users(user, queryset, filter_queries={}):
     groups = filter_queries.pop("groups__role_id", None)
+    print(filter_queries)
     if groups is None:
         return []
     if user.groups.role_id > groups:
@@ -35,11 +36,9 @@ def list_users(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
         users = queryset.filter(groups__role_id=groups, is_active=True, **filter_queries)
     elif user.groups.role_id == User.ADMIN:
-        users = user.school.users.filter(groups__role_id=groups, is_active=True, **filter_queries)
-    elif user.groups.role_id == User.OPERATOR:
-        users = user.branch.users.filter(branch=user.branch, groups__role_id=groups, is_active=True, **filter_queries)
+        users = queryset.filter(school=user.school, groups__role_id=groups, is_active=True, **filter_queries)
     else:
-        return []
+        users = user.branch.users.filter(branch=user.branch, groups__role_id=groups, is_active=True, **filter_queries)
     return users
 
 def generate_operator_profile_data(user: User):

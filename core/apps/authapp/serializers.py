@@ -56,9 +56,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
             "job_hour"
         ]
         extra_kwargs = {
-            "password": { "write_only": True },
-            "school": { "required": True },
             "branch": { "required": False },
+            "school": { "required": True },
+            "password": { "write_only": True },
         }
 
     def validate(self, data):
@@ -66,14 +66,18 @@ class CustomUserSerializer(serializers.ModelSerializer):
             data.pop("branch", None)
         elif "branch" not in data:
             raise serializers.ValidationError("Branch is required!")
-        if data["groups"].role_id != User.STUDENT and "email" not in data:
+        role_id = data["groups"].role_id
+        if role_id != User.STUDENT and "email" not in data:
             raise serializers.ValidationError("Email cannot be null!")
+        try:
+            if role_id == User.ADMIN:
+                self.Meta.model.objects.get(school=data["school"], phone=data["phone"])
+            else:
+                self.Meta.model.objects.get(branch=data["branch"], phone=data["phone"])
+            raise serializers.ValidationError("Phone is already registered!")
+        except self.Meta.model.DoesNotExist:
+            pass
         return data
-
-    # def validate_groups(self, value):
-    #     if value.role_id <= self.user.groups.role_id:
-    #         raise PermissionDenied()
-    #     return value
 
     def create(self, validated_data):
         if "password" not in validated_data:
@@ -112,6 +116,18 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
             "firstname": { "required": False },
             "phone": { "required": False },
         }
+
+    def validate(self, data):
+        role_id = data["groups"].role_id
+        try:
+            if role_id == User.ADMIN:
+                self.Meta.model.objects.get(school=data["school"], phone=data["phone"])
+            else:
+                self.Meta.model.objects.get(branch=data["branch"], phone=data["phone"])
+            raise serializers.ValidationError("Phone is already registered!")
+        except self.Meta.model.DoesNotExist:
+            pass
+        return data
 
 class ShortUserSerializer(serializers.ModelSerializer):
 
