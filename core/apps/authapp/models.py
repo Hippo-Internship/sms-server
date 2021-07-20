@@ -132,12 +132,12 @@ class CustomUser(AbstractUser):
     password = models.CharField(_('password'), max_length=128, null=True, blank=True)
     phone = models.CharField(
         validators=[ local_validators.validate_phone ], 
-        max_length=20, null=False, unique=True, 
+        max_length=20, null=False, 
         error_messages={
             "unique": "This number is already registered!"
         }
     )
-    related_phone = models.CharField(validators = [ local_validators.validate_phone ], max_length=20, null=True, blank=True)
+    related_phone = models.CharField(validators=[ local_validators.validate_phone ], max_length=20, null=True, blank=True)
     interested_at = models.CharField(null=True, max_length=255, blank=True)
     seen_datasheet = models.IntegerField(null=False, blank=True, choices=SEEN_DATASHEET_TYPE, default=SEEN_DATASHEET_TYPE[2][0])
     groups = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="users")
@@ -149,6 +149,7 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
 
     class Meta:
+        unique_together = [ "branch", "phone" ]
         ordering = [ "-id" ]
 
     @property

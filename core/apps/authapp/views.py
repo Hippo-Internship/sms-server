@@ -32,6 +32,11 @@ user_search_filter_model = {
     "branch": "branch"
 }
 
+school_query_model = {
+    "school": "branch__school",
+    "branch": "branch"
+}
+
 class UserViewSet(viewsets.GenericViewSet):
 
     queryset = User.objects.all()
@@ -61,7 +66,16 @@ class UserViewSet(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=Group, detail="Group", field="role_id")
     def group(self, request, groups=None):
         request_user = request.user
-        users = local_services.list_users(request_user, self.get_queryset(), filter_queries={ "groups__role_id": groups.role_id })
+        query_params = core_utils.normalize_data(
+            { 
+                "school": "int",
+                "branch": "int"
+            },
+            dict(request.query_params)
+        )
+        filter_queries = core_utils.build_filter_query(school_query_model, query_params)
+        filter_queries["groups__role_id"] = groups.role_id
+        users = local_services.list_users(request_user, self.get_queryset(), filter_queries=filter_queries)
         if groups.role_id == User.TEACHER:
             users = users.annotate(job_hour=Sum(F("classes__calendar__end_time") - F("classes__calendar__start_time"), output_field=CharField())).order_by("-id")
         p_users = self.paginate_queryset(users)
