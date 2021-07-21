@@ -220,9 +220,10 @@ class ClassViewSet(viewsets.GenericViewSet):
     @rest_decorator.action(detail=True, methods=[ "GET" ], url_path="calendar")
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
     def list_calendar(self, request, _class=None):
-        calendar = _class.calendar
-        calendar = self.get_serializer_class()(calendar, many=True)
-        return core_responses.request_success_with_data(calendar.data)
+        calendar = _class.calendar.all().order_by("date")
+        p_calendar = self.paginate_queryset(calendar)
+        calendar = self.get_serializer_class()(p_calendar, many=True)
+        return self.get_paginated_response(calendar.data)
 
     @list_calendar.mapping.post
     @core_decorators.object_exists(model=local_models.Class, detail="Class")
@@ -234,20 +235,23 @@ class ClassViewSet(viewsets.GenericViewSet):
         calendar.is_valid(raise_exception=True)
         start_date = calendar.validated_data["date"]
         all_dates = []
-        interval = getattr(_class, "interval", 0)
-        if interval != None and interval <= _class.calendar.count() + len(all_dates):
-            return Response({ "detail": "Interval has reached the limit!" }, status=400)
-        for i in range(int((_class.end_date - start_date).days / 7) + 1):
+        interval = getattr(_class.lesson, "interval", 0)
+        if "repeat" in calendar_data and calendar_data["repeat"]:
+            for i in range(int((_class.end_date - start_date).days / 7) + 1):
+                all_dates.append(start_date)
+                start_date += timedelta(days=7)
+        else:
             all_dates.append(start_date)
-            start_date += timedelta(days=7)
+        if interval != None and interval < _class.calendar.count() + len(all_dates):
+            return Response({ "detail": "Interval has reached the limit!" }, status=400)
         possible_occupied_date = local_models.Calendar.objects.filter(
             date__in=all_dates,
             room=calendar.validated_data["room"],
-            start_time = calendar.validated_data.get("start_time", None),
-            end_time = calendar.validated_data.get("end_time", None)
+            start_time__lte=calendar.validated_data.get("start_time", None),
+            end_time__gte=calendar.validated_data.get("start_time", None)
         )
         if possible_occupied_date.exists():
-            return Response({ "detail": "Day cannot be repeated because room is occupied for some days!" }, status=400)
+            return Response({ "detail": "Cannot be repeated because room is occupied!" }, status=400)
         for new_date in all_dates:
             new_calendar = local_models.Calendar()
             new_calendar._class = _class

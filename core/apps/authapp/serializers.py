@@ -118,12 +118,14 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, data):
-        role_id = data["groups"].role_id
+        role_id = self.instance.groups.role_id
         try:
+            if "phone" in data and self.instance.phone == data["phone"]:
+                raise self.Meta.model.DoesNotExist()
             if role_id == User.ADMIN:
-                self.Meta.model.objects.get(school=data["school"], phone=data["phone"])
+                self.Meta.model.objects.get(school=self.instance.school.id, phone=data["phone"])
             else:
-                self.Meta.model.objects.get(branch=data["branch"], phone=data["phone"])
+                self.Meta.model.objects.get(branch=self.instance.branch.id, phone=data["phone"])
             raise serializers.ValidationError("Phone is already registered!")
         except self.Meta.model.DoesNotExist:
             pass

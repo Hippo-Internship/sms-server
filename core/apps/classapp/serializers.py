@@ -149,9 +149,19 @@ class CalendarSerializer(serializers.ModelSerializer):
         model = local_models.Calendar
         fields = "__all__"
         extra_kwargs = {
-            "_class": { "required": False }
+            "_class": { "required": False },
+            "start_time": { "error_messages": { "unique": "dwqwdqdw" } }
         }
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=("room", "date", "start_time"),
+                message="Room is occupied during this time."
+            )
+        ]
 
+    def is_valid(self, raise_exception):
+        return super().is_valid(raise_exception=raise_exception)
     def validate(self, data):
         _class = data["_class"] if self.instance is None else self.instance._class
         if data["room"].branch.id != _class.branch.id:
@@ -160,7 +170,6 @@ class CalendarSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Day should be between 0 and 6")
         if data["end_time"] < data["start_time"]:
             raise serializers.ValidationError("End time should be later than the start time!")
-        today_date = datetime.now()
         calendar = local_models.Calendar.objects.filter(
             room=data["room"].id,
             date=data["date"],
@@ -170,7 +179,7 @@ class CalendarSerializer(serializers.ModelSerializer):
         if self.instance is not None:
             calendar = calendar.exclude(id=self.instance.id)
         if calendar.exists():
-            raise serializers.ValidationError("Room is occupied!")
+            raise serializers.ValidationError("Room is occupied  during this time.")
         return data
 
 
@@ -180,11 +189,6 @@ class ExamUpdateSerializer(serializers.ModelSerializer):
         model = local_models.Exam
         fields = "__all__"
         read_only_fields = [ "id", "_class" ]
-
-    def validate_date(self, value):
-        if value < datetime.date(datetime.now()):
-            raise serializers.ValidationError("Start date should be later than the today's date!")
-        return value
 
 
 class ShortClassSerializer(serializers.ModelSerializer):
