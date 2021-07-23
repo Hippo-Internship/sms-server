@@ -20,6 +20,7 @@ class School(base_models.BaseWithDate):
     color = models.CharField(max_length = 52, null=False, blank=True, default="#3d3f56")
     image = models.ImageField(upload_to="image/schools", null=False, blank=True, default="image/schools/default-min.jpg")
     logo = models.ImageField(upload_to="image/schools-logo", null=True, blank=True)
+    yearly_goal = models.IntegerField(null=True, blank=True, default=0)
 
     class Meta: 
         ordering = [ "-id" ]
@@ -57,6 +58,7 @@ class Branch(base_models.BaseWithDate):
     website = models.CharField(max_length=52, null=True, blank=True)
     color = models.CharField(max_length = 52, null=False, default="#3d3f56")
     image = models.ImageField(upload_to="image/branches", null=False, blank=True, default="image/branches/default_min.jpg")
+    yearly_goal = models.IntegerField(null=True, blank=True, default=0)
 
     class Meta: 
         ordering = [ "-id" ]
