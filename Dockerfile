@@ -11,3 +11,4 @@ RUN python3 manage.py migrate
 RUN python3 manage.py creategroups
 RUN python3 manage.py createdevusers
 RUN python3 manage.py createdefaults
+RUN python3 manage.py createuserpermissions
