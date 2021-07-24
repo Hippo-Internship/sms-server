@@ -3,14 +3,13 @@ from datetime import datetime
 # Django built-in imports
 from django.contrib.auth import get_user_model
 from django.db.models.aggregates import Count, Sum
-from django.db.models import Q
 # Third party imports
+from rest_framework.validators import UniqueTogetherValidator
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 # Local imports
 from . import models as local_models
 from core.apps.authapp import serializers as authapp_serializers
-from core.apps.schoolapp import serializers as schoolapp_serializers
 
 # User model
 User = get_user_model()
@@ -20,6 +19,14 @@ class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Lesson
         fields = "__all__"
+        validators = [
+            UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=['branch', 'name'],
+                message="Name is already registered!"
+            )
+        ]
+
 
 class LessonUpdateSerializer(serializers.ModelSerializer):
 
@@ -29,6 +36,13 @@ class LessonUpdateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "branch": { "read_only": True }
         }
+        validators = [
+            UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=['branch', 'name'],
+                message="Name is already registered!"
+            )
+        ]
 
 
 class RoomSerializer(serializers.ModelSerializer):
@@ -36,6 +50,14 @@ class RoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Room
         fields = "__all__"
+        validators = [
+            UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=['branch', 'name'],
+                message="Name is already registered!"
+            )
+        ]
+
 
 
 class RoomUpdateSerializer(serializers.ModelSerializer):
@@ -46,6 +68,13 @@ class RoomUpdateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "branch": { "read_only": True }
         }
+        validators = [
+            UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=['branch', 'name'],
+                message="Name is already registered!"
+            )
+        ]
 
 
 class ClassCreateAndUpdateSerializer(serializers.ModelSerializer):

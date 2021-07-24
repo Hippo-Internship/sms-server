@@ -22,10 +22,7 @@ class Lesson(base_models.BaseWithDate):
         db_index=True
     )
     name = models.CharField(
-        max_length=50, unique=True, null=False, blank=False, db_index=True,
-        error_messages={
-            "unique": "Name is already regeistered!"
-        }
+        max_length=50, null=False, blank=False, db_index=True
     )
     short_name = models.CharField(max_length=50, null=False, blank=False)
     description = models.CharField(max_length=255, null=True, blank=True)
@@ -58,10 +55,7 @@ class Room(base_models.BaseWithDate):
         db_index=True
     )
     name = models.CharField(
-        max_length=50, unique=True, null=False, blank=False, db_index=True,
-        error_messages={
-            "unique": "Name is already registered!"
-        }
+        max_length=50, null=False, blank=False, db_index=True,
     )
     capacity = models.PositiveIntegerField(null=False, blank=False, default=0)
 

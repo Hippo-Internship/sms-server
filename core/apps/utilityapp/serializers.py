@@ -14,6 +14,13 @@ class StatusSerializer(serializers.ModelSerializer):
             "default": { "read_only": True },
             "branch": { "required": True },
         }
+        validators = [
+            UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=['branch', 'name'],
+                message="Name is already registered!"
+            )
+        ]
 
 class StatusUpdateSerializer(serializers.ModelSerializer):
 
@@ -24,6 +31,13 @@ class StatusUpdateSerializer(serializers.ModelSerializer):
             "branch": { "required": False },
             "default": { "read_only": True }
         }
+        validators = [
+            UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=['branch', 'name'],
+                message="Name is already registered!"
+            )
+        ]
 
     def validate_branch(self, value):
         if value.id != self.instance.branch.id:
@@ -45,6 +59,13 @@ class PaymentMethodSerializer(serializers.ModelSerializer):
             "default": { "read_only": True },
             "branch": { "required": True },
         }
+        validators = [
+            UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=['branch', 'name'],
+                message="Name is already registered!"
+            )
+        ]
 
 class PaymentMethodWithAnnotation(serializers.ModelSerializer):
 
@@ -83,6 +104,13 @@ class PaymentMethodUpdateSerializer(serializers.ModelSerializer):
             "branch": { "required": False },
             "default": { "read_only": True }
         }
+        validators = [
+            UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=['branch', 'name'],
+                message="Name is already registered!"
+            )
+        ]
 
     def validate_branch(self, value):
         if value.id != self.instance.branch.id:

@@ -129,14 +129,8 @@ class CustomUser(AbstractUser):
             "unique": "This email is already registered!"
         }
     )
-    password = models.CharField(_('password'), max_length=128, null=True, blank=True)
-    phone = models.CharField(
-        validators=[ local_validators.validate_phone ], 
-        max_length=20, null=False, 
-        error_messages={
-            "unique": "This number is already registered!"
-        }
-    )
+    password = models.CharField('password', max_length=128, null=True, blank=True)
+    phone = models.CharField(validators=[ local_validators.validate_phone ], max_length=20, null=False)
     related_phone = models.CharField(validators=[ local_validators.validate_phone ], max_length=20, null=True, blank=True)
     interested_at = models.CharField(null=True, max_length=255, blank=True)
     seen_datasheet = models.IntegerField(null=False, blank=True, choices=SEEN_DATASHEET_TYPE, default=SEEN_DATASHEET_TYPE[2][0])
