@@ -13,7 +13,7 @@ services:
         build:
             context: ../sms-frontend
         volumes:
-            - react_build:/app/build 
+            - react_build:/react/build 
     nginx:
         image: nginx:latest
         ports:
