@@ -366,7 +366,10 @@ class DashboardViewset(viewsets.GenericViewSet):
                 except schoolapp_serializer.local_models.Branch.DoesNotExist:
                     return core_responses.request_denied()
             else:
-                return core_responses.request_denied()
+                return core_responses.request_success_with_data({
+                    "goal": 0,
+                    "income": 0
+                })
         elif user_role_id == local_services.User.ADMIN:
             if filter_branch is not None:
                 try:

@@ -12,10 +12,8 @@ def list_discounts(user, queryset, filter_queries={}):
         discounts = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
         discounts = queryset.filter(branch__school=user.school.id, **filter_queries)
-    elif user.groups.role_id == User.OPERATOR:
-        discounts = queryset.filter(branch=user.branch, **filter_queries)
     else:
-        discounts = []
+        discounts = queryset.filter(branch=user.branch, **filter_queries)
     return discounts
 
 # def list_payments(user, queryset, filter_queries={}):

@@ -15,22 +15,18 @@ def list_datasheet(user, queryset, filter_queries={}):
             branch__school=user.school, 
             **filter_queries
         )
-    elif user.groups.role_id == User.OPERATOR:
+    else:
         datasheets = queryset.filter(
             branch=user.branch,
             **filter_queries
         )
-    else:
-        datasheets = []
     return datasheets
 
 def list_datasheet_status(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
-        lessons = queryset.filter(**filter_queries)
+        datasheet_status = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
-        lessons = queryset.filter(branch__school=user.school.id, **filter_queries)
-    elif user.groups.role_id == User.OPERATOR:
-        lessons = queryset.filter(branch=user.branch)
+        datasheet_status = queryset.filter(branch__school=user.school.id, **filter_queries)
     else:
-        lessons = []
-    return lessons
+        datasheet_status = queryset.filter(branch=user.branch)
+    return datasheet_status

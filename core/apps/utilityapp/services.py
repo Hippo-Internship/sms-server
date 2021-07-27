@@ -10,23 +10,19 @@ User = get_user_model()
 
 def list_status(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
-        rooms = queryset.filter(**filter_queries)
+        status = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
-        rooms = queryset.filter(Q(default=True) | Q(branch__school=user.school.id, **filter_queries))
-    elif user.groups.role_id == User.OPERATOR:
-        rooms = queryset.filter(Q(default=True) | Q(branch=user.branch))
+        status = queryset.filter(Q(default=True) | Q(branch__school=user.school.id, **filter_queries))
     else:
-        rooms = []
-    return rooms
+        status = queryset.filter(Q(default=True) | Q(branch=user.branch))
+    return status
 
 
 def list_payment_methods(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
-        rooms = queryset.filter(**filter_queries)
+        payment_method = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
-        rooms = queryset.filter(Q(default=True) | Q(branch__school=user.school.id, **filter_queries))
-    elif user.groups.role_id == User.OPERATOR:
-        rooms = queryset.filter(Q(default=True) | Q(branch=user.branch))
+        payment_method = queryset.filter(Q(default=True) | Q(branch__school=user.school.id, **filter_queries))
     else:
-        rooms = []
-    return rooms
+        payment_method = queryset.filter(Q(default=True) | Q(branch=user.branch))
+    return payment_method

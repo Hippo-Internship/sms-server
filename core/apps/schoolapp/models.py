@@ -48,10 +48,7 @@ class Branch(base_models.BaseWithDate):
         db_index=True
     )
     name = models.CharField(
-        max_length=36, unique=True, null=False, blank=False,
-        error_messages={
-            "unique": "Name is already registered!"
-        }
+        max_length=36, null=False, blank=False, db_index=True
     )
     description = models.CharField(max_length=128, null=True, blank=True)
     address = models.CharField(max_length=128, null=True, blank=True)
@@ -62,6 +59,7 @@ class Branch(base_models.BaseWithDate):
 
     class Meta: 
         ordering = [ "-id" ]
+        unique_together= [ "school", "name" ]
 
     def save(self, *args, **kwargs):
         if self.image == None:

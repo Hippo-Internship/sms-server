@@ -449,10 +449,10 @@ class CalendarViewSet(viewsets.GenericViewSet):
             calendar = self.get_queryset().filter(**filter_queries)
         elif request_user.groups.role_id == local_models.User.ADMIN:
             calendar = self.get_queryset().filter(_class__branch__school=request_user.school.id, **filter_queries)
-        elif request_user.groups.role_id == local_models.User.OPERATOR:
-            calendar = self.get_queryset().filter(_class__branch=request_user.branch, **filter_queries)
         elif request_user.groups.role_id == local_models.User.TEACHER:
             calendar = self.get_queryset().filter(_class__teacher=request_user, **filter_queries)
+        else:
+            calendar = self.get_queryset().filter(_class__branch=request_user.branch, **filter_queries)
         p_calendar = self.paginate_queryset(calendar)
         calendar = self.get_serializer_class()(p_calendar, many=True)
         return self.get_paginated_response(calendar.data)

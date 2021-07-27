@@ -31,7 +31,7 @@ def list_users(user, queryset, filter_queries={}):
     print(filter_queries)
     if groups is None:
         return []
-    if user.groups.role_id > groups:
+    if groups in User.FORBIDDEN_USER_ACCESS[user.groups.role_id]:
         raise PermissionDenied()
     if user.groups.role_id == User.SUPER_ADMIN:
         users = queryset.filter(groups__role_id=groups, is_active=True, **filter_queries)

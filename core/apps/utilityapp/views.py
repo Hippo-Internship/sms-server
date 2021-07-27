@@ -85,7 +85,10 @@ detail_switch = {
         "params": {
             "queryset": classapp_serializers.local_models.Lesson.objects,
         },
-        "filter": filter_model,
+        "filter": {
+            **filter_model,
+            "status": "is_active"
+        },
         "serializer": classapp_serializers.ShortLessonSerializer
     },
     "discount": {

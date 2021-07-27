@@ -15,7 +15,7 @@ def list_classes(user, queryset, filter_queries={}):
             branch__school=user.school.id, 
             **filter_queries
         )
-    elif user.groups.role_id == User.OPERATOR:
+    elif user.groups.role_id == User.OPERATOR or user.groups.role_id == User.ACCOUNTANT:
         classes = queryset.filter(
             branch=user.branch, 
             **filter_queries
