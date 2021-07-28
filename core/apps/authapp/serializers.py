@@ -62,7 +62,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, data):
-        if data["groups"].role_id <= User.ADMIN:
+        if data["groups"].role_id == User.ADMIN or data["groups"].role_id == User.SUPER_ADMIN:
             data.pop("branch", None)
         elif "branch" not in data:
             raise serializers.ValidationError("Branch is required!")

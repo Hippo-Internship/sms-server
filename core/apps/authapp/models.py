@@ -143,7 +143,6 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
 
     class Meta:
-        unique_together = [ "branch", "phone" ]
         ordering = [ "-id" ]
 
     @property

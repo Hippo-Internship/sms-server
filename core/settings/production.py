@@ -7,7 +7,7 @@ AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
 AWS_DEFAULT_ACL = None
 # AWS_S3_CUSTOM_DOMAIN = f'd3462nj2929uop.cloudfront.net'
 AWS_S3_CUSTOM_DOMAIN = f'd3kdf0bw1o93xj.cloudfront.net'
-AWS_S3_REGION_NAME="ap-east-1"
+AWS_S3_REGION_NAME=env("AWS_REGION", default=None)
 AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 # s3 static settings
 STATIC_LOCATION = 'static'
