@@ -10,7 +10,7 @@ User = get_user_model()
 
 def list_status(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
-        status = queryset.filter(**filter_queries)
+        status = queryset.filter(Q(default=True) | Q(**filter_queries))
     elif user.groups.role_id == User.ADMIN:
         status = queryset.filter(Q(default=True) | Q(branch__school=user.school.id, **filter_queries))
     else:
@@ -20,7 +20,7 @@ def list_status(user, queryset, filter_queries={}):
 
 def list_payment_methods(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
-        payment_method = queryset.filter(**filter_queries)
+        payment_method = queryset.filter(Q(default=True) | Q(**filter_queries))
     elif user.groups.role_id == User.ADMIN:
         payment_method = queryset.filter(Q(default=True) | Q(branch__school=user.school.id, **filter_queries))
     else:

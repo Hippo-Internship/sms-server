@@ -1,5 +1,6 @@
 # Django built-in imports
 from django.contrib.auth import get_user_model
+from django.db.models.query_utils import Q
 # Third party imports
 from rest_framework.exceptions import PermissionDenied
 # Local imports
@@ -24,7 +25,7 @@ def list_datasheet(user, queryset, filter_queries={}):
 
 def list_datasheet_status(user, queryset, filter_queries={}):
     if user.groups.role_id == User.SUPER_ADMIN:
-        datasheet_status = queryset.filter(**filter_queries)
+        datasheet_status = queryset.filter(Q(default=True) | Q(**filter_queries))
     elif user.groups.role_id == User.ADMIN:
         datasheet_status = queryset.filter(branch__school=user.school.id, **filter_queries)
     else:
