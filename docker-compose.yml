@@ -6,7 +6,7 @@ services:
             - .env
         build:
             context: .
-        command: gunicorn core.wsgi --bind 0.0.0.0:8000
+        command: gunicorn core.wsgi --bind 0.0.0.0:8000 --workers=5
         ports:
             - "8000:8000"
     sms_client:
