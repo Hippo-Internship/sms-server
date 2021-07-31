@@ -20,7 +20,7 @@ DEFAULT_FILE_STORAGE = 'core.storages.PublicMediaStorage'
 
 STATICFILES_DIRS = (path.join(BASE_DIR, 'static'),)
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 CORS_ALLOW_ALL_ORIGINS = True
 ALLOWED_HOSTS = [ "*" ]
