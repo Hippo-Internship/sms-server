@@ -44,6 +44,11 @@ def compress_image(image):
 def handle_image_upload(instance, real_instance, field, path=""):
     new_file = getattr(instance, field)
     filename = new_file.name.split(".") if new_file.name is not None else None
+    if not instance.pk:
+        if new_file.name is not None:
+            new_file.name = '{}.{}'.format(uuid4().hex, filename[-1])
+            return True
+        return False
     old_file = getattr(real_instance, field)
     if not old_file.name.split("/")[-1] == new_file.name:
         if old_file and default_storage.exists(old_file.name):
