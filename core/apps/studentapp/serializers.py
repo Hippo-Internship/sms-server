@@ -2,11 +2,11 @@
 from datetime import date
 # Django built-in imports
 from django.contrib.auth import get_user_model
-from django.db.models import Sum, fields
+from django.db.models import Sum
 # Third party imports
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError, PermissionDenied
-from rest_framework.fields import ReadOnlyField
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.validators import UniqueTogetherValidator
 # Local imports
 from . import models as local_models
 from core.apps.authapp import serializers as authapp_serializers
@@ -23,6 +23,13 @@ class StudentCreateSerializer(serializers.ModelSerializer):
             "_class": { "required": False },
             "operator": { "required": False }
         }
+        validators = [
+            UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=['_class', 'user'],
+                message="User is already registered in the class!"
+            )
+        ]
 
     def validate(self, data):
         _class = data["_class"]
