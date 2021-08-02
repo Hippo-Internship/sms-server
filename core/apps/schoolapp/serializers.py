@@ -31,7 +31,7 @@ class BranchUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = local_models.Branch
         extra_kwargs = {
-            "branch": { "read_only": True }
+            "school": { "read_only": True }
         }
         validators = [
             UniqueTogetherValidator(

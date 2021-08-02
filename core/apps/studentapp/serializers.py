@@ -27,7 +27,7 @@ class StudentCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         _class = data["_class"]
         if (_class.branch.id is not data["user"].branch.id or 
-            _class.branch.id is not data["status"].branch.id or
+            (not data["status"].default and _class.branch.id is not data["status"].branch.id) or
             "payment_paid" in data or "discount_amount" in data):
             raise PermissionDenied()
         if "discounts" in data:

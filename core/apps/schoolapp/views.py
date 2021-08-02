@@ -103,3 +103,8 @@ class BranchViewSet(viewsets.GenericViewSet):
         branch = self.get_serializer_class()(branch)
         return core_responses.request_success_with_data(branch.data)
 
+    def get_serializer_class(self):
+        if self.action == "update":
+            return local_serializers.BranchUpdateSerializer
+        return super().get_serializer_class()
+

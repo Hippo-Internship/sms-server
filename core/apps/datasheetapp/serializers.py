@@ -34,7 +34,7 @@ class DatasheetCreateSerializer(serializers.ModelSerializer):
             raise PermissionDenied()
         if (("user" in data and data["user"] is not None and branch.id != data["user"].branch.id) or
             ("lesson" in data and data["lesson"] is not None and branch.id != data["lesson"].branch.id) or
-            ("status" in data and data["status"] is not None and branch.id != data["status"].branch.id)):
+            ("status" in data and data["status"] is not None and not data["status"].default and branch.id != data["status"].branch.id)):
             raise PermissionDenied()
         return data
 
