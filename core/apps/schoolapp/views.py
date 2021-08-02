@@ -88,8 +88,6 @@ class BranchViewSet(viewsets.GenericViewSet):
         branch_request_data = request.data
         s_branch = self.get_serializer_class()(branch, data=branch_request_data)
         s_branch.is_valid(raise_exception=True)
-        if branch.school.id == branch_request_data["school"]:
-            return core_responses.request_denied()
         s_branch.save()
         return core_responses.request_success_with_data(s_branch.data)
 
