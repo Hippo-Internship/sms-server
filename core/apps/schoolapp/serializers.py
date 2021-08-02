@@ -30,6 +30,7 @@ class BranchUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.Branch
+        fields = "__all__"
         extra_kwargs = {
             "school": { "read_only": True }
         }
