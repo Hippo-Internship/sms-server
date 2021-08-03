@@ -64,7 +64,7 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         _class = self.instance._class
-        if _class.branch.id != data["status"].branch.id:
+        if not data["status"].default and _class.branch.id != data["status"].branch.id:
             raise PermissionDenied()
         if "payment_paid" in data:
             data.pop("payment_paid")
@@ -224,7 +224,8 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         student = data["student"]
-        remaining_fee = student._class.lesson.price - student.payments.aggregate(total=Sum("paid"))["total"]
+        total_payment = student.payments.aggregate(total=Sum("paid"))
+        remaining_fee = student._class.lesson.price - (total_payment["total"] if total_payment["total"] is not None else 0)
         if data["paid"] > remaining_fee:
             raise serializers.ValidationError("Value can't be more than remainder!")
         return data

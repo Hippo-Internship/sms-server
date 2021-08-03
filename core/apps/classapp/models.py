@@ -10,7 +10,24 @@ from core import base_models
 # User model
 User = get_user_model()
 
-# Create your models here.
+class Curriculum(base_models.BaseWithDate):
+    
+    id = models.BigAutoField(primary_key=True)
+    branch = models.ForeignKey(
+        schoolapp_models.Branch,
+        on_delete=models.CASCADE, 
+        null=False, 
+        related_name="curriculums", 
+        db_index=True
+    )
+    name = models.CharField(max_length=50, null=False, blank=False, db_index=True)
+    description = models.TextField(null=True, blank=True)
+    file = models.FileField(upload_to="curriculum", null=False, blank=False)
+
+    def __str__(self):
+        return "%s %s" % (self.id, self.name)
+
+
 class Lesson(base_models.BaseWithDate):
 
     id = models.BigAutoField(primary_key=True)
@@ -21,9 +38,11 @@ class Lesson(base_models.BaseWithDate):
         related_name="lessons", 
         db_index=True
     )
-    name = models.CharField(
-        max_length=50, null=False, blank=False, db_index=True
+    curriculums = models.ManyToManyField(
+        Curriculum,
+        blank=True
     )
+    name = models.CharField(max_length=50, null=False, blank=False, db_index=True)
     short_name = models.CharField(max_length=50, null=False, blank=False)
     description = models.CharField(max_length=255, null=True, blank=True)
     interval = models.PositiveIntegerField(null=True, default=0)
