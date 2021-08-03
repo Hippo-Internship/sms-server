@@ -277,3 +277,41 @@ class CalendarCreateSerializer(serializers.ModelSerializer):
         model = local_models.Calendar
         field = "__all__"
 
+
+class CurriculumSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Curriculum
+        fields = "__all__"
+        validators = [
+            UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=['school', 'name'],
+                message="Name is already registered!"
+            )
+        ]
+
+    def validate_file(self, value):
+        if value.size > 1024 * 1024 * 8 * 10:
+            raise serializers.ValidationError("File must not exceed the 10mb limit")
+        return value
+
+class CurriculumUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Curriculum
+        fields = "__all__"
+        read_only_fields = [ "school" ]
+        validators = [
+            UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=['school', 'name'],
+                message="Name is already registered!"
+            )
+        ]
+
+    def validate_file(self, value):
+        if value.size > 1024 * 1024 * 8 * 10:
+            raise serializers.ValidationError("File must not exceed the 10mb limit")
+        return value
+

@@ -12,5 +12,6 @@ router.register("room", local_views.RoomViewSet, basename="room")
 router.register("action", local_views.ClassViewSet, basename="class")
 router.register("calendar", local_views.CalendarViewSet, basename="calendar")
 router.register("exam", local_views.ExamViewSet, basename="exam")
+router.register("curriculum", local_views.Curriculum, basename="curriculum")
 
 urlpatterns = router.urls

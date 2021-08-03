@@ -506,3 +506,52 @@ class ExamViewSet(viewsets.GenericViewSet):
         exam_result.mark = mark
         exam_result.save()
         return core_responses.request_success()
+
+
+class Curriculum(viewsets.GenericViewSet):
+
+    queryset = local_models.Curriculum.objects.all()
+    serializer_class = local_serializers.CurriculumSerializer
+
+    def list(self, request):
+        request_user = request.user
+        query_params = core_utils.normalize_data(
+            { 
+                "status": "str",
+                "search": "str"
+            },
+            dict(request.query_params)
+        )
+        filter_model = {
+            "search": "user__phone__startswith"
+        }
+        filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
+        curriculums = local_services.list_curriculums(request_user, self.get_queryset(), filter_queries)
+        curriculums = local_serializers.CurriculumSerializer(curriculums)
+        return core_responses.request_success_with_data(curriculums.data)
+
+    def create(self, request):
+        curriculum_data = request.data
+        curriculum_data = self.get_serializer_class()(data=curriculum_data)
+        curriculum_data.is_valid(raise_exception=True)
+        curriculum_data.save()
+        return core_responses.request_success()
+
+    def retrieve(self, request, pk=None):
+        return core_responses.request_success()
+
+    @core_decorators.object_exists(model=local_models.Curriculum, detail="Curriculum")
+    def update(self, request, curriculum=None):
+        curriculum_data = request.data
+        curriculum_data = self.get_serializer_class()(curriculum, data=curriculum_data)
+        curriculum_data.is_valid(raise_exception=True)
+        curriculum_data.save()
+        return core_responses.request_success()
+
+    def delete(self, request, pk=None):
+        return core_responses.request_success()
+
+    def get_serializer_class(self):
+        if self.action == "update":
+            return local_serializers.CurriculumUpdateSerializer
+        return super().get_serializer_class()

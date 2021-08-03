@@ -41,7 +41,7 @@ def compress_image(image):
         None
     )
 
-def handle_image_upload(instance, real_instance, field, path=""):
+def handle_file_upload(instance, real_instance, field, path=""):
     new_file = getattr(instance, field)
     filename = new_file.name.split(".") if new_file.name is not None else None
     if not instance.pk:

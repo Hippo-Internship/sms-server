@@ -13,8 +13,8 @@ User = get_user_model()
 class Curriculum(base_models.BaseWithDate):
     
     id = models.BigAutoField(primary_key=True)
-    branch = models.ForeignKey(
-        schoolapp_models.Branch,
+    school = models.ForeignKey(
+        schoolapp_models.School,
         on_delete=models.CASCADE, 
         null=False, 
         related_name="curriculums", 
@@ -23,6 +23,9 @@ class Curriculum(base_models.BaseWithDate):
     name = models.CharField(max_length=50, null=False, blank=False, db_index=True)
     description = models.TextField(null=True, blank=True)
     file = models.FileField(upload_to="curriculum", null=False, blank=False)
+
+    class Meta:
+        unique_together = [ "school", "name" ]
 
     def __str__(self):
         return "%s %s" % (self.id, self.name)

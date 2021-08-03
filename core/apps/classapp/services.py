@@ -45,3 +45,10 @@ def list_lessons(user, queryset, filter_queries={}):
     else:
         lessons = queryset.filter(branch=user.branch)
     return lessons
+    
+def list_curriculums(user, queryset, filter_queries={}):
+    if user.user == User.SUPER_ADMIN:
+        curriculums = queryset.filter(**filter_queries)
+    elif user.user == User.ADMIN:
+        curriculums = queryset.filter(school=user.school.id, **filter_queries)
+    return curriculums
