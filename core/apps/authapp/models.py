@@ -133,6 +133,7 @@ class CustomUser(AbstractUser):
     phone = models.CharField(validators=[ local_validators.validate_phone ], max_length=20, null=False)
     related_phone = models.CharField(validators=[ local_validators.validate_phone ], max_length=20, null=True, blank=True)
     interested_at = models.CharField(null=True, max_length=255, blank=True)
+    social_account = models.CharField(max_length=128, null=True, blank=True)
     seen_datasheet = models.IntegerField(null=False, blank=True, choices=SEEN_DATASHEET_TYPE, default=SEEN_DATASHEET_TYPE[2][0])
     groups = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="users")
     is_active = models.BooleanField(default=True)
