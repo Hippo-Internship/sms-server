@@ -302,6 +302,11 @@ class CurriculumUpdateSerializer(serializers.ModelSerializer):
         model = local_models.Curriculum
         fields = "__all__"
         read_only_fields = [ "school" ]
+        extra_kwargs = {
+            "file": {
+                "required": False
+            }
+        }
         validators = [
             UniqueTogetherValidator(
                 queryset=model.objects.all(),

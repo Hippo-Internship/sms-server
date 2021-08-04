@@ -517,18 +517,20 @@ class Curriculum(viewsets.GenericViewSet):
         request_user = request.user
         query_params = core_utils.normalize_data(
             { 
-                "status": "str",
-                "search": "str"
+                "search": "str",
+                "school": "int"
             },
             dict(request.query_params)
         )
         filter_model = {
-            "search": "user__phone__startswith"
+            "search": "name__contains",
+            "school": "school"
         }
         filter_queries = core_utils.build_filter_query(filter_model, query_params, user=request_user)
         curriculums = local_services.list_curriculums(request_user, self.get_queryset(), filter_queries)
-        curriculums = local_serializers.CurriculumSerializer(curriculums)
-        return core_responses.request_success_with_data(curriculums.data)
+        p_curriculums = self.paginate_queryset(curriculums)
+        curriculums = local_serializers.CurriculumSerializer(p_curriculums, many=True, context={ "request": request })
+        return self.get_paginated_response(curriculums.data)
 
     def create(self, request):
         curriculum_data = request.data
@@ -543,12 +545,14 @@ class Curriculum(viewsets.GenericViewSet):
     @core_decorators.object_exists(model=local_models.Curriculum, detail="Curriculum")
     def update(self, request, curriculum=None):
         curriculum_data = request.data
-        curriculum_data = self.get_serializer_class()(curriculum, data=curriculum_data)
-        curriculum_data.is_valid(raise_exception=True)
-        curriculum_data.save()
-        return core_responses.request_success()
+        _curriculum = self.get_serializer_class()(curriculum, data=curriculum_data)
+        _curriculum.is_valid(raise_exception=True)
+        _curriculum.save()
+        return core_responses.request_success_with_data(_curriculum.data)
 
-    def delete(self, request, pk=None):
+    @core_decorators.object_exists(model=local_models.Curriculum, detail="Curriculum")
+    def delete(self, request, curriculum=None):
+        curriculum.delete()
         return core_responses.request_success()
 
     def get_serializer_class(self):

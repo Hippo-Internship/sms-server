@@ -28,7 +28,9 @@ def list_groups(user, queryset, filter_queries={}):
 
 def list_users(user, queryset, filter_queries={}):
     groups = filter_queries.pop("groups__role_id", None)
-    print(filter_queries)
+    exclude_class = filter_queries.pop("exclude_class", None)
+    if exclude_class and type(exclude_class).__name__ == "int":
+        queryset = queryset.exclude(students___class=exclude_class)
     if groups is None:
         return []
     if groups in User.FORBIDDEN_USER_ACCESS[user.groups.role_id]:

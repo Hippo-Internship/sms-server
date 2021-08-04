@@ -60,7 +60,8 @@ detail_switch = {
         },
         "filter": {
             **filter_model,
-            "groups": "groups__role_id"
+            "groups": "groups__role_id",
+            "exclude": "exclude_class"
         },
         "serializer": authapp_serializers.ShortUserSerializer
     },

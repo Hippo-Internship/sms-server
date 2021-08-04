@@ -23,6 +23,7 @@ class Curriculum(base_models.BaseWithDate):
     name = models.CharField(max_length=50, null=False, blank=False, db_index=True)
     description = models.TextField(null=True, blank=True)
     file = models.FileField(upload_to="curriculum", null=False, blank=False)
+    shared = models.BooleanField(default=True)
 
     class Meta:
         unique_together = [ "school", "name" ]

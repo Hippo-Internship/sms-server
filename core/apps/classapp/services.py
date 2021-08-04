@@ -47,8 +47,8 @@ def list_lessons(user, queryset, filter_queries={}):
     return lessons
     
 def list_curriculums(user, queryset, filter_queries={}):
-    if user.user == User.SUPER_ADMIN:
+    if user.groups.role_id == User.SUPER_ADMIN:
         curriculums = queryset.filter(**filter_queries)
-    elif user.user == User.ADMIN:
+    elif user.groups.role_id == User.ADMIN:
         curriculums = queryset.filter(school=user.school.id, **filter_queries)
     return curriculums
