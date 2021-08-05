@@ -1,12 +1,10 @@
 # Django built-in imports
-from django.utils import timezone
 from django.db.models.fields import DateField
 from django.db import models
 from django.contrib.auth import get_user_model
 # Local imports
 from core.apps.schoolapp import models as schoolapp_models
 from core import base_models
-
 # User model
 User = get_user_model()
 
@@ -26,6 +24,7 @@ class Curriculum(base_models.BaseWithDate):
     shared = models.BooleanField(default=True)
 
     class Meta:
+        ordering = [ "-modified" ]
         unique_together = [ "school", "name" ]
 
     def __str__(self):

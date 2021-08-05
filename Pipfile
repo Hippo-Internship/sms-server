@@ -9,12 +9,13 @@ djangorestframework = "*"
 mysqlclient = "*"
 django-environ = "*"
 pillow = "*"
-dj-rest-auth = "*"
 djangorestframework-simplejwt = "*"
 django-cors-headers = "*"
 django-storages = "*"
 boto3 = "*"
 gunicorn = "*"
+cryptography = "*"
+dj-rest-auth = "==2.1.7"
 
 [dev-packages]
 

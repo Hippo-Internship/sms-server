@@ -12,3 +12,9 @@ class PublicMediaStorage(S3Boto3Storage):
     location = settings.PUBLIC_MEDIA_LOCATION
     default_acl = "public-read"
     file_overwrite = True
+
+class PrivateCurriculumStorage(S3Boto3Storage):
+
+    location = settings.PRIVATE_MEDIA_LOCATION
+    default_acl = "private"
+    file_overwrite = True

@@ -7,6 +7,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = path.join(BASE_DIR, 'media')
+SERVER_PRODUCTION = 0
 
 CORS_ALLOW_ALL_ORIGINS = True
 ALLOWED_HOSTS = ["*"]

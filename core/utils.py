@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.core.files.storage import default_storage
 from uuid import uuid4
 import os
 from django.contrib.auth import get_user_model

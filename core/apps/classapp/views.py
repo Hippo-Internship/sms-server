@@ -2,13 +2,16 @@
 from calendar import monthrange
 from datetime import datetime, timedelta
 # Django built-in imports
-from django.db.models import Sum, Count
+from django.db.models import Sum
+from django.conf import settings
 from django.db import transaction as django_transaction
+from django.core.files.storage import default_storage
 # Third party imports
-from rest_framework import status, viewsets
+from rest_framework import viewsets
 from rest_framework import decorators as rest_decorator
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from storages.backends.s3boto3 import S3Boto3Storage
 # Local imports
 from . import \
         models as local_models, \
@@ -554,6 +557,19 @@ class Curriculum(viewsets.GenericViewSet):
     def delete(self, request, curriculum=None):
         curriculum.delete()
         return core_responses.request_success()
+
+    @rest_decorator.action(detail=True, methods=[ "GET" ], url_path="file")
+    @core_decorators.object_exists(model=local_models.Curriculum, detail="Curriculum")
+    def get_curriculum_file(self, request, curriculum=None):
+        config = {}
+        if settings.SERVER_PRODUCTION == 1:
+            config["expire"] = 10
+        signed_url = default_storage.url(curriculum.file.name, **config)
+        data = {
+            "name": curriculum.name,
+            "url": signed_url
+        }
+        return core_responses.request_success_with_data(data)
 
     def get_serializer_class(self):
         if self.action == "update":

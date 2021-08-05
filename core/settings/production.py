@@ -9,6 +9,8 @@ AWS_DEFAULT_ACL = None
 AWS_S3_CUSTOM_DOMAIN = env("AWS_CLOUDFRONT_URL")
 AWS_S3_REGION_NAME=env("AWS_REGION", default=None)
 AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+AWS_CLOUDFRONT_KEY = env.str("AWS_CLOUDFRONT_KEY", multiline=True).encode('ascii')
+AWS_CLOUDFRONT_KEY_ID = env('AWS_CLOUDFRONT_KEY_ID', None)
 # s3 static settings
 STATIC_LOCATION = 'static'
 STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
@@ -17,10 +19,13 @@ STATICFILES_STORAGE = 'core.storages.StaticStorage'
 PUBLIC_MEDIA_LOCATION = 'media'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
 DEFAULT_FILE_STORAGE = 'core.storages.PublicMediaStorage'
-
+PRIVATE_MEDIA_LOCATION = 'private'
 STATICFILES_DIRS = (path.join(BASE_DIR, 'static'),)
+AWS_QUERYSTRING_AUTH = True
+AWS_QUERYSTRING_EXPIRE = 10
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+SERVER_PRODUCTION = 1
 
 CORS_ALLOW_ALL_ORIGINS = True
 ALLOWED_HOSTS = [ "*" ]

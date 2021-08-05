@@ -11,9 +11,9 @@ from core import functions as core_functions
 
 @receiver(post_delete, sender=local_models.Curriculum)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
-    if instance.image:
-        if default_storage.exists(instance.image.name):
-            default_storage.delete(instance.image.name)
+    if instance.file:
+        if default_storage.exists(instance.file.name):
+            default_storage.delete(instance.file.name)
 
 @receiver(pre_save, sender=local_models.Curriculum)
 def auto_delete_curriculum_on_change(sender, instance, **kwargs):
