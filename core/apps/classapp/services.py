@@ -51,4 +51,9 @@ def list_curriculums(user, queryset, filter_queries={}):
         curriculums = queryset.filter(**filter_queries)
     elif user.groups.role_id == User.ADMIN:
         curriculums = queryset.filter(school=user.school.id, **filter_queries)
+    elif user.groups.role_id == User.OPERATOR:
+        curriculums = queryset.filter(school=user.school.id, shared=True, **filter_queries)
+    elif user.groups.role_id == User.TEACHER:
+        currculum_id_list = user.classes.values_list("lesson__curriculums", flat=True)
+        curriculums = queryset.filter(id__in=currculum_id_list, shared=True, **filter_queries)
     return curriculums

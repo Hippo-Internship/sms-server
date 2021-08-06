@@ -515,6 +515,10 @@ class Curriculum(viewsets.GenericViewSet):
 
     queryset = local_models.Curriculum.objects.all()
     serializer_class = local_serializers.CurriculumSerializer
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
+        core_permissions.CurriculumGetOrModifySerializer,
+        core_permissions.SchoolContentManagementPermission,
+    ]
 
     def list(self, request):
         request_user = request.user

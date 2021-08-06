@@ -142,6 +142,17 @@ detail_switch = {
         "filter": filter_model,
         "serializer": datasheetapp_serializers.ShortDatasheetStatuSerializer
     },
+    "curriculum": {
+        "service": classapp_services.list_curriculums,
+        "params": {
+            "queryset": classapp_serializers.local_models.Curriculum.objects,
+        },
+        "filter": {
+            "school": "school",
+            "shared": "shared"
+        },
+        "serializer": classapp_serializers.ShortCurriculumSerializer
+    },
 }
 
 

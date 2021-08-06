@@ -282,7 +282,7 @@ class CurriculumSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.Curriculum
-        fields = "__all__"
+        exclude = [ "file" ]
         validators = [
             UniqueTogetherValidator(
                 queryset=model.objects.all(),
@@ -300,12 +300,11 @@ class CurriculumUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.Curriculum
-        fields = "__all__"
+        exclude = [ "file" ]
         read_only_fields = [ "school" ]
         extra_kwargs = {
-            "file": {
-                "required": False
-            }
+            "file": { "required": False },
+            "name": { "required": False }
         }
         validators = [
             UniqueTogetherValidator(
@@ -320,3 +319,9 @@ class CurriculumUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("File must not exceed the 10mb limit")
         return value
 
+
+class ShortCurriculumSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = local_models.Curriculum
+        fields = [ "id", "name" ]

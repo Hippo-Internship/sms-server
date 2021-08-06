@@ -281,3 +281,12 @@ class PaymentMethodGetOrModifySerializer(BasePermission):
         user = request.user
         switch = generate_basic_permission_switch("utilityapp", "paymentmethod")
         return user.has_perm(switch.get(view.action, ""))
+
+
+class CurriculumGetOrModifySerializer(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        switch = generate_basic_permission_switch("classapp", "curriculum")
+        switch["get_curriculum_file"] = "classapp.view_curriculum"
+        return user.has_perm(switch.get(view.action, ""))
