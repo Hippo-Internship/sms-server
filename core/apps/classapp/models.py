@@ -103,16 +103,16 @@ class Class(models.Model):
     lesson = models.ForeignKey(
         Lesson,
         related_name='classes', 
-        on_delete=models.DO_NOTHING,
-        null=False,
+        on_delete=models.SET_NULL,
+        null=True,
         blank=False,
         db_index=True
     )
     teacher = models.ForeignKey(
         User, 
         related_name='classes', 
-        on_delete=models.DO_NOTHING, 
-        null=False, 
+        on_delete=models.SET_NULL, 
+        null=True, 
         blank=False,
         db_index=True
     )
