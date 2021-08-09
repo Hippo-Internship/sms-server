@@ -19,9 +19,7 @@ STATICFILES_STORAGE = 'core.storages.StaticStorage'
 PUBLIC_MEDIA_LOCATION = 'media'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
 DEFAULT_FILE_STORAGE = 'core.storages.PublicMediaStorage'
-PRIVATE_MEDIA_LOCATION = 'private'
 STATICFILES_DIRS = (path.join(BASE_DIR, 'static'),)
-AWS_QUERYSTRING_AUTH = True
 AWS_QUERYSTRING_EXPIRE = 10
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

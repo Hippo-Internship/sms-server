@@ -282,7 +282,10 @@ class CurriculumSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = local_models.Curriculum
-        exclude = [ "file" ]
+        fields = "__all__"
+        extra_kwargs = {
+            "file": { "write_only": True }
+        }
         validators = [
             UniqueTogetherValidator(
                 queryset=model.objects.all(),
