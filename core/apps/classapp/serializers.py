@@ -284,7 +284,7 @@ class CurriculumSerializer(serializers.ModelSerializer):
         model = local_models.Curriculum
         fields = "__all__"
         extra_kwargs = {
-            "file": { "write_only": True }
+            "file": { "write_only": True }  
         }
         validators = [
             UniqueTogetherValidator(
