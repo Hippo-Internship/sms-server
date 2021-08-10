@@ -32,7 +32,9 @@ class DashboardViewset(viewsets.GenericViewSet):
             {
                 "branch": "int",
                 "school": "int",
-                "filter": "int"
+                "filter": "int",
+                "quarter": "int",
+                "year": "int",
             },
             dict(request.query_params)
         )
@@ -42,7 +44,14 @@ class DashboardViewset(viewsets.GenericViewSet):
             "school": "branch__school",
         }
         _filter_queries = core_utils.build_filter_query(_filter_model, query_params, user=request_user)
-        income_data = local_services.generate_total_income_data(request_user, filter_queries=filter_queries, filter=query_params.get("filter", 1), add_filter_queries=_filter_queries)
+        income_data = local_services.generate_total_income_data(
+            request_user, 
+            filter_queries=filter_queries, 
+            filter=query_params.get("filter", 1), 
+            quarter=query_params.get("quarter", 1), 
+            year=query_params.get("year", 1), 
+            add_filter_queries=_filter_queries
+        )
         return core_responses.request_success_with_data(income_data)
 
     @rest_decorators.action(detail=False, methods=[ "GET" ], url_path="payment/branch")

@@ -17,7 +17,84 @@ from core.apps.datasheetapp import models as datasheetapp_models
 
 User = get_user_model()
 
-def generate_total_income_data(user: User, filter_queries: dict={}, filter: int=1, add_filter_queries: dict={}) -> dict:
+def generate_total_income_data(user: User, filter_queries: dict={}, filter: int=1, quarter: int=1, year: int=None, add_filter_queries: dict={}) -> dict:
+    queryset: QuerySet = studentapp_models.Payment.objects
+    class_queryset: QuerySet = classapp_models.Class.objects
+    if user.groups.role_id == User.SUPER_ADMIN:
+        payments = queryset.filter(**filter_queries)
+        classes = class_queryset.filter(**add_filter_queries)
+    elif user.groups.role_id == User.ADMIN:
+        payments = queryset.filter(student__user__branch__school=user.school.id, **filter_queries)
+        classes = class_queryset.filter(branch__school=user.school.id, **add_filter_queries)
+    else:
+        payments = queryset.filter(student__user__branch=user.branch, **filter_queries)
+        classes = class_queryset.filter(branch=user.branch, **add_filter_queries)
+    today_date = datetime.now()
+    income_by_filter: list = []
+    income_dates: list = []
+    total_income_by_filter: int = 0
+    if filter == 1:
+        week_day = today_date.weekday()
+        _today_date = today_date - timedelta(days=week_day)
+        for day in range(7):
+            current_day = (_today_date + timedelta(days=day)).strftime("%Y-%m-%d")
+            if day > week_day:
+                income_by_filter.append(0)
+                income_dates.append(current_day)
+                continue
+            temp_total = payments.aggregate(total=Sum("paid", filter=Q(date=current_day)))
+            total = temp_total["total"] if temp_total["total"] is not None else 0
+            income_by_filter.append(total)
+            income_dates.append(current_day)
+            total_income_by_filter += total
+        lesson_classes = classes.filter(start_date__range=[ today_date - timedelta(days=7), today_date ])
+        print(income_by_filter, total_income_by_filter)
+    elif filter == 2:
+        quarter = quarter // 5 + quarter % 5
+        end_month = quarter * 3
+        start_month = end_month - 2
+        for month in range(3):
+            current_date = datetime(year=today_date.year, month=start_month + month, day=1).strftime("%Y-%m-%d")
+            temp_total = payments.aggregate(total=Sum("paid", filter=Q(date__year=today_date.year, date__month=start_month + month)))
+            total = temp_total["total"] if temp_total["total"] is not None else 0
+            income_by_filter.append(total)
+            income_dates.append(current_date)
+            total_income_by_filter += total
+        lesson_classes = classes.filter(start_date__year=today_date.year, start_date__month__range=[ start_month, end_month ])
+    elif filter == 3:
+        chosen_year = today_date.year if year is None else year
+        for month in range(12):
+            current_date = datetime(year=chosen_year, month=month + 1, day=1).strftime("%Y-%m-%d")
+            if month > today_date.month:
+                income_by_filter.append(0)
+                income_dates.append(current_date)
+                continue
+            temp_total = payments.aggregate(total=Sum("paid", filter=Q(date__year=chosen_year, date__month=month + 1)))
+            total = temp_total["total"] if temp_total["total"] is not None else 0
+            income_by_filter.append(total)
+            income_dates.append(current_date)
+            total_income_by_filter += total
+        lesson_classes = classes.filter(start_date__year=chosen_year, start_date__month__range=[ 1, 12 ])
+    temp_total_lesson_price = lesson_classes.annotate(students_count=Count("students")).aggregate(total=Sum(F("lesson__price") * F("students_count")))
+    temp_total_lesson_payment = lesson_classes.aggregate(total=Sum("students__payments__paid"))
+    temp_pending = temp_total_lesson_price["total"] if temp_total_lesson_price["total"] is not None else 0
+    temp_total = temp_total_lesson_payment["total"] if temp_total_lesson_payment["total"] is not None else 0
+    real_pending = temp_pending - temp_total
+    all_time_start_date = payments.aggregate(min_date=Min("date"))["min_date"]
+    all_time_start_date = datetime(all_time_start_date.year, all_time_start_date.month, all_time_start_date.day) if all_time_start_date is not None else today_date
+    generated_data: dict = {
+        "income": {
+            "total": total_income_by_filter,
+            "data": income_by_filter,
+            "dates": income_dates
+        },
+        "pending": real_pending,
+        "start_year": all_time_start_date.year
+    }
+    return generated_data
+
+
+def _generate_total_income_data(user: User, filter_queries: dict={}, filter: int=1, add_filter_queries: dict={}) -> dict:
     queryset: QuerySet = studentapp_models.Payment.objects
     class_queryset: QuerySet = classapp_models.Class.objects
     if user.groups.role_id == User.SUPER_ADMIN:
