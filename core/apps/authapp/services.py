@@ -11,6 +11,9 @@ from rest_framework.exceptions import PermissionDenied
 from core.apps.studentapp import models as studentapp_models
 from core.apps.datasheetapp import models as datasheetapp_models
 
+def user_multiple_field_search(query, value):
+    return query.filter(Q(firstname__contains=value) | Q(lastname__contains=value) | Q(phone__startswith=value))
+
 # User model 
 User = get_user_model()
 
@@ -29,6 +32,7 @@ def list_groups(user, queryset, filter_queries={}):
 def list_users(user, queryset, filter_queries={}):
     groups = filter_queries.pop("groups__role_id", None)
     exclude_class = filter_queries.pop("exclude_class", None)
+    search = filter_queries.pop("search", None)
     if exclude_class and type(exclude_class).__name__ == "int":
         queryset = queryset.exclude(students___class=exclude_class)
     if groups is None:
@@ -41,6 +45,8 @@ def list_users(user, queryset, filter_queries={}):
         users = queryset.filter(school=user.school, groups__role_id=groups, is_active=True, **filter_queries)
     else:
         users = user.branch.users.filter(branch=user.branch, groups__role_id=groups, is_active=True, **filter_queries)
+    if search is not None:
+        users = user_multiple_field_search(users, search)
     return users
 
 def generate_operator_profile_data(user: User):

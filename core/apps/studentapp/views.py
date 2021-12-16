@@ -1,6 +1,7 @@
 # Django built-in imports
 from django.db.models import F
 from django.db.models.aggregates import Count, Sum
+from django.db.models.query_utils import Q
 # Third Party imports
 from rest_framework import \
         viewsets, \
@@ -17,8 +18,7 @@ from core import \
         permissions as core_permissions, \
         responses as core_responses, \
         utils as core_utils
-from core.apps.authapp import services as authapp_services
-
+from core.apps.authapp import services as authapp_services    
 
 filter_model = {
     "school": "school",
@@ -37,7 +37,7 @@ filter_model = {
         },
         "discount": "students__discount_amount"
     },
-    "search": "students__user__phone__startswith"
+    "search": "search"
 }
 
 class StudentViewSet(viewsets.GenericViewSet):
