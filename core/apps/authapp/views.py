@@ -142,8 +142,8 @@ class UserViewSet(viewsets.GenericViewSet):
         user_request_data = request.data
         user = self.get_serializer_class()(data=user_request_data)
         user.is_valid(raise_exception=True)
-        if not local_utils.can_user_manage(request.user.groups, user.validated_data["groups"]):
-            raise PermissionDenied()
+        # if not local_utils.can_user_manage(request.user.groups, user.validated_data["groups"]):
+        #     raise PermissionDenied()
         user = user.save()
         profile = local_serializers.UserProfileSerializer(user.profile, data=user_request_data)
         profile.is_valid(raise_exception=True)
